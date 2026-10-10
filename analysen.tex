@@ -1,7 +1,8 @@
 \chapter{Tests und Analysen}
 \label{sec:analysen}
 
-In diesem Kapitel wird die Leistungsfähigkeit des gesamten Systems evaluiert. Die Beurteilung erfolgt anhand von realen Videodaten, die dem System während der Trainingsphase nicht präsentiert wurden. Im Fokus steht dabei die Frage, ob die Verbesserungen durch zeitliche Aggregation, den CLAHE-Algorithmus und das asymmetrische Zusammenschneiden zuverlässiger sind als die alleinige Verwendung der Objekterkennung und Klassifikation. Dabei ist es interessant zu sehen, in welchen Szenarien diese Zusätze das System deutlich beeinflussen.
+In diesem Kapitel wird die Leistungsfähigkeit des gesamten Systems evaluiert. Die Beurteilung erfolgt anhand von KI-generierten Videodaten, die dem System während der Trainingsphase nicht präsentiert wurden. Im Fokus steht dabei die Frage, ob die Verbesserungen durch zeitliche Aggregation und die zweistufige Verarbeitungskette zuverlässiger sind als die alleinige Verwendung der Objekterkennung und Segmentierung. Dabei ist es interessant zu sehen, in welchen Szenarien diese Zusätze das System deutlich beeinflussen.
+
 
 \section{Modell-Performance (Training \& Validation)}
 Da die YOLO-Modelle einen wesentlichen Teil der Zuverlässigkeit des Systems beeinflussen, werfen wir zuerst einen Blick auf deren isolierte Leistung.
@@ -54,14 +55,15 @@ Die Abbildung \ref{fig:val_pred_det} liefert einen Eindruck auf die Erkennungsle
     \label{fig:val_pred_det}
 \end{figure}
 
-\subsection{Leistung der Bildklassifikation}
-Die folgenden Trainingsmetriken des Beute-Klassifikators zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
-Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass der Klassifikator lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.
+\subsection{Leistung der Bildsegmentierung}
+% TODO: Abbildungen und Zahlen (335 Fotos, 5 Fehler) durch die Trainingsergebnisse des YOLO26-Segmentierungsmodells ersetzen
+Die folgenden Trainingsmetriken des Beute-Segmentierungsmodells zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
+Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass das Segmentierungsmodell lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/results_cls.png}
-    \caption{Trainingsverlauf und Metriken des YOLO-Klassifikators.}
+    \caption{Trainingsverlauf und Metriken des YOLO-Segmentierungsmodells.}
     \label{fig:training_cls}
 \end{figure}
 
@@ -70,7 +72,7 @@ Wenn man einen Blick auf die Wahrheitsmatrix (Abbildung \ref{fig:confusion_cls})
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{images/confusion_matrix_cls.png}
-    \caption{Confusion Matrix des Klassifikators auf dem Validierungsdatensatz.}
+    \caption{Confusion Matrix des Segmentierungsmodells auf dem Validierungsdatensatz.}
     \label{fig:confusion_cls}
 \end{figure}
 
@@ -79,22 +81,24 @@ Mithilfe der Abbildung \ref{fig:val_pred_cls} lässt sich gut erkennen, wie gut 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{images/val_batch0_pred_cls.jpg}
-    \caption{Beispielhafte Vorhersagen des Klassifikators auf dem Validierungsdatensatz.}
+    \caption{Beispielhafte Vorhersagen des Segmentierungsmodells auf dem Validierungsdatensatz.}
     \label{fig:val_pred_cls}
 \end{figure}
 
-Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die entscheidende Frage ist jedoch, wie verhält sich das System im Praxiseinsatz und welche Vorteile bietet die Verarbeitungskette gegenüber der reinen Detektion und Klassifikation.
+Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die entscheidende Frage ist jedoch, wie verhält sich das System im Praxiseinsatz und welche Vorteile bietet die Verarbeitungskette gegenüber der reinen Detektion und Segmentierung.
 
 \section{Evaluationsmethodik und Datensatz}
+\label{sec:evaluationsmethodik}
+Für die Evaluation des Gesamtsystems wird ein eigener Testdatensatz aus KI-generierten Videosequenzen erstellt. Dieses Kapitel beschreibt den Aufbau des Datensatzes, die Annotation der Referenzdaten und die verwendeten Metriken.
 
-Die Testbasis für das System bilden insgesamt 7 Videosequenzen, die sich auf zwei Kategorien aufteilen. Die Dateinamen der Kategorien geben Aufschluss wie viele Katzen und in welcher Farbe in dem Video vorkommen.
+\subsection{Testdatensatz}
+% TODO: Anzahl der Videopaare aktualisieren, sobald alle Videos erzeugt sind
+Die Testbasis bilden zehn Videopaare, die mit dem Videomodell Veo über Gemini \cite{geminiteam2023gemini} erzeugt werden. Jedes Video zeigt die Perspektive einer fest montierten Kamera unmittelbar über der Katzenklappe, auf die sich eine oder zwei Katzen zubewegen. Ein Videopaar besteht aus einer Sequenz, in der eine Katze ein Beutetier im Maul trägt, und einem Gegenstück mit identischer Szene und möglichst identischem Bewegungsablauf, in dem keine Katze Beute trägt. Dadurch unterscheiden sich die beiden Videos eines Paares ausschließlich im Vorhandensein der Beute.
 
-\begin{itemize}
-    \item \textbf{Positive Samples (Mit Beute):} 4 Videos (\texttt{black.mp4}, \texttt{orange.mp4}, \texttt{orange2.mp4}, \texttt{two\_cats\_black\_white.mp4})
-    \item \textbf{Negative Samples (Ohne Beute):} 3 Videos (\texttt{black.mp4}, \texttt{orange.mp4}, \texttt{two\_cats\_grey\_black.mp4})
-\end{itemize}
+Die Videopaare decken unterschiedliche Fellfarben, Beutetiere (Maus, Vogel, Ratte und Wühlmaus), Lichtverhältnisse (Tag, Dämmerung und Infrarot-Nachtsicht) sowie Szenen mit zwei Katzen ab. Die Videos besitzen eine Länge von zehn Sekunden bei 24 Bildern pro Sekunde. Da das System auf dem Raspberry Pi 5 rund 8 Bilder pro Sekunde verarbeitet, werden die Videos für die Evaluation auf 8 Bilder pro Sekunde ausgedünnt. Dadurch entsprechen die gemessenen Entscheidungszeiten dem realen Betrieb.
 
-Die Evaluation fand automatisiert über das Testskript \texttt{main.py} statt. Dabei durchläuft jedes Einzelbild des Videos die gesamte Verarbeitungskette. Ein Video wird positiv klassifiziert, wenn die Katze Beute trägt. Andernfalls, sprich die Katze ist sauber, wird es negativ klassifiziert.
+\subsection{Annotation der Referenzdaten}
+Für jedes Video wird eine Referenzannotation erstellt. Sie legt für jede Katze die Zeitintervalle fest, in denen die Katze im Bild sichtbar ist, in denen ihr Gesicht erkennbar ist und in denen sie Beute trägt. Aus diesen Intervallen ergibt sich für jedes Einzelbild der korrekte Zustand der Katzenklappe: Befindet sich mindestens eine Katze mit Beute im Bild, muss die Klappe gesperrt sein, andernfalls darf sie geöffnet werden.
 
 \subsection{Definition der System-Metriken}
 Nachdem alle Videosequenzen die Verarbeitungskette durchlaufen sind, kann man die Metriken für das gesamte System erstellen. Diese leiten sich aus Wahrheitsmatrix ab:
@@ -108,35 +112,41 @@ Nachdem alle Videosequenzen die Verarbeitungskette durchlaufen sind, kann man di
 
 Im Kontext einer Katzenklappe besitzt die Katze aus Nutzersicht die höchste Priorität. Ein Falsch-Positiv-Ergebnis (Fehlalarm) bedeutet, dass das Haustier grundlos vor einer verschlossenen Tür steht. Um das Vertrauen des Tieres in die Klappe nicht zu zerstören, liegt der Fokus der Evaluierung primär auf der Vermeidung solcher Fehlalarme (hohe Präzision). Ein seltenes Falsch-Negativ-Ergebnis (\emph{engl. False Negative}) (eine Maus gelangt ins Haus) wird im Tausch für eine stressfreie Nutzung der Klappe durch die Katze bewusst in Kauf genommen.
 
-\section{Ergebnisse der Evaluation}
-Das System verarbeitete die Videosequenzen mit einer durchschnittlichen Inferenzgeschwindigkeit von knapp 8 FPS. Da der Zustandsautomat eine Historie von 30 Einzelbildern (\texttt{history\_length=30}) auswertet, entspricht dies einer zeitlichen Glättung von knapp vier Sekunden. Bei den folgenden Metriken ist zu beachten, dass ein Video als korrekt eingestuft wird, wenn das System grundsätzlich richtig entscheidet. Kleine Schwankungen werden dabei nicht berücksichtigt. Die Erkennungsleistung über den Testdatensatz ist in der folgenden Wahrheitsmatrix dargestellt.
 
+Anders als eine Bewertung auf Videoebene erfasst die bildweise Auswertung auch kurzzeitige Fehlentscheidungen. Für jedes Einzelbild mit sichtbarer Katze wird der Zustand der Klappe mit der Referenzannotation verglichen. Daraus ergeben sich folgende Kennzahlen:
+
+\begin{itemize}
+    \item \emph{Sicherheitsfehler}: Anteil der Einzelbilder, in denen die Klappe geöffnet ist, obwohl eine Katze mit Beute sichtbar ist.
+    \item \emph{Komfortfehler}: Anteil der Einzelbilder, in denen die Klappe gesperrt ist, obwohl nur saubere Katzen sichtbar sind. Gezählt wird erst nach einer Entscheidungszeit von drei Sekunden ab dem Erkennen des Katzengesichts, da der Zustandsautomat zu Beginn bewusst sperrt.
+    \item \emph{Präzision}, \emph{Trefferquote} und \emph{F1-Maß} der Entscheidung \glqq Klappe sperren\grqq\ über alle Einzelbilder mit sichtbarer Katze.
+    \item \emph{Durchgelassene Beute}: Anzahl der Videos mit Beute, in denen die Klappe mindestens einmal geöffnet wurde.
+    \item \emph{Entscheidungszeit}: Zeit vom Erkennen des Katzengesichts bis zur ersten korrekten Entscheidung.
+\end{itemize}
+
+Die Auswertung erfolgt in zwei Schritten. Zunächst werden Detektor und Segmentierungsmodell einmal pro Video und Konfiguration ausgeführt und die Ergebnisse jedes Einzelbildes protokolliert. Anschließend wird der Zustandsautomat auf diesen Protokollen nachgebildet. Dadurch lassen sich unterschiedliche Parameter des Zustandsautomaten ohne erneute Inferenz vergleichen.
+
+\section{Ergebnisse der Evaluation}
+% TODO: Ergebnisse der Evaluation des Gesamtsystems eintragen
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|}
-        \hline
-         & \textbf{Vorhersage: Beute} & \textbf{Vorhersage: Keine Beute} \\
-        \hline
-        \textbf{Realität: Beute} & 4 (TP) & 0 (FN) \\
-        \hline
-        \textbf{Realität: Keine Beute} & 0 (FP) & 3 (TN) \\
-        \hline
+    \begin{tabular}{lcc}
+        \toprule
+        Metrik & Videos mit Beute & Videos ohne Beute \\
+        \midrule
+        Sicherheitsfehler & -- & -- \\
+        Komfortfehler & -- & -- \\
+        Durchgelassene Beute & -- & -- \\
+        Entscheidungszeit & -- & -- \\
+        \bottomrule
     \end{tabular}
-    \caption{Wahrheitsmatrix der Systemevaluation auf dem Videodatensatz (Schwellenwert = 0.8).}
+    \caption{Ergebnisse des Gesamtsystems auf dem Testdatensatz.}
     \label{tab:system_eval}
 \end{table}
 
-Aus diesen Werten ergeben sich die Leistungsmetriken des Systems:
+\section{Ablationsstudien}
+In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.
 
-\begin{itemize}
-    \item \textbf{Präzision (\emph{engl. Precision}):} $\frac{TP}{TP+FP} = \frac{4}{4+0} = 100,0\,\%$
-    \item \textbf{Trefferquote (\emph{engl. Recall}):} $\frac{TP}{TP+FN} = \frac{4}{4+0} = 100,0\,\%$
-\end{itemize}
-
-\subsection{Analyse der Systemleistung und Kompromisse}
-Die Ergebnisse der Leistungsmetriken würden bedeuten, dass das System perfekt funktioniert. Während uns diese Metriken lediglich mitteilen, dass das System für das gesamte Video die richtige Entscheidung getroffen hat, ist für die Zuverlässigkeit die Stärke des Flackerns viel interessanter. Um ein tieferes Verständnis für die Leistung zu erlangen, verwenden die nachfolgenden Ablationsstudien eine andere Metrik: die Anzahl der Zustandswechsel pro 100 Bilder. Dadurch können wir die Robustheit des Systems wirklich bewerten.
-
-\section{Ablationsstudie: Relevanz des Zustandsautomaten}
+\subsection{Zustandsautomat}
 Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Einige Zustandswechsel sind gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Bei dieser Studie wurde das exakt selbe System zweimal auf eine Auswahl von Testvideos angewendet:
 
 \begin{enumerate}
@@ -144,50 +154,12 @@ Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustan
     \item \textbf{Ablation:} Da der Zustandsautomat deaktiviert wurde, basierte die Entscheidung über die Klappensperre ausschließlich auf dem Ergebnis des aktuellen Einzelbildes. (\texttt{history\_length=1}).
 \end{enumerate}
 
-Die Ergebnisse (siehe Abbildung \ref{fig:ablation_states} und \ref{fig:ablation_states_prey}) zeigen drastische Unterschiede. Egal in welchen Szenario das Volle System liefert immer die bessere Leistung. Die Klappe wird durch den Zustandsautomat nicht dauernd geöffnet und geschlossen, er beruhigt die Fehlerrate und gleicht die Ungenauigkeiten des Detektors und Klassifikators aus.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{images/ablation_state_changes.png}
-	\caption{Zustandswechsel bei Videos ohne Beute.}
-	\label{fig:ablation_states}
-\end{figure}
+Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5, 8, 10, 15 und 20 Einzelbilder) und den Schwellenwert (0,3 bis 0,8) ausgewertet. Sie zeigt den Zielkonflikt zwischen Sicherheitsfehlern, Komfortfehlern und Entscheidungszeit und dient der Festlegung der finalen Parameter.
+% TODO: Ergebnistabelle und Diagramm der Parameterreihe einfügen
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/ablation_state_changes_with_prey.png}
-    \caption{Zustandswechsel bei Videos mit Beute.}
-    \label{fig:ablation_states_prey}
-\end{figure}
-
-\subsection{Ablationsstudie: Relevanz der Randerweiterung}
-Um isoliert beurteilen zu können wie wichtig diese Funktionalität für unser System wirklich ist, wird der Zustandsautomat völlig deaktiviert (\texttt{history\_length=1}). 
-
-Hier wird ganz schnell klar, ohne die Randerweiterung fängt das System an zu raten. Dadurch das nicht die vollständige Beute im Bild ist, kann das Modell keine Entscheidung treffen, egal ob mit oder ohne Beute, die Vorhersagen sind unsicher und ungenau.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{images/ablation_crop_state_changes.png}
-    \caption{Isolierte Auswirkung des asymmetrischen Croppings auf die rohe Systemstabilität (ohne Zustandsautomat).}
-    \label{fig:ablation_crop}
-\end{figure}
-
-\subsection{Ablationsstudie: Kontrastverstärkung (CLAHE) im Klassifikator}
-Für diese Studie wurden zwei unterschiedliche Klassifikatoren verwendet. Einer wurde mit Kontrastverstärkten (CLAHE) und der andere mit normalen Graustufen Bildern trainiert. Um den Effekt dieser Funktionalität realistisch bewerten zu können, wurden die Testvideos in Graustufen konvertiert. Die Ergebnisse (siehe Abbildung \ref{fig:ablation_clahe}) zeigen, dass der CLAHE-Filter einen interessanten Kompromiss mit sich bringt.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/ablation_clahe_state_changes.png}
-    \caption{Vergleich der normalisierten Zustandswechsel bei Videos \emph{mit Beute} mit und ohne CLAHE-Filter im Klassifikator auf Graustufenbildern.}
-    \label{fig:ablation_clahe}
-\end{figure}
-
-Während der CLAHE-Filter das Flackern bei der schwarzen Katze ohne Beute (\texttt{black.mp4}) stark reduziert, ist es bei dem Video mit Beute fast doppelt so stark. Bei den Videos mit den Orangen Katzen (\texttt{orange.mp4}) halten sich die Zustandswechsel pro 100 Bilder egal ob mit oder ohne Beute im Rahmen und sind daher für unsere Studie nicht ausschlaggebend
-
-Da aus unserer Sicht wichtiger ist, dass die Katze nicht vor verschlossener Tür steht obwohl sie sauber ist, bringt der CLAHE-Filter genau in diesem Punkt, bei Katzen mit dunklerem Fell) einen klaren Vorteil mit sich.
-
-\subsection{Ablationsstudie: Einstufige vs zweistufige Klassifikation}
-Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Klassifikator) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.
+\subsection{Detektion und Segmentierung gegenüber Detektion}
+Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.
 
 \begin{figure}[H]
     \centering
@@ -203,14 +175,10 @@ Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Klassifik
     \label{fig:ablation_1stage_conf}
 \end{figure}
 
+
 Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Fehlklassifikationen beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
+% TODO: Ergebnisse mit den neuen Metriken einfügen
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1.0\textwidth]{images/ablation_1stage_evaluation.png}
-    \caption{Vergleich: Klassifikationsfehler (oben) und komplett \"ubersehene Katzen (unten) pro 100 Frames.}
-    \label{fig:ablation_1stage_eval}
-\end{figure}
-
-Die Ergebnisse (siehe Abbildung \ref{fig:ablation_1stage_eval}) verdeutlichen, dass der zweistufige Ansatz in den meisten Szenarien die bessere Wahl ist.
-
+\subsection{Graustufen gegenüber Farbbildern}
+Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
+% TODO: Ergebnisse einfügen, sobald das Graustufenmodell fertig trainiert ist
