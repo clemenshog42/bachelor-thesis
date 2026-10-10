@@ -121,6 +121,7 @@ Anders als eine Bewertung auf Videoebene erfasst die bildweise Auswertung auch k
     \item \emph{Präzision}, \emph{Trefferquote} und \emph{F1-Maß} der Entscheidung \glqq Klappe sperren\grqq\ über alle Einzelbilder mit sichtbarer Katze.
     \item \emph{Durchgelassene Beute}: Anzahl der Videos mit Beute, in denen die Klappe mindestens einmal geöffnet wurde.
     \item \emph{Entscheidungszeit}: Zeit vom Erkennen des Katzengesichts bis zur ersten korrekten Entscheidung.
+    \item \emph{Übersehene Katzen}: Anteil der Einzelbilder mit erkennbarem Katzengesicht, in denen das System keine Katze detektiert.
 \end{itemize}
 
 Die Auswertung erfolgt in zwei Schritten. Zunächst werden Detektor und Segmentierungsmodell einmal pro Video und Konfiguration ausgeführt und die Ergebnisse jedes Einzelbildes protokolliert. Anschließend wird der Zustandsautomat auf diesen Protokollen nachgebildet. Dadurch lassen sich unterschiedliche Parameter des Zustandsautomaten ohne erneute Inferenz vergleichen.
