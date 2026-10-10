@@ -1,28 +1,9 @@
 \chapter{Kurzfassung}
 
-An dieser Stelle steht eine Zusammenfassung der Arbeit, Umfang max.\ 1 Seite.
-Im Unterschied zu anderen Kapiteln ist die Kurzfassung (und das Abstract)
-üblicherweise nicht in Abschnitte und Unterabschnitte gegliedert. Auch
-Fußnoten sind hier falsch am Platz.
+Freigängerkatzen bringen regelmäßig Beutetiere wie Mäuse oder Vögel in den Wohnraum. Herkömmliche Katzenklappen können dies nicht verhindern, da sie lediglich zwischen bekannten und fremden Tieren unterscheiden. Eine kamerabasierte Beuteerkennung steht dabei vor der Herausforderung, dass das Beutetier im Bild klein und häufig teilweise verdeckt ist und die Vorhersagen eines Modells durch Bewegungsunschärfe, wechselnde Blickwinkel und schlechte Lichtverhältnisse von Einzelbild zu Einzelbild schwanken. Eine Entscheidung auf Basis einzelner Videoeinzelbilder führt daher zu einem ständigen Wechsel zwischen Sperren und Freigeben der Klappe.
 
-Kurzfassungen werden übrigens häufig -- zusammen mit Autor*in und Titel der
-Arbeit -- in Literaturdatenbanken aufgenommen. Es ist daher darauf zu achten,
-dass die Information in der Kurzfassung für sich \emph{allein} (\dah ohne
-weitere Teile der Arbeit) zusammenhängend und abgeschlossen ist. Insbesondere
-werden an dieser Stelle (wie \ua auch im \emph{Titel} der Arbeit und im
-\emph{Abstract}) normalerweise \emph{keine Literaturverweise} verwendet!
-Falls unbedingt solche benötigt werden -- etwa weil die Arbeit eine
-Weiterentwicklung einer bestimmten, früheren Arbeit darstellt --, dann sind
-\emph{vollständige} Quellenangaben in der Kurzfassung selbst notwendig, \zB\
-[\textsc{Zobel} J.: \textit{Writing for Computer Science -- The Art of
-Effective Commu\-nica\-tion}. Springer-Verlag, Singa\-pur, 1997].
+Die vorliegende Arbeit untersucht, ob eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildklassifikation und zeitlicher Zustandsmodellierung eine robustere Beuteerkennung ermöglicht als die Auswertung einzelner Bilder. Dazu lokalisiert ein feinabgestimmter YOLO-Objektdetektor zunächst die Gesichter aller Katzen im Bild. Der Tracking-Algorithmus ByteTrack ordnet diese Erkennungen über die Zeit eindeutigen Identitäten zu. Ein nach unten erweiterter Bildausschnitt jedes Katzengesichts wird anschließend von einem YOLO-Bildklassifikator bewertet, der einen Konfidenzwert für das Vorhandensein von Beute liefert. Ein Zustandsautomat aggregiert diese Konfidenzwerte pro Katze über ein gleitendes Zeitfenster und entscheidet erst auf dieser Grundlage über die Freigabe der Klappe. Um auch bei Infrarot-Nachtsicht zu funktionieren, arbeitet das System durchgehend auf Graustufenbildern mit Kontrastverstärkung. Da kaum reale Aufnahmen von Katzen mit Beute verfügbar sind, wurden die Trainingsdaten des Klassifikators mithilfe generativer KI erzeugt. Für den Betrieb auf einem Raspberry Pi 5 wurden die Modelle in ein für ARM-Prozessoren optimiertes Format exportiert.
 
-Auch sollte daran gedacht werden, dass bei der Aufnahme in Datenbanken
-Sonderzeichen oder etwa Aufzählungen mit "Knödellisten" in der Regel verloren
-gehen. Dasselbe gilt natürlich auch für das \emph{Abstract}.
+Die Evaluierung erfolgt anhand realer Videosequenzen von Katzen mit und ohne Beute. Das Gesamtsystem trifft für alle Testvideos die korrekte Entscheidung. In mehreren Ablationsstudien wird der Beitrag einzelner Komponenten untersucht. Die zeitliche Aggregation durch den Zustandsautomaten reduziert die Anzahl der Zustandswechsel gegenüber der Einzelbildentscheidung um mehr als die Hälfte. Der zweistufige Ansatz aus Gesichtsdetektion und Klassifikation übersieht deutlich weniger Katzen und begeht in den meisten Szenarien weniger Fehlklassifikationen als ein einstufiger Detektor. Die Erweiterung des Bildausschnitts nach unten erweist sich als notwendig, damit die Beute für den Klassifikator sichtbar ist. Die Kontrastverstärkung verringert insbesondere bei dunklen Katzen ohne Beute die Zahl der Fehlalarme.
 
-Inhaltlich sollte die Kurzfassung \emph{keine} Auflistung der einzelnen
-Kapitel sein (dafür ist das Einleitungskapitel vorgesehen), sondern dem*der
-Leser*in einen kompakten, inhaltlichen Überblick über die gesamte Arbeit
-verschaffen. Der hier verwendete Aufbau ist daher zwangsläufig anders als der
-in der Einleitung.
+Die Ergebnisse bestätigen, dass die Kombination aus Objekterkennung, Objektverfolgung und zeitlicher Zustandsmodellierung zu deutlich stabileren Entscheidungen führt als eine Einzelbildauswertung und sich auf kostengünstiger, lokaler Hardware umsetzen lässt. Die verbleibenden Schwächen, etwa bei sehr dunklem Fell oder fehlender Tiefeninformation, lassen sich vor allem durch reale Trainingsdaten adressieren, die das System im Betrieb gezielt sammelt.
