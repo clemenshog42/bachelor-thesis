@@ -1,0 +1,22 @@
+\chapter{Material und Versuchsgrundlage}
+\label{sec:material}
+
+In diesem Kapitel werden die konkreten Ressourcen und Technologien erläutert, welche für das Training der Modelle und die Evaluation der Verarbeitungskette verwendet wurden.
+
+\section{Datensätze}
+Für die Objekterkennung und Bildklassifikation wurden unterschiedliche Datensätze benötigt, da beide ein spezifisches Problem lösen.
+
+\textbf{Datensatz für die Objekterkennung (Katzengesichter):} \\
+Für das Training der Objekterkennung mit YOLO26 wurde ein öffentlicher Kaggle-Datensatz verwendet (\glqq Cat Dataset\grqq\ von Crawford \cite{kaggle2024cat}). In diesem Datensatz ist bereits für jede Katze gekennzeichnet wo sich dessen Gesicht im Bild befindet, außerdem enthält er eine große Variation an Katzen in verschiedensten Lichtverhältnissen, Posen und Hintergründen. Die Daten mussten nur noch leicht umgeändert werden damit sie für das YOLO-Training geeignet waren.
+
+\textbf{Datensatz für die Klassifikation (Beutetiere):} \\
+Im Gegensatz zur Objekterkennung wo es bereits einen fertigen Datensatz gab, fand ich zu diesem Problem kaum Daten. Entweder waren Datensätze quantitativ oder qualitativ zu niederwertig. Um dieses Problem zu lösen wurden die Trainingsdaten mit hilfe von KI-generiert. Dadurch konnten gezielt verschiedene Szenarien, sprich unterschiedliche Beutetiere und Posen, erzeugt werden. Durch diese Art und Weise konnte das YOLO26 Modell mit ausreichender Genauigkeit trainiert werden.
+
+\section{Hardware und Softwareumgebung}
+Das Training der Modelle benötigt im Vergleich zur reinen Verwendung sehr ressourcenintensiv, daher habe ich das Training ausgelagert um schnell an Ergebnisse zu kommen.
+
+\textbf{Hardware-Setup:} \\
+Das Training der Modell wurde auf der Plattform Kaggle durchgeführt, diese stellt eine ausreichend starke GPU zur Verfügung welche für das Training unerlässlich war. Die späteren Tests wurden zuerst auf meiner lokalen Systemarchitektur und anschließend noch auf einem Mikrocontroller, in diesem Fall auf dem Raspberry Pi 5, getestet.
+
+\textbf{Softwareumgebung:} \\
+Die Implementierung des Systems erfolgte mit Hilfe der Programmiersprache Python \cite{van1995python}. Für Detektor und Klassifikator wurde das \texttt{ultralytics}-Paket verwendet. Bilderverarbeitungsoperationen wie z.b. Extrahieren von Bildausschnitten, wurden mit OpenCV \cite{bradski2000opencv} realisiert. Für die optimale Inferrenzgeschwindigkeit wurden die Modelle in das TensorFlow Lite \cite{abadi2016tensorflow} Format exportiert, da diese extra für ARM \cite{arm2026architecture} Architekturen optimiert sind, welche von unserem Mikrocontroller verwendet wird.

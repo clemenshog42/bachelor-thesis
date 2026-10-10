@@ -1,0 +1,43 @@
+\chapter{Theoretische Grundlagen}
+\label{sec:grundlagen}
+
+In diesem Kapitel werden die theoretischen Grundlagen erläutert, diese bilden dass Fundament dieser Arbeit. Es werden ausschließlich Technologien und Algorithmen erklärt, welche in der finalen Arbeit verwendet werden. Dazu zählen Objekterkennung, Objektverfolgung, Bildklassifikation und Zustandsautomaten.
+
+\section{Objekterkennung mit YOLO}
+\label{subsec:yolo_det}
+
+Die automatische Bildanalyse lässt sich grundsätzlich in verschiedene Problemklassen unterteilen \cite{szeliski2022computer}. Während die reine Bildklassifikation lediglich die Frage beantwortet, ob ein bestimmtes Objekt in einem Bild vorhanden ist, geht die Objekterkennung einen Schritt weiter. Sie ermittelt nicht nur die Klasse des Objekts, sondern auch die genaue Position an der sich das Objekt befindet. 
+
+In dieser Arbeit wird YOLO \cite{jocher2024yolo} in der Version 26 verwendet. Im Gegensatz zu zweistufigen Detektoren, welche zuerst interessante Bildregionen extrahieren und erst im zweiten Schritt klassifizieren, ist YOLO ein einstufiger Detektor, welcher das gesamte Bild in einem Durchlauf mithilfe eines Faltungsnetzwerk \cite{lecun1998gradient} analysiert. Das Bild wird in Raster unterteilt, jede Rasterzelle gibt das Netzwerk mehrere Begrenzungsrahmen und die zugehörigen Klassenwahrscheinlichkeiten und Konfidenzwerte voraus. Der Begrenzungsrahmen ist der Rahmen in dem sich ein Objekt befindet. Die Klassenwahrscheinlichkeit gibt an wie wahrscheinlich das erkannte Objekt zur Klasse Katze gehört. Der Konfidenzwert hingegen gibt an, wie sicher sich das Netzwerk ist, dass es sich überhaupt um ein Objekt handelt \cite{ultralytics_confidence}.
+
+Für diese Arbeit ist YOLO unerlässlich, da ein solches System niedrige Inferrenzzeiten benötigt. Das ist auf der einen Seite wichtig damit das System verlässlich bleibt und die Katze nicht zu lange vor der Klappe warten muss. Das Modell liefert für jede erkannte Katze die exakten Koordinaten dessen Gesichtes, was die Basis für die Objektverfolgung bildet.
+
+\section{Mehrfach-Objektverfolgung mit ByteTrack}
+\label{subsec:bytetrack}
+
+Eine Objekterkennung wie YOLO alleine bewertet jedes Videoeinzelbild isoliert. Wenn sich eine Katze auf einem Video befindet, dann wird jedes Einzelbild des Videos separat betrachtet. Jede erkannte Katze ist also eine neue Katze. Durch eine Objektverfolgung wird es möglich, eine Katze über ein ganzes Video eindeutig zuzuordnen. Eine Mehrfach-Objektverfolgung ist dann die Erweiterung auf mehrere Katzen pro Video. Das ist zwingend erforderlich um eine zeitliche Analyse einer bestimmten Katze durchführen zu können.
+
+In dieser Arbeit erzeugt ein Objektdetektor (in diesem Fall YOLO26) die Begrenzungsrahmen, diese enthalten die genauen Koordinaten der Objekte, in unserem Fall vom Gesicht der Katze. Im zweiten Schritt übernimmt der Tracker. Er versucht die neuen Erkennungen den bekannten zuzuordnen, sollte das nicht möglich sein wird eine neue Identität erzeugt. Im Fall von ByteTrack \cite{zhang2022bytetrack} passiert dieses zuordnen durch Bewegungsvorhersagen welche der Kalman-Filter \cite{kalman1960new} trifft.
+
+ByteTrack hebt sich von klassischen Trackern ab indem er auch Erkennungen mit niedrigem Konfidenzwert verwendet um Identitätswechsel vorzubeugen, damit dies nicht zu Fehlalarmen führt, ordnet er im ersten Schritt die Begrenzungsrahmen mit hohen Konfidenzwerten zu. Anschließend werden die Objekte mit den niedrigen Konfidenzwerten verglichen welche im vorigen Schritt nicht zugeordnet werden konnten. Dadurch wird die Verfolgung robuster bei Verdeckungen. Daher eignet sich ByteTrack ideal für unvorhersehbare Bewegungen und Okklusionen beim Anwendungsfall einer Katzenklappe.
+ 
+\section{Bildklassifikation mit YOLO}
+\label{subsec:yolo_class}
+
+Die Klassifikation arbeitet wie die Objekterkennung nach dem Prinzip von Faltungsnetzwerken \cite{lecun1998gradient}. Moderne YOLO-Versionen, wie in unserem Fall YOLO26, bieten eben nicht nur die Objekterkennung, sondern auch die Klassifikation an. Diese Netzwerke sind durch ihre Archtitektur für schnelle Inferenz bei hoher Genauigkeit ausgelegt.
+
+Während die Objekterkennung uns zeigt wo sich eine Katze befindet, wissen wir aber noch nicht ob eine Katze Beute im Mund trägt oder nicht. Hier kommt die Bildklassifikation zum Einsatz.
+Dieser Ansatz hat den Vorteil dass die Klassifikation nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Klassifikation immer eine ähnliche Aufgabe mit wenig Varianz bekommt.
+
+Die Aufgabe des Klassifikators ist somit eine binäre Entscheidung, trägt die Katze Beute im Mund oder nicht. Die Ausgabe des Modells ist ein Konfidenzwert wie wahrscheinlich die Katze Beute trägt.
+
+\section{Zustandsautomaten}
+\label{subsec:fsm}
+
+Während der Objektdetektor und die Klassifikation Momentaufnahmen liefern, welche durchaus schwanken können, hilft uns bei der Entscheidung ein Zustandsautomat. Er aggregiert die Ergebnisse von Detektor und Klassifikation zeitlich, dadurch wird das Ergebnis nicht stark durch Ausreißer beeinflusst, und wird robuster gegen Fehler.
+
+Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zuständen beinhaltet. Das Modell befindet sich zu einem Zeitpunkt immer in genau einem Zustand. Durch bestimmte Ereignisse oder erfüllen bestimmter Bedingungen, wird der aktuelle Zustand des Automaten bestimmt, z.B. wenn das System die letzten 5 mal Katze mit Maus erkannt hat, dann wechselt der Zustandsautomat auf Zugang verweigert. Der Übergang von einem Zustand löst für gewöhnlich auch Aktionen aus, in unserem Fall würden wir die Katzenklappe öffnen oder schließen.
+
+Ein einfaches Beispiel für einen Zustandsautomaten ist eine Ampel, das Modell repräsentiert ob die Ampel Rot, Gelb oder Grün ist. Bedingung für das Wechseln ist ein Timer. Die Aktion wäre das Umschalten der Ampel.
+
+In unserem Kontext dient der Zustandsautomat Ungenauigkeiten der Objekterkennung und Klassifikation zu glätten. Anstatt bei einem Ausreißer sofort den Zustand der Katzenklappe zu ändern, wird der Zustandsübergang an Bedingungen (z.b. einen Schwellenwert über ein Zeitfenster) gebunden.

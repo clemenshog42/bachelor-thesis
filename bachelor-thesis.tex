@@ -1,0 +1,47 @@
+% !TeX encoding = utf8
+% !TeX program = pdflatex 
+% !TeX spellcheck = de_DE
+% !BIB program = biber
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{hgbpdfa}
+
+\documentclass[type=bachelor,degree=engineering,theme=default,language=german,titlelanguage=german,smartquotes=true]{hgbthesis}
+
+\usepackage{float}
+\graphicspath{{images/}}
+\bibliography{literatur} % BibLaTeX-Literaturdatei
+
+\begin{document}
+
+\title{Zeitlich robuste Erkennung und Zustandsmodellierung von Katzen und Beutetieren mittels Deep Learning}
+\author{Clemens Höglinger}
+\programname{Software Engineering}
+\placeofstudy{Hagenberg}
+\dateofsubmission{2026}{08}{20}
+\advisor{Dr. Gerald Adam Zwettler}
+
+\frontmatter
+\maketitle
+\include{front/ki-dokumentation}
+\tableofcontents
+
+\include{front/kurzfassung}		
+\include{front/abstract}			
+
+\mainmatter
+
+\include{einleitung}
+\include{grundlagen}
+\include{material}
+\include{methodik}
+\include{implementierung}
+\include{analysen}
+\include{diskussion}
+\include{zusammenfassung}
+
+\backmatter
+
+\MakeBibliography
+
+\end{document}

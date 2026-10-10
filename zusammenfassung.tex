@@ -1,0 +1,33 @@
+\chapter{Zusammenfassung und Ausblick}
+\label{sec:zusammenfassung}
+
+In der vorliegenden Bachelorarbeit wird ein robustes Zugangssystem für Katzen entwickelt, dass das eindringen von Beutetieren (z. B. Mäuse oder Vögel) in den Wohnraum verhindert. Durch die Kombination von mehrschitigen Lernen (eng. Deep Learning) und zeitlicher Aggregation wurde ein System geschaffen, das die einzelbildbasierte Objekterkennung bei Weitem übertrifft.
+
+\section{Zusammenfassung der Erkenntnisse}
+\label{subsec:zusammenfassung_erkenntnisse}
+
+Die theoretischen Annahmen konnten durch die praktische Evaluierung erfolgreich validiert werden. Ein klassischer In diesem Anwendungsfall ist der monolithische Objektdetektor bei weitem ungenauer als die in der Arbeit vorgestellte Verarbeitungskette, die aus einem Objektdetektor, einer Bildklassifikation und einer zeitlichen Aggregation besteht.
+
+Zunächst detektiert ein YOLO-Detektor das Gesicht der Katze. Um zu verhindern, dass die eventuelle Beute im Maul der Katze okkludiert wird, wird der Ausschnitt des Gesichts um 35 Prozent nach unten erweitert. Im zweiten Schritt analysiert ein YOLO-Klassifikator, ob sich Beute im Maul der Katze befindet. Um Fehlklassifikationen auszugleichen, muss eine Katze beweisen, dass sie sauber ist. Erst dann darf sie in den Wohnraum eintreten. Dazu wird die Katze über mehrere Sekunden hinweg mithilfe von ByteTrack verfolgt. Der gleitende Durchschnitt der letzten 30 Einzelbilder (was etwa zwei Sekunden entspricht) entscheidet dann, ob die Katze ins Haus darf oder nicht.
+
+Die Evaluierung mit realen Videodaten zeigte den Erfolg des gewählten Architektur-Ansatzes. Das System konnte alle Testdaten erfolgreich und korrekt auswerten und so feststellen, ob die Katze sauber ist oder nicht. Der gewählte Schwellenwert von 0,8 spiegelt dabei die Priorität wider, dass Katzen im Falle von Systemunsicherheiten Zugang zum Haus haben. Dadurch wird sichergestellt, dass keine Katze zu Unrecht ausgesperrt wird. Das System erweist sich somit als sehr praxistauglich und läuft mit durchschnittlich 15 Bildern pro Sekunde ressourcenschonend auf lokalen Endgeräten.
+
+Somit konnte die zentrale Forschungsfrage bejaht werden. Eine Kombination aus Objekterkennung, Objektverfolgung und zeitlicher Glättung ist deutlich robuster als herkömmliche Einzelbildauswertungen.
+
+\section{Ausblick und Weiterentwicklungsmöglichkeiten}
+\label{subsec:ausblick}
+
+Obwohl das System in seiner aktuellen Form bereits zuverlässig Beutetiere aussperrt, zeigt die Praxis, dass auch dieser Ansatz Schwächen und Limitierungen hat. Das eröffnet die Möglichkeit, konkrete Ansatzpunkte für zukünftige Verbesserungen zu identifizieren.
+
+\subsection{Kontinuierliches Sammeln schwieriger Negativbeispiele}
+Die vielversprechendste Methode, um die Systemleistung zu steigern, ist die Erweiterung des Datensatzes für Katzen mit Beute. Um dieses Ziel zu automatisieren, verfügt die Applikation über eine Funktionalität, die Bilder speichert, bei denen die Bildklassifikation unsicher war. Dadurch können zukünftige Arbeiten diesen stetig wachsenden Datensatz nutzen, um den YOLO-Klassifikator iterativ nachzutrainieren. Sobald der Klassifikator aus diesen Fehlern lernen kann, wird die Fehlalarmrate des gesamten Systems erheblich sinken.
+
+\subsection{Verlust der Tiefeninformationen}
+Eine weitere Einschränkung ist der Verlust von 3D-Informationen im Bild. Dadurch kann es passieren, dass Objekte im Hintergrund oder sogar der Körper der Katze fälschlicherweise als \glqq im Maul der Katze\grqq\ interpretiert werden. Eine mögliche Erweiterung bestünde darin, diese 3D-Informationen mithilfe von Stereo-Kameras oder Time-of-Flight-Sensoren zurückzugewinnen. Dadurch könnten Fehlalarme herausgefiltert werden, bei denen sich das vermeintliche Beutetier weit hinter dem Maul der Katze befindet.
+
+\subsection{Hardware-Beschleunigung}
+Derzeit wird das System ausschließlich auf der CPU ausgeführt. Ein Wechsel auf eine dedizierte Hardware (z. B. Google Coral) würde die Anzahl der pro Sekunde verarbeiteten Bilder deutlich erhöhen. Dadurch können wir in der gleichen Zeit mehr Daten der Katze sammeln, was die zeitliche Glättung verbessern würde. Das Flackern des Systems würde dadurch noch weiter eingeschränkt.
+
+\vspace{0.5cm}
+
+Abschließend lässt sich zusammenfassen, dass die in dieser Arbeit entwickelte Verarbeitungskette ein äußerst kompaktes und robustes Fundament bildet. Sie löst das Problem des unerwünschten Beuteeintrags durch Katzen zuverlässig und ermöglicht zugleich spannende Erweiterungen und Verbesserungen.

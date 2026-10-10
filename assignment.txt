@@ -1,0 +1,12 @@
+
+
+Motivation und Problemstellung Automatische visuelle Erkennungssysteme sind ein zentraler Bestandteil moderner Computer-Vision-Anwendungen. Während aktuelle Objektdetektoren wie YOLO bereits sehr gute Ergebnisse auf Einzelbildern liefern, bleiben reale Szenarien fehleranfällig, insbesondere bei kurzen Okklusionen, Bewegungsunschärfe oder schwer unterscheidbaren Objekten. Im Anwendungskontext eines intelligenten Zugangssystems (z. B. Katzenklappe) ist jedoch nicht nur die momentane Objekterkennung entscheidend, sondern auch die Frage, ob eine Katze ein Beutetier mit sich führt. Diese Entscheidung erfordert eine robuste Analyse über mehrere Frames hinweg.
+
+Zielsetzung
+Ziel dieser Arbeit ist die Entwicklung eines Computer-Vision-Systems zur zuverlässigen Detektion von Katzen und potenziellen Beutetieren (z. B. Mäusen oder Vögeln) sowie deren zeitlicher Verfolgung. Aufbauend auf diesen Informationen wird ein Zustandsmodell entwickelt, das auf Basis einer Zeitserie von Konfidenzwerten robuste semantische Entscheidungen ermöglicht (z. B. „Katze mit Beute“).
+
+Methodik Zunächst wird ein Deep-Learning-basierter Objektdetektor (z. B. YOLOv8) eingesetzt und ggf. auf einen spezifischen Datensatz feinjustiert. YOLO zeichnet sich durch hohe Detektionsgenauigkeit bei gleichzeitig sehr schneller Inferenz aus, wodurch es für Echtzeit-Anwendungen geeignet ist. Darauf aufbauend wird ein Tracking-by-Detection-Ansatz implementiert (z. B. DeepSORT), der erkannte Objekte über mehrere Frames hinweg konsistent verfolgt. Durch die Integration visueller Merkmale kann DeepSORT Identitätswechsel reduzieren und auch bei kurzzeitigen Verdeckungen stabil bleiben. Zur Verbesserung der Robustheit werden Konfidenzwerte der Detektion über die Zeit aggregiert (z. B. durch Glättung oder gleitende Mittelwerte). Diese zeitliche Information wird anschließend in einem Zustandsautomaten modelliert, der diskrete Situationen (z. B. „keine Katze“, „Katze ohne Beute“, „Katze mit Beute“) beschreibt und Übergänge basierend auf Tracking- und Konfidenzinformationen definiert.
+
+Erwartete Ergebnisse Es wird erwartet, dass die Kombination aus Objektdetektion, Tracking und zeitlicher Zustandsmodellierung eine signifikant robustere Klassifikation gegenüber Einzelbildmethoden ermöglicht. Insbesondere sollen Fehlalarme reduziert und stabile Entscheidungen über komplexe Szenen hinweg getroffen werden.
+
+Ausblick Die Integration in physische Systeme (z. B. automatische Türen) wird als mögliches Anwendungsszenario betrachtet, steht jedoch nicht im Fokus der Arbeit.
