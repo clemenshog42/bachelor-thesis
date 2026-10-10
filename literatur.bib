@@ -1,15 +1,21 @@
 @misc{jocher2024yolo,
-  author = {Jocher, Glenn and Qiu, Jing},
-  title = {Ultralytics YOLO26},
+  author = {Jocher, Glenn and Qiu, Jing and Liu, Mengyu and Lyu, Shuai and Akyon, Fatih Cagatay and Kalfaoglu, Muhammet Esat},
+  title = {Ultralytics {YOLO26}: Unified Real-Time End-to-End Vision Models},
   year = {2026},
-  note = {Verfügbar unter: \url{https://docs.ultralytics.com/models/yolo26/}}
+  eprint = {2606.03748},
+  eprinttype = {arxiv},
+  note = {arXiv:2606.03748}
 }
 
-@article{zhang2022bytetrack,
-  title={ByteTrack: Multi-Object Tracking by Associating Every Detection Box},
-  author={Zhang, Yifu and Sun, Peize and Jiang, Yi and Yu, Dongdong and Weng, Fucheng and Yuan, Zehuan and Luo, Ping and Liu, Wenyu and Wang, Xinggang},
-  journal={Proceedings of the European Conference on Computer Vision (ECCV)},
-  year={2022}
+@inproceedings{zhang2022bytetrack,
+  title = {{ByteTrack}: Multi-Object Tracking by Associating Every Detection Box},
+  author = {Zhang, Yifu and Sun, Peize and Jiang, Yi and Yu, Dongdong and Weng, Fucheng and Yuan, Zehuan and Luo, Ping and Liu, Wenyu and Wang, Xinggang},
+  booktitle = {Computer Vision -- ECCV 2022},
+  series = {Lecture Notes in Computer Science},
+  volume = {13682},
+  pages = {1--21},
+  publisher = {Springer},
+  year = {2022}
 }
 
 @article{jiao2022video,
@@ -161,3 +167,222 @@
   year = {2026},
   note = {Verf{\"u}gbar unter: \url{https://www.surepetcare.com/en-gb/pet-doors/microchip-cat-flap}}
 }
+
+% ====================================================================
+% Literatur für die theoretischen Grundlagen (Kapitel 2)
+% ====================================================================
+
+% --- 2.1 Objekterkennung ---
+@inproceedings{redmon2016yolo,
+  title = {You Only Look Once: Unified, Real-Time Object Detection},
+  author = {Redmon, Joseph and Divvala, Santosh and Girshick, Ross and Farhadi, Ali},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages = {779--788},
+  year = {2016}
+}
+
+@inproceedings{ren2015faster,
+  title = {Faster {R-CNN}: Towards Real-Time Object Detection with Region Proposal Networks},
+  author = {Ren, Shaoqing and He, Kaiming and Girshick, Ross and Sun, Jian},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume = {28},
+  year = {2015}
+}
+
+@article{zou2023object,
+  title = {Object Detection in 20 Years: A Survey},
+  author = {Zou, Zhengxia and Chen, Keyan and Shi, Zhenwei and Guo, Yuhong and Ye, Jieping},
+  journal = {Proceedings of the IEEE},
+  volume = {111},
+  number = {3},
+  pages = {257--276},
+  year = {2023}
+}
+
+@article{terven2023yolo,
+  title = {A Comprehensive Review of {YOLO} Architectures in Computer Vision: From {YOLOv1} to {YOLOv8} and {YOLO-NAS}},
+  author = {Terven, Juan and C{\'o}rdova-Esparza, Diana-Margarita and Romero-Gonz{\'a}lez, Julio-Alejandro},
+  journal = {Machine Learning and Knowledge Extraction},
+  volume = {5},
+  number = {4},
+  pages = {1680--1716},
+  year = {2023}
+}
+
+@misc{sapkota2025yolo26,
+  title = {{YOLO26}: Key Architectural Enhancements and Performance Benchmarking for Real-Time Object Detection},
+  author = {Sapkota, Ranjan and Cheppally, Rahul Harsha and Sharda, Ajay and Karkee, Manoj},
+  year = {2025},
+  eprint = {2509.25164},
+  eprinttype = {arxiv},
+  note = {arXiv:2509.25164}
+}
+
+@article{everingham2010pascal,
+  title = {The {PASCAL} Visual Object Classes ({VOC}) Challenge},
+  author = {Everingham, Mark and Van Gool, Luc and Williams, Christopher K. I. and Winn, John and Zisserman, Andrew},
+  journal = {International Journal of Computer Vision},
+  volume = {88},
+  number = {2},
+  pages = {303--338},
+  year = {2010}
+}
+
+@inproceedings{lin2014coco,
+  title = {Microsoft {COCO}: Common Objects in Context},
+  author = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C. Lawrence},
+  booktitle = {Computer Vision -- ECCV 2014},
+  series = {Lecture Notes in Computer Science},
+  volume = {8693},
+  pages = {740--755},
+  publisher = {Springer},
+  year = {2014}
+}
+
+@inproceedings{yosinski2014transferable,
+  title = {How Transferable Are Features in Deep Neural Networks?},
+  author = {Yosinski, Jason and Clune, Jeff and Bengio, Yoshua and Lipson, Hod},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume = {27},
+  year = {2014}
+}
+
+@inproceedings{krizhevsky2012imagenet,
+  title = {{ImageNet} Classification with Deep Convolutional Neural Networks},
+  author = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E.},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume = {25},
+  year = {2012}
+}
+
+% --- 2.2 Mehrfach-Objektverfolgung ---
+@article{kuhn1955hungarian,
+  title = {The {Hungarian} Method for the Assignment Problem},
+  author = {Kuhn, Harold W.},
+  journal = {Naval Research Logistics Quarterly},
+  volume = {2},
+  number = {1--2},
+  pages = {83--97},
+  year = {1955}
+}
+
+@inproceedings{bewley2016sort,
+  title = {Simple Online and Realtime Tracking},
+  author = {Bewley, Alex and Ge, Zongyuan and Ott, Lionel and Ramos, Fabio and Upcroft, Ben},
+  booktitle = {IEEE International Conference on Image Processing (ICIP)},
+  pages = {3464--3468},
+  year = {2016}
+}
+
+@inproceedings{wojke2017deepsort,
+  title = {Simple Online and Realtime Tracking with a Deep Association Metric},
+  author = {Wojke, Nicolai and Bewley, Alex and Paulus, Dietrich},
+  booktitle = {IEEE International Conference on Image Processing (ICIP)},
+  pages = {3645--3649},
+  year = {2017}
+}
+
+@article{luo2021mot,
+  title = {Multiple Object Tracking: A Literature Review},
+  author = {Luo, Wenhan and Xing, Junliang and Milan, Anton and Zhang, Xiaoqin and Liu, Wei and Kim, Tae-Kyun},
+  journal = {Artificial Intelligence},
+  volume = {293},
+  pages = {103448},
+  year = {2021}
+}
+
+% --- 2.3 Bildsegmentierung ---
+@inproceedings{long2015fcn,
+  title = {Fully Convolutional Networks for Semantic Segmentation},
+  author = {Long, Jonathan and Shelhamer, Evan and Darrell, Trevor},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages = {3431--3440},
+  year = {2015}
+}
+
+@inproceedings{he2017maskrcnn,
+  title = {Mask {R-CNN}},
+  author = {He, Kaiming and Gkioxari, Georgia and Doll{\'a}r, Piotr and Girshick, Ross},
+  booktitle = {Proceedings of the IEEE International Conference on Computer Vision (ICCV)},
+  pages = {2961--2969},
+  year = {2017}
+}
+
+@inproceedings{bolya2019yolact,
+  title = {{YOLACT}: Real-Time Instance Segmentation},
+  author = {Bolya, Daniel and Zhou, Chong and Xiao, Fanyi and Lee, Yong Jae},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  pages = {9157--9166},
+  year = {2019}
+}
+
+@article{minaee2022segmentation,
+  title = {Image Segmentation Using Deep Learning: A Survey},
+  author = {Minaee, Shervin and Boykov, Yuri and Porikli, Fatih and Plaza, Antonio and Kehtarnavaz, Nasser and Terzopoulos, Demetri},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  volume = {44},
+  number = {7},
+  pages = {3523--3542},
+  year = {2022}
+}
+
+% --- 2.4 Zustandsautomaten und zeitliche Aggregation ---
+@article{mealy1955method,
+  title = {A Method for Synthesizing Sequential Circuits},
+  author = {Mealy, George H.},
+  journal = {The Bell System Technical Journal},
+  volume = {34},
+  number = {5},
+  pages = {1045--1079},
+  year = {1955}
+}
+
+@incollection{moore1956gedanken,
+  title = {Gedanken-Experiments on Sequential Machines},
+  author = {Moore, Edward F.},
+  booktitle = {Automata Studies},
+  editor = {Shannon, Claude E. and McCarthy, John},
+  series = {Annals of Mathematics Studies},
+  volume = {34},
+  pages = {129--153},
+  publisher = {Princeton University Press},
+  year = {1956}
+}
+
+@article{harel1987statecharts,
+  title = {Statecharts: A Visual Formalism for Complex Systems},
+  author = {Harel, David},
+  journal = {Science of Computer Programming},
+  volume = {8},
+  number = {3},
+  pages = {231--274},
+  year = {1987}
+}
+
+@book{hopcroft2006automata,
+  title = {Introduction to Automata Theory, Languages, and Computation},
+  author = {Hopcroft, John E. and Motwani, Rajeev and Ullman, Jeffrey D.},
+  edition = {3},
+  publisher = {Pearson Addison-Wesley},
+  year = {2006}
+}
+
+@misc{han2016seqnms,
+  title = {{Seq-NMS} for Video Object Detection},
+  author = {Han, Wei and Khorrami, Pooya and Paine, Tom Le and Ramachandran, Prajit and Babaeizadeh, Mohammad and Shi, Honghui and Li, Jianan and Yan, Shuicheng and Huang, Thomas S.},
+  year = {2016},
+  eprint = {1602.08465},
+  eprinttype = {arxiv},
+  note = {arXiv:1602.08465}
+}
+
+@article{kang2018tcnn,
+  title = {{T-CNN}: Tubelets With Convolutional Neural Networks for Object Detection From Videos},
+  author = {Kang, Kai and Li, Hongsheng and Yan, Junjie and Zeng, Xingyu and Yang, Bin and Xiao, Tong and Zhang, Cong and Wang, Zhe and Wang, Ruohui and Wang, Xiaogang and Ouyang, Wanli},
+  journal = {IEEE Transactions on Circuits and Systems for Video Technology},
+  volume = {28},
+  number = {10},
+  pages = {2896--2907},
+  year = {2018}
+}
+
