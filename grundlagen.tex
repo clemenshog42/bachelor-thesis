@@ -1,7 +1,7 @@
 \chapter{Theoretische Grundlagen}
 \label{sec:grundlagen}
 
-In diesem Kapitel werden die theoretischen Grundlagen erläutert, diese bilden dass Fundament dieser Arbeit. Es werden ausschließlich Technologien und Algorithmen erklärt, welche in der finalen Arbeit verwendet werden. Dazu zählen Objekterkennung, Objektverfolgung, Bildklassifikation und Zustandsautomaten.
+In diesem Kapitel werden die theoretischen Grundlagen erläutert, diese bilden dass Fundament dieser Arbeit. Es werden ausschließlich Technologien und Algorithmen erklärt, welche in der finalen Arbeit verwendet werden. Dazu zählen Objekterkennung, Objektverfolgung, Bildsegmentierung und Zustandsautomaten.
 
 \section{Objekterkennung mit YOLO}
 \label{subsec:yolo_det}
@@ -21,23 +21,23 @@ In dieser Arbeit erzeugt ein Objektdetektor (in diesem Fall YOLO26) die Begrenzu
 
 ByteTrack hebt sich von klassischen Trackern ab indem er auch Erkennungen mit niedrigem Konfidenzwert verwendet um Identitätswechsel vorzubeugen, damit dies nicht zu Fehlalarmen führt, ordnet er im ersten Schritt die Begrenzungsrahmen mit hohen Konfidenzwerten zu. Anschließend werden die Objekte mit den niedrigen Konfidenzwerten verglichen welche im vorigen Schritt nicht zugeordnet werden konnten. Dadurch wird die Verfolgung robuster bei Verdeckungen. Daher eignet sich ByteTrack ideal für unvorhersehbare Bewegungen und Okklusionen beim Anwendungsfall einer Katzenklappe.
  
-\section{Bildklassifikation mit YOLO}
+\section{Bildsegmentierung mit YOLO}
 \label{subsec:yolo_class}
 
-Die Klassifikation arbeitet wie die Objekterkennung nach dem Prinzip von Faltungsnetzwerken \cite{lecun1998gradient}. Moderne YOLO-Versionen, wie in unserem Fall YOLO26, bieten eben nicht nur die Objekterkennung, sondern auch die Klassifikation an. Diese Netzwerke sind durch ihre Archtitektur für schnelle Inferenz bei hoher Genauigkeit ausgelegt.
+Die Segmentierung arbeitet wie die Objekterkennung nach dem Prinzip von Faltungsnetzwerken \cite{lecun1998gradient}. Moderne YOLO-Versionen, wie in unserem Fall YOLO26, bieten eben nicht nur die Objekterkennung, sondern auch die Segmentierung an. Diese Netzwerke sind durch ihre Archtitektur für schnelle Inferenz bei hoher Genauigkeit ausgelegt.
 
-Während die Objekterkennung uns zeigt wo sich eine Katze befindet, wissen wir aber noch nicht ob eine Katze Beute im Mund trägt oder nicht. Hier kommt die Bildklassifikation zum Einsatz.
-Dieser Ansatz hat den Vorteil dass die Klassifikation nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Klassifikation immer eine ähnliche Aufgabe mit wenig Varianz bekommt.
+Während die Objekterkennung uns zeigt wo sich eine Katze befindet, wissen wir aber noch nicht ob eine Katze Beute im Mund trägt oder nicht. Hier kommt die Bildsegmentierung zum Einsatz.
+Dieser Ansatz hat den Vorteil dass die Segmentierung nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Segmentierung immer eine ähnliche Aufgabe mit wenig Varianz bekommt.
 
-Die Aufgabe des Klassifikators ist somit eine binäre Entscheidung, trägt die Katze Beute im Mund oder nicht. Die Ausgabe des Modells ist ein Konfidenzwert wie wahrscheinlich die Katze Beute trägt.
+Die Aufgabe des Segmentierungsmodells ist somit eine binäre Entscheidung, trägt die Katze Beute im Mund oder nicht. Die Ausgabe des Modells ist ein Konfidenzwert wie wahrscheinlich die Katze Beute trägt.
 
 \section{Zustandsautomaten}
 \label{subsec:fsm}
 
-Während der Objektdetektor und die Klassifikation Momentaufnahmen liefern, welche durchaus schwanken können, hilft uns bei der Entscheidung ein Zustandsautomat. Er aggregiert die Ergebnisse von Detektor und Klassifikation zeitlich, dadurch wird das Ergebnis nicht stark durch Ausreißer beeinflusst, und wird robuster gegen Fehler.
+Während der Objektdetektor und die Segmentierung Momentaufnahmen liefern, welche durchaus schwanken können, hilft uns bei der Entscheidung ein Zustandsautomat. Er aggregiert die Ergebnisse von Detektor und Segmentierung zeitlich, dadurch wird das Ergebnis nicht stark durch Ausreißer beeinflusst, und wird robuster gegen Fehler.
 
 Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zuständen beinhaltet. Das Modell befindet sich zu einem Zeitpunkt immer in genau einem Zustand. Durch bestimmte Ereignisse oder erfüllen bestimmter Bedingungen, wird der aktuelle Zustand des Automaten bestimmt, z.B. wenn das System die letzten 5 mal Katze mit Maus erkannt hat, dann wechselt der Zustandsautomat auf Zugang verweigert. Der Übergang von einem Zustand löst für gewöhnlich auch Aktionen aus, in unserem Fall würden wir die Katzenklappe öffnen oder schließen.
 
 Ein einfaches Beispiel für einen Zustandsautomaten ist eine Ampel, das Modell repräsentiert ob die Ampel Rot, Gelb oder Grün ist. Bedingung für das Wechseln ist ein Timer. Die Aktion wäre das Umschalten der Ampel.
 
-In unserem Kontext dient der Zustandsautomat Ungenauigkeiten der Objekterkennung und Klassifikation zu glätten. Anstatt bei einem Ausreißer sofort den Zustand der Katzenklappe zu ändern, wird der Zustandsübergang an Bedingungen (z.b. einen Schwellenwert über ein Zeitfenster) gebunden.
+In unserem Kontext dient der Zustandsautomat Ungenauigkeiten der Objekterkennung und Segmentierung zu glätten. Anstatt bei einem Ausreißer sofort den Zustand der Katzenklappe zu ändern, wird der Zustandsübergang an Bedingungen (z.b. einen Schwellenwert über ein Zeitfenster) gebunden.

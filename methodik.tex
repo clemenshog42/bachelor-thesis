@@ -4,7 +4,7 @@
 In diesem Kapitel wird die konzeptionelle Entwicklung und technische Umsetzung des vorgestellten Erkennungssystems dieser Arbeit erläutert. Es wird der Weg von der Problemstellung bis hin zur Lösung beschrieben. Dabei wird genauer auf die Designentscheidungen und die Architektur der einzelnen Komponenten der Verarbeitungskette eingegangen.
 
 \section{Gesamtarchitektur und Datenfluss}
-Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt, reicht weder eine reine Objekterkennung noch eine reine Bildklassifikation aus. Da wir nur einen begrenzten Datensatz an Katzen mit Beutetieren zur Verfügung haben, ist es unerlässlich diese Aufgabe auf mehrere Stufen zu teilen. Daraus ergibt sich eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildklassifikation und zeitlicher Zustandsmodellierung. Dabei sieht die finale Verarbeitungskette wie folgt aus:
+Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt, reicht weder eine reine Objekterkennung noch eine reine Bildsegmentierung aus. Da wir nur einen begrenzten Datensatz an Katzen mit Beutetieren zur Verfügung haben, ist es unerlässlich diese Aufgabe auf mehrere Stufen zu teilen. Daraus ergibt sich eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildklassifikation und zeitlicher Zustandsmodellierung. Dabei sieht die finale Verarbeitungskette wie folgt aus:
 
 \begin{enumerate}
 	\item Ein Einzelbild der Kamera wird aufgenommen.
@@ -15,7 +15,7 @@ Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt
 	\end{enumerate}
 	\item Der ByteTrack-Algorithmus ordnet den Katzengesichtern eine Identität zu oder erstellt eine neue, sollte die Katze frisch ins Bild gekommen sein.
 	\item Das YOLO-System untersucht jedes Katzengesicht einzeln. Danach meldet es für jede Katze entweder ‚sauber‘ oder ‚Beute‘.
-	\item Der Zustandsautomat aggregiert die Ergebnisse der Bildklassifikation über die Zeit und trifft dann eine finale Entscheidung, in welchem Zustand (z.\,B. \glqq Katze mit Beute\grqq) sich die verfolgten Objekte befindet.
+	\item Der Zustandsautomat aggregiert die Ergebnisse der Bildsegmentierung über die Zeit und trifft dann eine finale Entscheidung, in welchem Zustand (z.\,B. \glqq Katze mit Beute\grqq) sich die verfolgten Objekte befindet.
 	\begin{enumerate}
 		\item Trägt eine Katze Beute im Maul so wird die Klappe geschlossen.
 		\item Sind alle Katzen sauber so wird die Klappe geöffnet.
@@ -25,40 +25,38 @@ Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt
 \section{Vorverarbeitung für Infrarot-Nachtsicht}
 Da Katzen ihre Beute nicht nur am Tag bei optimaler Belichtung ins Haus bringen, ist eine zentrale Anforderung an das System das es auch Nachts und bei schlechter Belichtung funktioniert. Das bringt eine weitere Schwierigkeit mit sich: Nachtsichtkameras schalten bei Dunkelheit auf Infrarot um, wodurch Graustufenbilder entstehen.
 
-Damit das neuronale Netz die Farbinformationen nicht erlernt, werden alle Bilder vor dem Training und der Inferenz zu Graustufenbildern konvertiert. Andernfalls würde weder Objekterkennung noch Bildklassifikation bei Nacht zuverlässig funktionieren.
-
-Zusätzlich kommt ein Algorithmus namens CLAHE (Contrast Limited Adaptive Histogram Equalization) zum Einsatz, der in \cite{zuiderveld1994contrast} beschrieben wird. Vor allem bei schlechten Lichtverhältnissen oder dunklen Katzen, verbessert CLAHE den lokalen Kontrast. Dadurch gelingt es, Katzengesichter und Beute in der Nacht besser zu erkennen. Er löst vor allem das Problem des schwachen Kontrasts bei Katzen mit dunkler Fellfarbe.
+Damit das neuronale Netz die Farbinformationen nicht erlernt, werden alle Bilder vor dem Training und der Inferenz zu Graustufenbildern konvertiert. Andernfalls würde weder Objekterkennung noch Bildsegmentierung bei Nacht zuverlässig funktionieren.
 
 \section{Training und Anpassung des Objektdetektors (YOLO26n)}
-Für die Objekterkennung kommt die Archtitektur YOLO26 in der Ausführung \texttt{yolov11n} zum Einsatz. Sie ist die kleinste und bietet hohe Erkennungsgenauigkeit während es die notwendige Inferenzgeschwindigkeit für Mikrocontroller liefert.
+Für die Objekterkennung kommt die Archtitektur YOLO26 in der Ausführung \texttt{yolo26n} zum Einsatz. Sie ist die kleinste und bietet hohe Erkennungsgenauigkeit während es die notwendige Inferenzgeschwindigkeit für Mikrocontroller liefert.
 
 Standardmodelle von YOLO26 sind nicht spezifisch auf die Erkennung von Katzengesichtern abgestimmt. Daher wurde eine Feinabstimmung für genau dieses Problem durchgeführt. Grundlage hierfür ist der Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}), da dieser bereits Annotationen für das Gesicht enthält. Der Datensatz beinhaltet die Koordinaten für Augen, Ohren und Mund. Um diese für YOLO nutzbar zu machen, müssen sie in ein Begrenzungsrahmen-Format umgewandelt werden. Dafür wurde ein Algorithmus entwickelt, der die Breite des Rahmens durch die Ohren und die Höhe durch die Ohren und den Mund vorgibt.
 
 Die Feinabstimmung des YOLO26n-Modells erfolgte über 100 Epochen und einer Bildauflösung von 640x640 Pixeln und der Standard YOLO-Augmentation \cite{ultralytics_augmentation}. Um eine Überanpassung des Modells zu vermeiden, wird das Training abgebrochen, sollte in den letzten zehn Epochen keine Verbesserung mehr eintreten. \cite{goodfellow2016deep}.
 
-\section{Automatisierte Generierung des Klassifikations-Datensatzes}
-Für die Klassifikation, ob die Katze Beute im Maul trägt, gab es leider keinen brauchbaren Datensatz. Für das Training werden zwei Arten von Bildern benötigt, Katzen mit und Katzen ohne Beute. Die Katzen ohne Beute können wir wieder aus dem Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}) verwenden. Katzen mit Beute auf der anderen Seite sind extrem schwierig zu bekommen, entweder sie sind qualitativ minderwertig oder Urheberrechtlich geschützt. 
+\section{Automatisierte Generierung des Segmentierungs-Datensatzes}
+Für die Segmentierung, ob die Katze Beute im Maul trägt, gab es leider keinen brauchbaren Datensatz. Für das Training werden zwei Arten von Bildern benötigt, Katzen mit und Katzen ohne Beute. Die Katzen ohne Beute können wir wieder aus dem Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}) verwenden. Katzen mit Beute auf der anderen Seite sind extrem schwierig zu bekommen, entweder sie sind qualitativ minderwertig oder Urheberrechtlich geschützt. 
 
 Die Bilder von Katzen mit Beute, lies ich mir daher von Gemini \cite{geminiteam2023gemini} generieren. Mithilfe der offiziellen Gemini Application Programming Interface (API), entwickelte ich einen Algorithmus, der unter Berücksichtigung des Benutzungslimits automatisch Bilder von Katzen mit Beute in unterschiedlichen Posen und Entfernungen generiert.
 
-Für die Vorbereitung des Datensatzes zur Feinabstimmung des YOLOv11n Klassifikators, wird der zuvor trainierte Katzengesichts-Detektor verwendet. Er erkennt und extrahiert die Katzengesichter und schlüsselt diese dann direkt auf zwei Gruppen auf, Katzen mit und ohne Beute. Dadurch sind die Bilder fertig annotiert und benötigen keine weitere Aufmerksamkeit mehr. 
+Für die Vorbereitung des Datensatzes zur Feinabstimmung des YOLO26n Segmentierungsmodells, wird der zuvor trainierte Katzengesichts-Detektor verwendet. Er erkennt und extrahiert die Katzengesichter und schlüsselt diese dann direkt auf zwei Gruppen auf, Katzen mit und ohne Beute. Dadurch sind die Bilder fertig annotiert und benötigen keine weitere Aufmerksamkeit mehr. 
 
-Der Klassifikator hat somit immer die gleiche Eingangslage: Er bekommt stets ein Katzengesicht ohne viel Hintergrund. Das bildet die perfekte Trainingsgrundlage, da die Klassifikation in der späteren Inferenz genau die gleichen Eingangsbilder erhält.
+Das Segmentierungsmodell hat somit immer die gleiche Eingangslage: Er bekommt stets ein Katzengesicht ohne viel Hintergrund. Das bildet die perfekte Trainingsgrundlage, da die Segmentierung in der späteren Inferenz genau die gleichen Eingangsbilder erhält.
 
 \section{Bildausschnitt-Extraktion}
-Da der Eingang des Klassifikators der Ausgang des Detektors ist, müssen beide die erforderlichen Informationen erhalten. Während der Detektor am besten funktioniert, wenn er nur auf das Katzengesicht trainiert wird, benötigt er auch die Information, was sich unter dem Maul des Katzengesichts befindet.
+Da der Eingang des Segmentierungsmodells der Ausgang des Detektors ist, müssen beide die erforderlichen Informationen erhalten. Während der Detektor am besten funktioniert, wenn er nur auf das Katzengesicht trainiert wird, benötigt er auch die Information, was sich unter dem Maul des Katzengesichts befindet.
 
-Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn der Klassifikator bekommt. Das Katzengesicht wird nach untenhin um 30 Pixel erweitert um sicher zu gehen das die Beute im Bild ist.
+Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn das Segmentierungsmodell bekommt. Das Katzengesicht wird nach untenhin um die doppelte Gesichtshöhe und seitlich um jeweils 80\,\% der Gesichtsbreite erweitert um sicher zu gehen das die Beute im Bild ist.
 
-Das extrahierte Katzenbild wird danach durch CLAHE im Kontrast verstärkt. Dadurch das die Eingabeschicht des Klassifikators ein 3-Kanal-Bild erwartet wird die Graustufe dreifach dupliziert (\texttt{cv2.cvtColor(gray\_crop, cv2.COLOR\_GRAY2BGR)}).
+Dadurch das die Eingabeschicht des Segmentierungsmodells ein 3-Kanal-Bild erwartet wird die Graustufe dreifach dupliziert (\texttt{cv2.cvtColor(gray\_crop, cv2.COLOR\_GRAY2BGR)}).
 
-\section{Training des Bildklassifikators (YOLO-Klassifikation)}
-Als Bildklassifikator kommt wie beim Detektor ein YOLO-Modell zum Einsatz. Dadurch das wir uns bereits in der Ultralytics Umgebung befinden und moderne YOLO-Versionen hochoptimierte Netzwerke für Klassifikationsaufgaben bereitstellen, war diese Entscheidung naheliegend.
+\section{Training des Segmentierungsmodells (YOLO-Segmentierung)}
+Als Segmentierungsmodell kommt wie beim Detektor ein YOLO-Modell zum Einsatz. Dadurch das wir uns bereits in der Ultralytics Umgebung befinden und moderne YOLO-Versionen hochoptimierte Netzwerke für Segmentierungsaufgaben bereitstellen, war diese Entscheidung naheliegend.
 
-Das Modell bekommt ein 320x320 Pixel großes Bild und liefert einen Konfidenzwert, der angibt mit welcher Wahrscheinlichkeit sich Beute auf dem Bild befindet. Dadurch dass der Datensatz des Modells relativ klein ist, wird hier stark auf Datenvervielfältigung gesetzt (zufällige Rotation des Bildes, horizontale Spiegelung). Durch diese Augmentationsschritte wird das Modell robuster gegen unbekannte Posen der Katzen. 
+Das Modell bekommt ein 640x640 Pixel großes Bild und liefert einen Konfidenzwert, der angibt mit welcher Wahrscheinlichkeit sich Beute auf dem Bild befindet. Dadurch dass der Datensatz des Modells relativ klein ist, wird hier stark auf Datenvervielfältigung gesetzt (zufällige Rotation des Bildes, horizontale Spiegelung). Durch diese Augmentationsschritte wird das Modell robuster gegen unbekannte Posen der Katzen. 
 
 \section{Objektverfolgung und Entwicklung des Zustandsmodells}
-Wenn sich eine Katze der Klappe nähert, ändert sich die Qualität der Bilder durch Bewegungsunschärfe oder ungünstige Winkel stark. Das hat zur Folge, dass die Ausgaben des Bildklassifikators schwanken. Wenn z.b. die Beute kurzzeitig verdeckt ist, würde das zur Folge haben das die Katze ins Haus darf. 
+Wenn sich eine Katze der Klappe nähert, ändert sich die Qualität der Bilder durch Bewegungsunschärfe oder ungünstige Winkel stark. Das hat zur Folge, dass die Ausgaben des Segmentierungsmodells schwanken. Wenn z.b. die Beute kurzzeitig verdeckt ist, würde das zur Folge haben das die Katze ins Haus darf. 
 
 Damit dieses Problem eingedämpft wird, wurde die Objekterkennung um den ByteTrack-Algorithmus erweitert. Dadurch bekommt eine Katze beim ersten auftreten im Bild eine eindeutige Objekt-ID, diese ID bleibt in den darauffolgenden Bildern für diese Katze gleich. Basierend auf der Eindeutigkeit jeder Katze konnte nun ein Zustandsautomat entwickelt werden. Diese Klasse \texttt{StateMachine} verwaltet für jede erkannte Katze (\texttt{track\_id}) ein \texttt{TrackState}-Objekt. Das Modell kennt drei Zustände:
 
@@ -68,7 +66,7 @@ Damit dieses Problem eingedämpft wird, wurde die Objekterkennung um den ByteTra
     \item \texttt{CAT\_WITH\_PREY}: Eine Katze wurde erkannt und trägt mit hinreichender Sicherheit eine Beute.
 \end{itemize}
 
-Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Klassifikators der letzten 15 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,8 überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert.
+Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Segmentierungsmodells der letzten 15 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,8 überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert.
 
 Der Schwellenwert von 0,8 wurde bewusst so hoch gewählt, um zu vermeiden, dass die Katze zu Unrecht draußen bleiben muss. Dieser Wert ist aber nicht in Stein gemeißelt. Wenn es für den Endanwender wichtiger wäre, Beute im Haus um jeden Preis zu vermeiden würde man den Wert niedriger ansetzen, beispielsweise bei 0,3.
 
