@@ -1,28 +1,12 @@
 \chapter{Abstract}
 
 \begin{english} %switch to English language rules
-This should be a 1-page (maximum) summary of your work in English.
-%und hier geht dann das Abstract weiter...
+Outdoor cats regularly bring prey such as mice or birds into the home. Conventional cat flaps cannot prevent this, as they only distinguish between known and unknown animals. Camera-based prey detection is challenging because the prey is small and often partially occluded, and the predictions of a model fluctuate from frame to frame due to motion blur and changing lighting conditions. Decisions based on individual frames therefore lead to the flap constantly switching between locking and unlocking.
+
+This thesis investigates whether a processing pipeline consisting of object detection, object tracking, image segmentation and temporal state modelling enables more robust prey detection than the evaluation of individual frames. A fine-tuned YOLO object detector localises the faces of the cats, ByteTrack assigns the detections to consistent identities over time, and a YOLO segmentation model examines a downward-extended crop of each cat's face for the presence of prey. A state machine aggregates the confidence scores of each cat over a sliding time window and only then decides whether to unlock the flap. To support operation at night, the system works on grayscale images. Due to the lack of real recordings, the training data for the segmentation model was created using generative AI, and the models were optimised for operation on a Raspberry Pi~5.
+
+The evaluation on real video sequences shows that the overall system makes the correct decision for all test videos. In ablation studies, the state machine reduces the number of state changes by more than half compared to frame-by-frame decisions. The two-stage approach misses considerably fewer cats than a single-stage detector.
+% TODO: update the results paragraph after the new evaluation (Veo test videos, new metrics), together with the Kurzfassung
+
+The results confirm that the combination of object detection, object tracking and temporal state modelling leads to considerably more stable decisions than frame-by-frame evaluation and can be implemented on low-cost local hardware.
 \end{english}
-
-Im englischen "Abstract" sollte inhaltlich das Gleiche stehen wie in der
-deutschen Kurzfassung. Versuchen Sie daher, die Kurzfassung prä\-zise
-umzusetzen, ohne aber dabei Wort für Wort zu übersetzen. Beachten Sie bei der
-Übersetzung, dass gewisse Redewendungen aus dem Deutschen im Englischen kein
-Pendant haben oder völlig anders formuliert werden müssen und dass die
-Satzstellung im Englischen sich (bekanntlich) vom Deutschen stark unterscheidet
-(mehr dazu in Abschn.\ \ref{sec:englisch}). Es empfiehlt sich übrigens --
-auch bei höchstem Vertrauen in die persönlichen Englischkenntnisse -- eine
-kundige Person für das "proof reading" zu engagieren.
-
-Die richtige Übersetzung für "Diplomarbeit" ist übrigens schlicht
-\emph{thesis}, allenfalls "diploma thesis", auf keinen Fall aber "diploma
-work" oder gar "dissertation". Für "Masterarbeit" \bzw\ "Bachelorarbeit" sind
-"master's thesis" \bzw\ "bachelor's thesis" die passenden Übersetzungen.
-
-Übrigens sollte für diesen Abschnitt die \emph{Spracheinstellung} in \latex\
-von Deutsch auf Englisch umgeschaltet werden, um die richtige Form der
-Silbentrennung zu erhalten. Mit der Option \texttt{smartquotes} werden dabei
-auch die Anführungszeichen automatisch an die jeweilige Sprache angepasst
-(s.\ dazu die Abschnitte \ref{sec:sprachumschaltung} und
-\ref{sec:anfuehrungszeichen}).
