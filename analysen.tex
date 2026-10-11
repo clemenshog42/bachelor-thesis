@@ -56,7 +56,7 @@ Die Abbildung \ref{fig:val_pred_det} liefert einen Eindruck auf die Erkennungsle
 \end{figure}
 
 \subsection{Leistung der Bildsegmentierung}
-% TODO: Abbildungen und Zahlen (335 Fotos, 5 Fehler) durch die Trainingsergebnisse des YOLO26-Segmentierungsmodells ersetzen
+% TODO: results_cls.png und val_batch0_pred_cls.jpg durch results.png und val_batch0_pred.jpg des YOLO26-Graustufenmodells ersetzen
 Die folgenden Trainingsmetriken des Beute-Segmentierungsmodells zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
 Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass das Segmentierungsmodell lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.
 
@@ -67,13 +67,22 @@ Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über di
     \label{fig:training_cls}
 \end{figure}
 
-Wenn man einen Blick auf die Wahrheitsmatrix (Abbildung \ref{fig:confusion_cls}) wirft, zeigt sich, dass das Modell auf den Validierungsdatensatz großartig funktionierte. Bei den insgesamt 335 Fotos, gab es nur 5 Fehler bei der binären Entscheidung \glqq Beute\grqq\ und \glqq Keine Beute\grqq.
+Die Präzision-Trefferquote-Kurve der Segmentierungsmasken (Abbildung \ref{fig:pr_curve_seg}) zeigt, dass das Modell bis zu einer Trefferquote von etwa 94\,\% keine einzige Fehlerkennung liefert. Auf dem Validierungsdatensatz erreicht es eine mAP50 von 0,945.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/confusion_matrix_cls.png}
-    \caption{Confusion Matrix des Segmentierungsmodells auf dem Validierungsdatensatz.}
-    \label{fig:confusion_cls}
+    \includegraphics[width=0.6\textwidth]{images/seg_pr_curve.png}
+    \caption{Präzision-Trefferquote-Kurve der Segmentierungsmasken.}
+    \label{fig:pr_curve_seg}
+\end{figure}
+
+Die F1-Maß-Kurve (Abbildung \ref{fig:f1_curve_seg}) erreicht ihr Maximum von 0,97 bei einem Konfidenzschwellenwert von 0,728. Zwischen etwa 0,1 und 0,85 bleibt sie nahezu konstant, das Modell reagiert in diesem Bereich also kaum empfindlich auf die Wahl des Schwellenwerts.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/seg_f1_curve.png}
+    \caption{F1-Maß-Kurve des Segmentierungsmodells.}
+    \label{fig:f1_curve_seg}
 \end{figure}
 
 Mithilfe der Abbildung \ref{fig:val_pred_cls} lässt sich gut erkennen, wie gut das Modell mit unbekannten Daten umgeht.
