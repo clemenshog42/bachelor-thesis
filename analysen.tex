@@ -56,7 +56,7 @@ Die Abbildung \ref{fig:val_pred_det} liefert einen Eindruck auf die Erkennungsle
 \end{figure}
 
 \subsection{Leistung der Bildsegmentierung}
-% TODO: results_cls.png und val_batch0_pred_cls.jpg durch results.png und val_batch0_pred.jpg des YOLO26-Graustufenmodells ersetzen
+% TODO: results_cls.png durch results.png des YOLO26-Graustufenmodells ersetzen
 Die folgenden Trainingsmetriken des Beute-Segmentierungsmodells zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
 Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass das Segmentierungsmodell lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.
 
@@ -89,7 +89,7 @@ Mithilfe der Abbildung \ref{fig:val_pred_cls} lässt sich gut erkennen, wie gut 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/val_batch0_pred_cls.jpg}
+    \includegraphics[width=0.8\textwidth]{images/seg_val_pred.jpg}
     \caption{Beispielhafte Vorhersagen des Segmentierungsmodells auf dem Validierungsdatensatz.}
     \label{fig:val_pred_cls}
 \end{figure}
