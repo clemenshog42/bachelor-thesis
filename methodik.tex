@@ -44,6 +44,7 @@ Für die Vorbereitung des Datensatzes zur Feinabstimmung des YOLO26n Segmentieru
 Das Segmentierungsmodell hat somit immer die gleiche Eingangslage: Es bekommt stets den erweiterten Ausschnitt um das Katzengesicht ohne viel Hintergrund. Das bildet die perfekte Trainingsgrundlage, da die Segmentierung in der späteren Inferenz genau die gleichen Eingangsbilder erhält.
 
 \section{Bildausschnitt-Extraktion}
+\label{sec:bildausschnitt}
 Da der Eingang des Segmentierungsmodells der Ausgang des Detektors ist, müssen beide die erforderlichen Informationen erhalten. Während der Detektor am besten funktioniert, wenn er nur auf das Katzengesicht trainiert wird, benötigt er auch die Information, was sich unter dem Maul des Katzengesichts befindet.
 
 Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn das Segmentierungsmodell bekommt. Das Katzengesicht wird nach untenhin um die doppelte Gesichtshöhe und seitlich um jeweils 80\,\% der Gesichtsbreite erweitert um sicher zu gehen das die Beute im Bild ist.
