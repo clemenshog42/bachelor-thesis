@@ -142,26 +142,27 @@ Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor
         \toprule
         Metrik & Videos mit Beute & Videos ohne Beute \\
         \midrule
-        Sicherheitsfehler & 1,6\,\% & -- \\
-        Komfortfehler & -- & 4,1\,\% \\
-        Durchgelassene Beute & 3 von 10 & -- \\
+        Sicherheitsfehler & 1,0\,\% & -- \\
+        Komfortfehler & -- & 3,3\,\% \\
+        Durchgelassene Beute & 2 von 10 & -- \\
         Ausgesperrte saubere Katzen & -- & 0 von 10 \\
-        Entscheidungszeit & 0,13\,s & 0,67\,s \\
+        Entscheidungszeit & 0,13\,s & 0,60\,s \\
         \bottomrule
     \end{tabular}
     \caption{Ergebnisse des Gesamtsystems auf dem Testdatensatz.}
     \label{tab:system_eval}
 \end{table}
 
-Über alle Einzelbilder mit sichtbarer Katze erreicht die Entscheidung \glqq Klappe sperren\grqq\ eine Präzision von 0,980, eine Trefferquote von 0,984 und ein F1-Maß von 0,982. In 4,3\,\% der Einzelbilder mit erkennbarem Katzengesicht detektiert das System keine Katze. Getrennt nach Lichtverhältnissen liegt der Sicherheitsfehler bei Tagaufnahmen bei 1,9\,\% und bei Infrarot-Aufnahmen bei 1,2\,\%, der Komfortfehler bei 6,8\,\% beziehungsweise 0,0\,\%.
+Über alle Einzelbilder mit sichtbarer Katze erreicht die Entscheidung \glqq Klappe sperren\grqq\ eine Präzision von 0,984, eine Trefferquote von 0,990 und ein F1-Maß von 0,987. In 4,3\,\% der Einzelbilder mit erkennbarem Katzengesicht detektiert das System keine Katze. Getrennt nach Lichtverhältnissen liegt der Sicherheitsfehler bei Tagaufnahmen bei 0,8\,\% und bei Infrarot-Aufnahmen bei 1,2\,\%, der Komfortfehler bei 5,6\,\% beziehungsweise 0,0\,\%.
 
-Keine saubere Katze wird dauerhaft ausgesperrt. In drei der zehn Videos mit Beute wird die Klappe kurzzeitig geöffnet. Die Analyse dieser Videos zeigt drei Ursachen:
+Keine saubere Katze wird dauerhaft ausgesperrt. In zwei der zehn Videos mit Beute wird die Klappe kurzzeitig für jeweils vier Einzelbilder (0,5~Sekunden) geöffnet. Die Analyse dieser Videos zeigt zwei Ursachen:
 
 \begin{itemize}
-    \item Die Katze ist noch weit von der Kamera entfernt, wodurch die Beute im Bildausschnitt zu klein ist, um vom Segmentierungsmodell erkannt zu werden.
-    \item Die Katze dreht den Kopf weg oder läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
-    \item Der Tracker (ByteTrack) weist derselben Katze eine neue Identität zu. Der neue Track beginnt mit einer leeren Historie, wodurch die bisherigen Beuteerkennungen verloren gehen.
+    \item Die Katze ist zu Beginn noch weit von der Kamera entfernt, wodurch die Beute im Bildausschnitt zu klein ist, um vom Segmentierungsmodell erkannt zu werden. Liegt der Durchschnitt nach 20 Einzelbildern noch unter dem Schwellenwert, wird die Katze kurz freigegeben, bis die Beute erkannt wird.
+    \item Die Katze läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
 \end{itemize}
+
+In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind. Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Entscheidungszeit.
 
 \section{Ablationsstudien}
 In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.
@@ -184,12 +185,12 @@ Tabelle~\ref{tab:sm_ablation} stellt beide Konfigurationen gegenüber. Für die 
         \toprule
         Metrik & Ohne Zustandsautomat & Mit Zustandsautomat \\
         \midrule
-        Sicherheitsfehler & 17,3\,\% & 1,6\,\% \\
-        Komfortfehler & 20,5\,\% & 4,1\,\% \\
-        Präzision & 0,892 & 0,980 \\
-        Trefferquote & 0,828 & 0,984 \\
-        F1-Maß & 0,859 & 0,982 \\
-        Durchgelassene Beute & 10 von 10 & 3 von 10 \\
+        Sicherheitsfehler & 17,0\,\% & 1,0\,\% \\
+        Komfortfehler & 19,7\,\% & 3,3\,\% \\
+        Präzision & 0,896 & 0,984 \\
+        Trefferquote & 0,830 & 0,990 \\
+        F1-Maß & 0,862 & 0,987 \\
+        Durchgelassene Beute & 10 von 10 & 2 von 10 \\
         Ausgesperrte saubere Katzen & 0 von 10 & 0 von 10 \\
         \bottomrule
     \end{tabular}
@@ -197,7 +198,7 @@ Tabelle~\ref{tab:sm_ablation} stellt beide Konfigurationen gegenüber. Für die 
     \label{tab:sm_ablation}
 \end{table}
 
-Ohne Zustandsautomat ist die Klappe in 17,3\,\% der Einzelbilder mit Beute geöffnet, und in jedem der zehn Videos mit Beute wird die Klappe mindestens einmal freigegeben. Gleichzeitig ist die Klappe in 20,5\,\% der Einzelbilder mit sauberen Katzen gesperrt. Einzelne Fehlentscheidungen des Segmentierungsmodells wirken sich ohne zeitliche Aggregation unmittelbar auf den Zustand der Klappe aus. Mit Zustandsautomat sinkt der Sicherheitsfehler auf 1,6\,\% und der Komfortfehler auf 4,1\,\%.
+Ohne Zustandsautomat ist die Klappe in 17,0\,\% der Einzelbilder mit Beute geöffnet, und in jedem der zehn Videos mit Beute wird die Klappe mindestens einmal freigegeben. Gleichzeitig ist die Klappe in 19,7\,\% der Einzelbilder mit sauberen Katzen gesperrt. Einzelne Fehlentscheidungen des Segmentierungsmodells wirken sich ohne zeitliche Aggregation unmittelbar auf den Zustand der Klappe aus. Mit Zustandsautomat sinkt der Sicherheitsfehler auf 1,0\,\% und der Komfortfehler auf 3,3\,\%.
 
 Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5, 8, 10, 15 und 20 Einzelbilder) und den Schwellenwert (0,3 bis 0,8) ausgewertet. Sie zeigt den Zielkonflikt zwischen Sicherheitsfehlern, Komfortfehlern und Entscheidungszeit und dient der Festlegung der finalen Parameter. Tabelle~\ref{tab:sm_sweep} enthält die Ergebnisse aller Kombinationen. Der Anteil übersehener Katzen beträgt in allen Kombinationen 4,3\,\%, da er nur vom Detektor abhängt. In keiner Kombination wird eine saubere Katze dauerhaft ausgesperrt.
 
@@ -211,54 +212,54 @@ Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5,
         \cmidrule(lr){7-8}
         Fenster & Schwelle & Sicherheitsf. & Komfortf. & F1 & Beute & Beute & sauber \\
         \midrule
-        1 & 0,3 & 12,8\,\% & 20,0\,\% & 0,886 & 10/10 & 0,03 & 0,00 \\
-        1 & 0,4 & 13,4\,\% & 20,0\,\% & 0,882 & 10/10 & 0,03 & 0,00 \\
-        1 & 0,5 & 17,2\,\% & 20,5\,\% & 0,859 & 10/10 & 0,46 & 0,00 \\
-        1 & 0,6 & 17,5\,\% & 21,0\,\% & 0,856 & 10/10 & 0,46 & 0,00 \\
-        1 & 0,7 & 19,9\,\% & 21,0\,\% & 0,842 & 10/10 & 0,46 & 0,00 \\
-        1 & 0,8 & 25,1\,\% & 21,0\,\% & 0,809 & 10/10 & 0,57 & 0,00 \\
+        1 & 0,3 & 11,6\,\% & 19,2\,\% & 0,894 & 9/10 & 0,03 & 0,00 \\
+        1 & 0,4 & 12,5\,\% & 19,2\,\% & 0,889 & 10/10 & 0,03 & 0,00 \\
+        1 & 0,5 & 17,0\,\% & 19,7\,\% & 0,862 & 10/10 & 0,46 & 0,00 \\
+        1 & 0,6 & 17,2\,\% & 20,3\,\% & 0,859 & 10/10 & 0,46 & 0,00 \\
+        1 & 0,7 & 18,5\,\% & 20,3\,\% & 0,852 & 10/10 & 0,46 & 0,00 \\
+        1 & 0,8 & 23,8\,\% & 20,3\,\% & 0,819 & 10/10 & 0,58 & 0,00 \\
         \midrule
-        3 & 0,3 & 11,1\,\% & 20,8\,\% & 0,893 & 9/10 & 0,03 & 0,00 \\
-        3 & 0,4 & 11,9\,\% & 21,0\,\% & 0,888 & 9/10 & 0,03 & 0,00 \\
-        3 & 0,5 & 16,2\,\% & 21,3\,\% & 0,863 & 9/10 & 0,46 & 0,00 \\
-        3 & 0,6 & 20,2\,\% & 13,1\,\% & 0,857 & 10/10 & 0,46 & 0,00 \\
-        3 & 0,7 & 25,8\,\% & 11,3\,\% & 0,826 & 10/10 & 0,46 & 0,00 \\
-        3 & 0,8 & 32,5\,\% & 11,3\,\% & 0,780 & 10/10 & 0,06 & 0,00 \\
+        3 & 0,3 & 10,5\,\% & 20,0\,\% & 0,898 & 9/10 & 0,03 & 0,00 \\
+        3 & 0,4 & 11,2\,\% & 20,3\,\% & 0,894 & 9/10 & 0,03 & 0,00 \\
+        3 & 0,5 & 16,2\,\% & 20,5\,\% & 0,865 & 9/10 & 0,46 & 0,00 \\
+        3 & 0,6 & 20,2\,\% & 12,3\,\% & 0,859 & 10/10 & 0,46 & 0,00 \\
+        3 & 0,7 & 25,8\,\% & 10,5\,\% & 0,828 & 10/10 & 0,46 & 0,00 \\
+        3 & 0,8 & 31,1\,\% & 10,5\,\% & 0,792 & 10/10 & 0,06 & 0,00 \\
         \midrule
-        5 & 0,3 & 7,9\,\% & 21,5\,\% & 0,909 & 9/10 & 0,03 & 0,00 \\
-        5 & 0,4 & 8,5\,\% & 21,3\,\% & 0,907 & 9/10 & 0,03 & 0,00 \\
-        5 & 0,5 & 18,2\,\% & 11,3\,\% & 0,873 & 9/10 & 0,51 & 0,00 \\
-        5 & 0,6 & 21,1\,\% & 4,1\,\% & 0,872 & 10/10 & 0,54 & 0,00 \\
-        5 & 0,7 & 22,6\,\% & 4,1\,\% & 0,863 & 10/10 & 0,61 & 0,00 \\
-        5 & 0,8 & 27,8\,\% & 4,1\,\% & 0,829 & 10/10 & 0,43 & 0,00 \\
+        5 & 0,3 & 7,1\,\% & 20,8\,\% & 0,915 & 9/10 & 0,03 & 0,00 \\
+        5 & 0,4 & 7,8\,\% & 20,5\,\% & 0,912 & 9/10 & 0,03 & 0,00 \\
+        5 & 0,5 & 21,2\,\% & 10,5\,\% & 0,857 & 9/10 & 0,51 & 0,00 \\
+        5 & 0,6 & 24,1\,\% & 3,3\,\% & 0,855 & 10/10 & 0,54 & 0,00 \\
+        5 & 0,7 & 25,6\,\% & 3,3\,\% & 0,845 & 10/10 & 0,61 & 0,00 \\
+        5 & 0,8 & 30,8\,\% & 3,3\,\% & 0,811 & 10/10 & 0,43 & 0,00 \\
         \midrule
-        8 & 0,3 & 6,8\,\% & 19,5\,\% & 0,920 & 8/10 & 0,04 & 0,16 \\
-        8 & 0,4 & 9,8\,\% & 14,1\,\% & 0,916 & 8/10 & 0,05 & 0,16 \\
-        8 & 0,5 & 14,5\,\% & 4,1\,\% & 0,912 & 8/10 & 0,55 & 0,16 \\
-        8 & 0,6 & 17,1\,\% & 4,1\,\% & 0,897 & 8/10 & 0,57 & 0,16 \\
-        8 & 0,7 & 19,8\,\% & 4,1\,\% & 0,881 & 9/10 & 0,65 & 0,16 \\
-        8 & 0,8 & 30,0\,\% & 4,1\,\% & 0,814 & 9/10 & 0,36 & 0,16 \\
+        8 & 0,3 & 5,4\,\% & 18,7\,\% & 0,929 & 8/10 & 0,04 & 0,11 \\
+        8 & 0,4 & 9,6\,\% & 12,6\,\% & 0,920 & 9/10 & 0,05 & 0,11 \\
+        8 & 0,5 & 16,4\,\% & 3,3\,\% & 0,903 & 9/10 & 0,55 & 0,11 \\
+        8 & 0,6 & 19,5\,\% & 3,3\,\% & 0,884 & 9/10 & 0,57 & 0,11 \\
+        8 & 0,7 & 23,1\,\% & 3,3\,\% & 0,861 & 10/10 & 0,65 & 0,11 \\
+        8 & 0,8 & 33,6\,\% & 3,3\,\% & 0,790 & 10/10 & 0,36 & 0,11 \\
         \midrule
-        10 & 0,3 & 5,0\,\% & 14,1\,\% & 0,941 & 6/10 & 0,05 & 0,16 \\
-        10 & 0,4 & 7,6\,\% & 4,1\,\% & 0,950 & 8/10 & 0,06 & 0,16 \\
-        10 & 0,5 & 10,8\,\% & 4,1\,\% & 0,933 & 8/10 & 0,54 & 0,16 \\
-        10 & 0,6 & 15,2\,\% & 4,1\,\% & 0,908 & 8/10 & 0,64 & 0,16 \\
-        10 & 0,7 & 16,5\,\% & 4,1\,\% & 0,900 & 8/10 & 0,72 & 0,16 \\
-        10 & 0,8 & 32,0\,\% & 4,1\,\% & 0,800 & 9/10 & 0,39 & 0,16 \\
+        10 & 0,3 & 4,0\,\% & 12,6\,\% & 0,950 & 6/10 & 0,05 & 0,14 \\
+        10 & 0,4 & 5,9\,\% & 3,3\,\% & 0,962 & 8/10 & 0,06 & 0,14 \\
+        10 & 0,5 & 11,9\,\% & 3,3\,\% & 0,929 & 9/10 & 0,54 & 0,14 \\
+        10 & 0,6 & 16,4\,\% & 3,3\,\% & 0,903 & 9/10 & 0,64 & 0,14 \\
+        10 & 0,7 & 19,1\,\% & 3,3\,\% & 0,886 & 9/10 & 0,73 & 0,14 \\
+        10 & 0,8 & 36,2\,\% & 3,3\,\% & 0,771 & 10/10 & 0,39 & 0,14 \\
         \midrule
-        15 & 0,3 & 2,2\,\% & 4,1\,\% & 0,979 & 5/10 & 0,07 & 0,30 \\
-        15 & 0,4 & 4,6\,\% & 4,1\,\% & 0,966 & 6/10 & 0,16 & 0,30 \\
-        15 & 0,5 & 11,2\,\% & 4,1\,\% & 0,931 & 6/10 & 0,66 & 0,30 \\
-        15 & 0,6 & 14,1\,\% & 4,1\,\% & 0,914 & 8/10 & 0,79 & 0,30 \\
-        15 & 0,7 & 15,6\,\% & 4,1\,\% & 0,905 & 8/10 & 0,96 & 0,30 \\
-        15 & 0,8 & 28,2\,\% & 4,1\,\% & 0,826 & 9/10 & 0,67 & 0,30 \\
+        15 & 0,3 & 1,8\,\% & 3,3\,\% & 0,983 & 4/10 & 0,08 & 0,20 \\
+        15 & 0,4 & 4,1\,\% & 3,3\,\% & 0,971 & 5/10 & 0,16 & 0,20 \\
+        15 & 0,5 & 11,4\,\% & 3,3\,\% & 0,932 & 6/10 & 0,66 & 0,20 \\
+        15 & 0,6 & 13,1\,\% & 3,3\,\% & 0,922 & 8/10 & 0,79 & 0,20 \\
+        15 & 0,7 & 14,9\,\% & 3,3\,\% & 0,912 & 9/10 & 0,96 & 0,20 \\
+        15 & 0,8 & 28,7\,\% & 3,3\,\% & 0,824 & 10/10 & 0,67 & 0,20 \\
         \midrule
-        \textbf{20} & \textbf{0,3} & \textbf{1,6\,\%} & \textbf{4,1\,\%} & \textbf{0,982} & \textbf{3/10} & \textbf{0,13} & \textbf{0,67} \\
-        20 & 0,4 & 2,4\,\% & 4,1\,\% & 0,978 & 4/10 & 0,21 & 0,67 \\
-        20 & 0,5 & 6,9\,\% & 4,1\,\% & 0,955 & 6/10 & 0,78 & 0,67 \\
-        20 & 0,6 & 8,4\,\% & 4,1\,\% & 0,946 & 6/10 & 1,00 & 0,67 \\
-        20 & 0,7 & 11,0\,\% & 4,1\,\% & 0,932 & 9/10 & 1,31 & 0,67 \\
-        20 & 0,8 & 23,6\,\% & 4,1\,\% & 0,856 & 10/10 & 1,19 & 0,67 \\
+        \textbf{20} & \textbf{0,3} & \textbf{1,0\,\%} & \textbf{3,3\,\%} & \textbf{0,987} & \textbf{2/10} & \textbf{0,13} & \textbf{0,60} \\
+        20 & 0,4 & 1,8\,\% & 3,3\,\% & 0,983 & 3/10 & 0,21 & 0,60 \\
+        20 & 0,5 & 6,9\,\% & 3,3\,\% & 0,956 & 6/10 & 0,78 & 0,60 \\
+        20 & 0,6 & 8,4\,\% & 3,3\,\% & 0,948 & 6/10 & 1,00 & 0,60 \\
+        20 & 0,7 & 11,0\,\% & 3,3\,\% & 0,934 & 9/10 & 1,31 & 0,60 \\
+        20 & 0,8 & 24,4\,\% & 3,3\,\% & 0,853 & 10/10 & 1,19 & 0,60 \\
         \bottomrule
     \end{tabular}
     \caption{Parameterreihe des Zustandsautomaten über die Länge des Zeitfensters (in Einzelbildern) und den Schwellenwert. Die gewählte Konfiguration ist fett hervorgehoben. Ein Zeitfenster von einem Einzelbild entspricht einem System ohne Zustandsautomat.}
@@ -268,12 +269,12 @@ Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5,
 Aus der Parameterreihe lassen sich folgende Zusammenhänge ablesen:
 
 \begin{itemize}
-    \item \emph{Länge des Zeitfensters}: Bei einem Schwellenwert von 0,3 sinken mit zunehmender Länge des Zeitfensters sowohl der Sicherheitsfehler (von 12,8\,\% auf 1,6\,\%) als auch die Anzahl der Videos, in denen Beute durchgelassen wird (von 10 auf 3). Kurze Fehlentscheidungen des Segmentierungsmodells werden über mehr Einzelbilder gemittelt und führen seltener zu einer Freigabe. Bei hohen Schwellenwerten ist dieser Zusammenhang nicht zu beobachten. Ab einem Zeitfenster von zehn Einzelbildern bleibt der Komfortfehler bei Schwellenwerten ab 0,4 konstant bei 4,1\,\%.
-    \item \emph{Schwellenwert}: Ein niedriger Schwellenwert sperrt die Klappe bereits bei einem geringen mittleren Beuteanteil. Dadurch sinkt der Sicherheitsfehler, bei Zeitfenstern von drei bis zehn Einzelbildern steigt jedoch der Komfortfehler. Bei langen Zeitfenstern bleibt der Komfortfehler auch bei einem Schwellenwert von 0,3 bei 4,1\,\%.
-    \item \emph{Entscheidungszeit}: Längere Zeitfenster verzögern die Freigabe für saubere Katzen, da der Zustandsautomat zuerst eine ausreichende Historie sammeln muss. Gleichzeitig steigt mit dem Schwellenwert in der Regel die Zeit bis zur Sperrung bei Katzen mit Beute. Bei 20 Einzelbildern beträgt die mittlere Entscheidungszeit für saubere Katzen 0,67~Sekunden und liegt damit deutlich unter der Entscheidungszeit von drei Sekunden.
+    \item \emph{Länge des Zeitfensters}: Bei einem Schwellenwert von 0,3 sinken mit zunehmender Länge des Zeitfensters sowohl der Sicherheitsfehler (von 11,6\,\% auf 1,0\,\%) als auch die Anzahl der Videos, in denen Beute durchgelassen wird (von 9 auf 2). Kurze Fehlentscheidungen des Segmentierungsmodells werden über mehr Einzelbilder gemittelt und führen seltener zu einer Freigabe. Bei hohen Schwellenwerten ist dieser Zusammenhang nicht zu beobachten. Ab einem Zeitfenster von zehn Einzelbildern bleibt der Komfortfehler bei Schwellenwerten ab 0,4 konstant bei 3,3\,\%.
+    \item \emph{Schwellenwert}: Ein niedriger Schwellenwert sperrt die Klappe bereits bei einem geringen mittleren Beuteanteil. Dadurch sinkt der Sicherheitsfehler, bei Zeitfenstern von drei bis zehn Einzelbildern steigt jedoch der Komfortfehler. Bei langen Zeitfenstern bleibt der Komfortfehler auch bei einem Schwellenwert von 0,3 bei 3,3\,\%.
+    \item \emph{Entscheidungszeit}: Längere Zeitfenster verzögern die Freigabe für saubere Katzen, da der Zustandsautomat zuerst eine ausreichende Historie sammeln muss. Gleichzeitig steigt mit dem Schwellenwert in der Regel die Zeit bis zur Sperrung bei Katzen mit Beute. Bei 20 Einzelbildern beträgt die mittlere Entscheidungszeit für saubere Katzen 0,60~Sekunden und liegt damit deutlich unter der Entscheidungszeit von drei Sekunden.
 \end{itemize}
 
-Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwert von 0,3 erreicht den geringsten Sicherheitsfehler (1,6\,\%), das höchste F1-Maß (0,982) und die geringste Anzahl an Videos mit durchgelassener Beute (3 von 10). Der Komfortfehler liegt mit 4,1\,\% auf dem niedrigsten Wert, der bei langen Zeitfenstern erreicht wird, und keine saubere Katze wird ausgesperrt. Bei 8 Bildern pro Sekunde entspricht das Zeitfenster einer Historie von 2,5~Sekunden. Diese Konfiguration wird daher als finale Parametrisierung des Zustandsautomaten festgelegt und in allen folgenden Ablationsstudien verwendet.
+Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwert von 0,3 erreicht den geringsten Sicherheitsfehler (1,0\,\%), das höchste F1-Maß (0,987) und die geringste Anzahl an Videos mit durchgelassener Beute (2 von 10). Der Komfortfehler liegt mit 3,3\,\% auf dem niedrigsten Wert der gesamten Parameterreihe, und keine saubere Katze wird ausgesperrt. Bei 8 Bildern pro Sekunde entspricht das Zeitfenster einer Historie von 2,5~Sekunden. Diese Konfiguration wird daher als finale Parametrisierung des Zustandsautomaten festgelegt und in allen folgenden Ablationsstudien verwendet.
 
 \subsection{Detektion und Segmentierung gegenüber Detektion}
 Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.
@@ -304,21 +305,21 @@ Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfig
         \cmidrule(lr){2-3}\cmidrule(lr){4-5}
         Metrik & Zweistufig & Einstufig & Zweistufig & Einstufig \\
         \midrule
-        Sicherheitsfehler & 17,3\,\% & 10,1\,\% & 1,6\,\% & 10,6\,\% \\
-        Komfortfehler & 20,5\,\% & 62,1\,\% & 4,1\,\% & 30,5\,\% \\
-        Präzision & 0,892 & 0,748 & 0,980 & 0,857 \\
-        Trefferquote & 0,828 & 0,899 & 0,984 & 0,894 \\
-        F1-Maß & 0,859 & 0,817 & 0,982 & 0,875 \\
+        Sicherheitsfehler & 17,0\,\% & 9,9\,\% & 1,0\,\% & 10,6\,\% \\
+        Komfortfehler & 19,7\,\% & 61,5\,\% & 3,3\,\% & 29,7\,\% \\
+        Präzision & 0,896 & 0,750 & 0,984 & 0,860 \\
+        Trefferquote & 0,830 & 0,901 & 0,990 & 0,894 \\
+        F1-Maß & 0,862 & 0,819 & 0,987 & 0,877 \\
         Übersehene Katzen & 4,3\,\% & 6,5\,\% & 4,3\,\% & 6,5\,\% \\
-        Durchgelassene Beute & 10 von 10 & 10 von 10 & 3 von 10 & 2 von 10 \\
-        Entscheidungszeit (sauber) & 0,00\,s & 2,54\,s & 0,67\,s & 3,02\,s \\
+        Durchgelassene Beute & 10 von 10 & 8 von 10 & 2 von 10 & 2 von 10 \\
+        Entscheidungszeit (sauber) & 0,00\,s & 2,54\,s & 0,60\,s & 3,02\,s \\
         \bottomrule
     \end{tabular}
     \caption{Vergleich des zweistufigen Systems (Detektion und Segmentierung) mit dem einstufigen Objektdetektor, ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3).}
     \label{tab:ablation_1stage}
 \end{table}
 
-Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,3\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 62,1\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 30,5\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lässt das einstufige System in zwei von zehn Videos Beute durch, das zweistufige System in drei. Der Sicherheitsfehler des einstufigen Systems ist mit 10,6\,\% jedoch mehr als sechsmal so hoch wie jener des zweistufigen Systems (1,6\,\%). Das F1-Maß des zweistufigen Systems liegt mit 0,982 deutlich über jenem des einstufigen Systems (0,875). Zudem benötigt das einstufige System im Mittel 3,02~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Entscheidungszeit von drei Sekunden.
+Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,3\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 61,5\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 29,7\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lassen beide Systeme in zwei von zehn Videos Beute durch. Der Sicherheitsfehler des einstufigen Systems ist mit 10,6\,\% jedoch rund zehnmal so hoch wie jener des zweistufigen Systems (1,0\,\%). Das F1-Maß des zweistufigen Systems liegt mit 0,987 deutlich über jenem des einstufigen Systems (0,877). Zudem benötigt das einstufige System im Mittel 3,02~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Entscheidungszeit von drei Sekunden.
 
 \subsection{Graustufen gegenüber Farbbildern}
 Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
@@ -333,12 +334,12 @@ Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werd
         \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
         Metrik & Grau & Farbe & Grau & Farbe & Grau & Farbe \\
         \midrule
-        Sicherheitsfehler & 1,9\,\% & 4,4\,\% & 1,2\,\% & 5,6\,\% & 1,6\,\% & 4,9\,\% \\
-        Komfortfehler & 6,8\,\% & 1,3\,\% & 0,0\,\% & 0,0\,\% & 4,1\,\% & 0,8\,\% \\
-        Präzision & 0,967 & 0,994 & 1,000 & 1,000 & 0,980 & 0,996 \\
-        Trefferquote & 0,981 & 0,956 & 0,988 & 0,944 & 0,984 & 0,951 \\
-        F1-Maß & 0,974 & 0,975 & 0,994 & 0,971 & 0,982 & 0,973 \\
-        Durchgelassene Beute & 2 von 6 & 2 von 6 & 1 von 4 & 2 von 4 & 3 von 10 & 4 von 10 \\
+        Sicherheitsfehler & 0,8\,\% & 4,4\,\% & 1,2\,\% & 5,6\,\% & 1,0\,\% & 4,9\,\% \\
+        Komfortfehler & 5,6\,\% & 0,0\,\% & 0,0\,\% & 0,0\,\% & 3,3\,\% & 0,0\,\% \\
+        Präzision & 0,973 & 1,000 & 1,000 & 1,000 & 0,984 & 1,000 \\
+        Trefferquote & 0,992 & 0,956 & 0,988 & 0,944 & 0,990 & 0,951 \\
+        F1-Maß & 0,982 & 0,978 & 0,994 & 0,971 & 0,987 & 0,975 \\
+        Durchgelassene Beute & 1 von 6 & 2 von 6 & 1 von 4 & 2 von 4 & 2 von 10 & 4 von 10 \\
         Entscheidungszeit (Beute) & 0,19\,s & 0,94\,s & 0,03\,s & 0,75\,s & 0,13\,s & 0,86\,s \\
         \bottomrule
     \end{tabular}
@@ -346,4 +347,4 @@ Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werd
     \label{tab:ablation_gray}
 \end{table}
 
-Bei Tagaufnahmen erreichen beide Modelle ein nahezu gleiches F1-Maß (0,974 gegenüber 0,975). Das Graustufenmodell weist einen geringeren Sicherheitsfehler auf (1,9\,\% gegenüber 4,4\,\%), das Farbmodell einen geringeren Komfortfehler (1,3\,\% gegenüber 6,8\,\%). Bei Infrarot-Aufnahmen liegt keine Farbinformation vor. Hier erzielt das Graustufenmodell einen deutlich geringeren Sicherheitsfehler (1,2\,\% gegenüber 5,6\,\%) und ein höheres F1-Maß (0,994 gegenüber 0,971), während beide Modelle keinen Komfortfehler aufweisen. Zudem sperrt das Graustufenmodell die Klappe bei Katzen mit Beute im Mittel nach 0,13~Sekunden, das Farbmodell erst nach 0,86~Sekunden. Über den gesamten Testdatensatz erreicht das Graustufenmodell das höhere F1-Maß und lässt in drei statt vier Videos Beute durch.
+Bei Tagaufnahmen erreichen beide Modelle ein ähnliches F1-Maß (0,982 gegenüber 0,978). Das Graustufenmodell weist einen geringeren Sicherheitsfehler auf (0,8\,\% gegenüber 4,4\,\%), das Farbmodell einen geringeren Komfortfehler (0,0\,\% gegenüber 5,6\,\%). Bei Infrarot-Aufnahmen liegt keine Farbinformation vor. Hier erzielt das Graustufenmodell einen deutlich geringeren Sicherheitsfehler (1,2\,\% gegenüber 5,6\,\%) und ein höheres F1-Maß (0,994 gegenüber 0,971), während beide Modelle keinen Komfortfehler aufweisen. Zudem sperrt das Graustufenmodell die Klappe bei Katzen mit Beute im Mittel nach 0,13~Sekunden, das Farbmodell erst nach 0,86~Sekunden. Über den gesamten Testdatensatz erreicht das Graustufenmodell das höhere F1-Maß und lässt in zwei statt vier Videos Beute durch.
