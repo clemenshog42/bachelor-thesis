@@ -201,7 +201,7 @@ Ohne Zustandsautomat ist die Klappe in 17,3\,\% der Einzelbilder mit Beute geöf
 
 Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5, 8, 10, 15 und 20 Einzelbilder) und den Schwellenwert (0,3 bis 0,8) ausgewertet. Sie zeigt den Zielkonflikt zwischen Sicherheitsfehlern, Komfortfehlern und Entscheidungszeit und dient der Festlegung der finalen Parameter. Tabelle~\ref{tab:sm_sweep} enthält die Ergebnisse aller Kombinationen. Der Anteil übersehener Katzen beträgt in allen Kombinationen 4,3\,\%, da er nur vom Detektor abhängt. In keiner Kombination wird eine saubere Katze dauerhaft ausgesperrt.
 
-\begin{table}[p]
+\begin{table}[H]
     \centering
     \footnotesize
     \renewcommand{\arraystretch}{0.92}
@@ -253,7 +253,7 @@ Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5,
         15 & 0,7 & 15,6\,\% & 4,1\,\% & 0,905 & 8/10 & 0,96 & 0,30 \\
         15 & 0,8 & 28,2\,\% & 4,1\,\% & 0,826 & 9/10 & 0,67 & 0,30 \\
         \midrule
-        \textbf{20} & \textbf{0,3} & \textbf{1,6\,\%} & \textbf{4,1\,\%} & \textbf{0,982} & \textbf{3/10} & \textbf{0,12} & \textbf{0,67} \\
+        \textbf{20} & \textbf{0,3} & \textbf{1,6\,\%} & \textbf{4,1\,\%} & \textbf{0,982} & \textbf{3/10} & \textbf{0,13} & \textbf{0,67} \\
         20 & 0,4 & 2,4\,\% & 4,1\,\% & 0,978 & 4/10 & 0,21 & 0,67 \\
         20 & 0,5 & 6,9\,\% & 4,1\,\% & 0,955 & 6/10 & 0,78 & 0,67 \\
         20 & 0,6 & 8,4\,\% & 4,1\,\% & 0,946 & 6/10 & 1,00 & 0,67 \\
@@ -326,6 +326,7 @@ Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werd
 
 \begin{table}[H]
     \centering
+    \small
     \begin{tabular}{lrrrrrr}
         \toprule
         & \multicolumn{2}{c}{Tag} & \multicolumn{2}{c}{Infrarot} & \multicolumn{2}{c}{Gesamt} \\
