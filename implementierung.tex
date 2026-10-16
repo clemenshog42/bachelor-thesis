@@ -74,7 +74,7 @@ Das System kann je nach Einsatzzweck in verschiedenen Umgebungen ausgeführt wer
 \subsection{Die lokale Testumgebung (\texttt{main.py})}
 Das Skript \texttt{main.py} wurde entwickelt um neu trainierte Modelle schnell auf der lokalen Umgebung (z.b. Windows Laptop) validieren zu können. Dabei liest das Skript eine Videodatei ein. Danach durchläuft jedes Videoeinzelbild die \texttt{process\_frame} Methode der Klasse \texttt{CatFlapProcessor}. Anschließend wird die Visualisierung auf das Video eingezeichnet und abgespielt.
 
-\subsection{Die Mikrocontroller Testumgebung (\texttt{pi\_main.py})}
+\subsection{Die Testumgebung auf dem Raspberry Pi (\texttt{pi\_main.py})}
 Um das Zusammenspiel aller Komponenten sinnvoll auf dem Endgerät testen zu können wurde das \texttt{pi\_main.py} Skript entwickeltentwickelt. Dadurch ist es möglich, jeden Teil – also Detektor, Segmentierungsmodell, Servo und Kamera – isoliert zu testen. Außerdem ist dieser teil wichtig zum zu testen wie viele Bilder pro Sekunde der Raspberry Pi 5 verarbeiten kann. Ansonsten funktioniert das Skript gleich wie \texttt{main.py}.
 
 \subsection{Die Reale Welt (\texttt{pi\_server.py})}
