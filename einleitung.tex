@@ -6,3 +6,47 @@ Freigänger-Katzen bringen von Zeit zu Zeit Beutetiere, wie z.b. Mäuse oder Vö
 Diese Bachelorarbeit beschäftigt sich mit der durch künstliche Intelligenz gestützter Erkennung von Beutetieren im Maul einer Katze. Das Ziel dieses Projektes ist es, eine Alternative zu den herrkömlichen Katzenklappen zu bieten und dem Katzenbesitzer das lästige fangen von Beute im Wohnraum zu ersparen.
 
 Da die Bilderkennung unter anderem das Herzstück dieses Projektes ist, habe ich mich intensiv mit verschiedenen Algorithmen beschäftigt. Im ersten Schritt wird das Objektdetektionsmodell YOLO26 \cite{jocher2024yolo} eingesetzt. YOLO26 erreicht eine hohe Genauigkeit während es auch auf Endgeräten echtzeitfähig bleibt. Anschließend kommt der ByteTrack \cite{zhang2022bytetrack} Algorithmus zum Einsatz. Dieser Algorithmus verfolgt die erkannten Begrenzungsrahmen über die Zeit und sorgt dafür, dass das System die Katze auch bei kurzzeitigen Verdeckungen nicht aus den Augen verliert. ByteTrack sorgt auch dafür, dass jede Katze eindeutig ist sollten sich mehrere Katzen auf dem Videoeinzelbild befinden. Die erkannten Bereiche werden anschließend durch eine weitere künstliche Intelligenz (YOLO-Segmentierung) ausgewertet, welche die Beute im Bild segmentiert und daraus einen Konfidenzwert für Beute liefert. Um die Zuverlässigkeit zu erhöhen und Fehlalarme zu vermeiden, trifft man nicht für jedes Videoeinzelbild eine Entscheidung sondern sammelt Daten über mehrere Videoeinzelbilder hinweg und trifft für diese Daten als gesamtes eine Entscheidung. Dafür wurde ein eigener Zustandsautomat (State Machine) eingebunden. Dieser wertet die Historie der Bilder über ein gleitendes Zeitfenster aus und trifft dann eine Entscheidung, ob die Katze beute im Mund trägt oder nicht. In dieser Arbeit wird evaluiert, inwiefern diese Kombination aus Objekterkennung, Segmentierung, Objektverfolgung und Zustandsautomaten eine bessere Lösung ist als die reine Bewertung durch Einzelbilder.
+
+\section{Forschungsfrage und Hypothesen}
+\label{sec:forschungsfrage}
+Aus der beschriebenen Problemstellung ergibt sich die zentrale Forschungsfrage dieser Arbeit:
+
+\begin{quote}
+\emph{Ermöglicht eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildsegmentierung und zeitlicher Zustandsmodellierung eine robustere Erkennung von Beutetieren im Maul einer Katze als die Bewertung einzelner Bilder?}
+\end{quote}
+
+Zur Beantwortung werden folgende Hypothesen aufgestellt und in Ablationsstudien überprüft:
+
+\begin{itemize}
+	\item[\textbf{H1:}] Die zeitliche Zusammenfassung der Ergebnisse durch einen Zustandsautomaten senkt sowohl die Sicherheitsfehler als auch die Komfortfehler gegenüber einer Entscheidung auf Basis einzelner Bilder.
+	\item[\textbf{H2:}] Eine zweistufige Verarbeitungskette aus Gesichtsdetektion und Beutesegmentierung trifft weniger Fehlentscheidungen als ein einstufiger Objektdetektor, der direkt zwischen Katzen mit und ohne Beute unterscheidet.
+	\item[\textbf{H3:}] Ein auf Graustufenbildern trainiertes Segmentierungsmodell erkennt Beute bei Infrarot-Aufnahmen zuverlässiger als ein auf Farbbildern trainiertes Modell.
+\end{itemize}
+
+\section{Anforderungen}
+\label{sec:anforderungen}
+An das System werden folgende Anforderungen gestellt:
+
+\begin{itemize}
+	\item \emph{Sicherheit}: Eine Katze mit Beute darf den Wohnraum nicht betreten.
+	\item \emph{Komfort}: Eine saubere Katze darf nicht dauerhaft ausgesperrt werden und soll innerhalb von drei Sekunden Zugang erhalten.
+	\item \emph{Tag- und Nachtbetrieb}: Das System muss sowohl bei Tageslicht als auch bei Infrarot-Nachtsicht funktionieren.
+	\item \emph{Mehrere Katzen}: Befinden sich mehrere Katzen im Bild, muss jede Katze einzeln bewertet werden.
+	\item \emph{Lokale Verarbeitung}: Die gesamte Verarbeitung erfolgt ohne Internetverbindung auf kostengünstiger Hardware (Raspberry Pi~5) in Echtzeit.
+\end{itemize}
+
+\section{Beitrag dieser Arbeit}
+\label{sec:beitrag}
+Aufbauend auf dem kaskadierten Ansatz von Baumann und Ganz \cite{baumann2020smartcatflap} leistet diese Arbeit folgende Beiträge:
+
+\begin{enumerate}
+	\item den Einsatz moderner YOLO26-Modelle für Gesichtsdetektion und Beutesegmentierung,
+	\item die getrennte Bewertung mehrerer Katzen durch Objektverfolgung,
+	\item eine systematische Auswertung des Beitrags der einzelnen Komponenten in Ablationsstudien,
+	\item den Nachtbetrieb durch eine durchgehende Verarbeitung von Graustufenbildern,
+	\item einen größeren Datensatz für die Beuteerkennung mithilfe synthetischer Daten.
+\end{enumerate}
+
+\section{Aufbau der Arbeit}
+\label{sec:aufbau}
+Kapitel~\ref{sec:grundlagen} erläutert die theoretischen Grundlagen. Kapitel~\ref{sec:verwandte_arbeiten} stellt verwandte Arbeiten vor und grenzt diese Arbeit davon ab. Kapitel~\ref{sec:material} beschreibt die verwendeten Datensätze sowie die Hardware- und Softwareumgebung. Kapitel~\ref{sec:methodik} behandelt die Methodik und die Entwicklung der Verarbeitungskette, Kapitel~\ref{sec:implementierung} deren Implementierung. Kapitel~\ref{sec:analysen} evaluiert das System und enthält die Ablationsstudien. Kapitel~\ref{sec:diskussion} diskutiert die Ergebnisse, Kapitel~\ref{sec:zusammenfassung} fasst die Arbeit zusammen und gibt einen Ausblick.
