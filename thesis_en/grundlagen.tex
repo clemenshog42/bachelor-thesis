@@ -1,0 +1,43 @@
+\chapter{Theoretical Background}
+\label{sec:grundlagen}
+
+This chapter explains the theoretical background, which forms the foundation of this thesis. Only technologies and algorithms that are used in the final work are explained. These include object detection, object tracking, image segmentation and state machines.
+
+\section{Object Detection with YOLO}
+\label{subsec:yolo_det}
+
+Automatic image analysis can fundamentally be divided into different problem classes \cite{szeliski2022computer}. While pure image classification merely answers the question of whether a certain object is present in an image, object detection goes one step further \cite{zou2023object}. It determines not only the class of the object but also the exact position at which the object is located.
+
+In this thesis, YOLO \cite{jocher2024yolo} in version 26 is used \cite{sapkota2025yolo26}. In contrast to two-stage detectors, which first extract interesting image regions and only classify them in the second step \cite{ren2015faster}, YOLO is a single-stage detector that analyses the entire image in one pass using a convolutional neural network \cite{lecun1998gradient, krizhevsky2012imagenet} \cite{redmon2016yolo}. The image is divided into a grid, and for each grid cell the network predicts several bounding boxes and the associated class probabilities and confidence scores \cite{redmon2016yolo}. The bounding box is the frame in which an object is located. The class probability indicates how likely it is that the detected object belongs to the class cat. The confidence score, on the other hand, indicates how certain the network is that there is an object at all \cite{ultralytics_confidence}.
+
+YOLO is indispensable for this thesis, since such a system requires low inference times \cite{terven2023yolo}. On the one hand, this is important so that the system remains reliable and the cat does not have to wait in front of the flap for too long. For each detected cat, the model delivers the exact coordinates of its face, which forms the basis for object tracking.
+
+\section{Multi-Object Tracking with ByteTrack}
+\label{subsec:bytetrack}
+
+An object detection model such as YOLO on its own evaluates each video frame in isolation. If a cat is in a video, each frame of the video is considered separately. Every detected cat is therefore a new cat. Object tracking makes it possible to uniquely assign a cat across an entire video. Multi-object tracking is then the extension to several cats per video \cite{luo2021mot}. This is absolutely necessary in order to be able to carry out a temporal analysis of a specific cat.
+
+In this thesis, an object detector (in this case YOLO26) produces the bounding boxes, which contain the exact coordinates of the objects, in our case of the cat's face. In the second step, the tracker takes over. It tries to assign the new detections to the known ones; if this is not possible, a new identity is created \cite{bewley2016sort, kuhn1955hungarian}. In the case of ByteTrack \cite{zhang2022bytetrack}, this assignment is done using motion predictions made by the Kalman filter \cite{kalman1960new}.
+
+ByteTrack differs from classic trackers \cite{bewley2016sort, wojke2017deepsort} in that it also uses detections with a low confidence score in order to prevent identity switches. So that this does not lead to false alarms, it first assigns the bounding boxes with high confidence scores \cite{zhang2022bytetrack}. Subsequently, the objects with low confidence scores that could not be assigned in the previous step are compared. This makes the tracking more robust against occlusions \cite{zhang2022bytetrack}. ByteTrack is therefore ideally suited to unpredictable movements and occlusions in the use case of a cat flap.
+
+\section{Image Segmentation with YOLO}
+\label{subsec:yolo_class}
+
+Like object detection, segmentation works on the principle of convolutional neural networks \cite{lecun1998gradient, long2015fcn}. Modern YOLO versions, such as YOLO26 in our case, offer not only object detection but also segmentation \cite{jocher2024yolo}. Owing to their architecture, these networks are designed for fast inference at high accuracy \cite{bolya2019yolact}.
+
+While object detection shows us where a cat is located, we still do not know whether or not a cat is carrying prey in its mouth. This is where image segmentation comes into play \cite{minaee2022segmentation, he2017maskrcnn}.
+This approach has the advantage that the segmentation no longer has to understand the whole image; the model only receives a crop around the cat's face. This approach requires a considerably smaller dataset, since the segmentation always receives a similar task with little variance.
+
+The task of the segmentation model is thus to mark the prey in the cat's mouth with pixel accuracy. For each prey animal found, the model delivers a mask and a confidence score. The highest confidence score of a crop indicates how likely it is that the cat is carrying prey. If the model finds no prey, the value is 0.
+
+\section{State Machines}
+\label{subsec:fsm}
+
+While the object detector and the segmentation deliver snapshots, which can certainly fluctuate, a state machine helps us with the decision. It aggregates the results of the detector and the segmentation over time, so that the result is not strongly influenced by outliers and becomes more robust against errors \cite{han2016seqnms, kang2018tcnn}.
+
+A finite state machine is a model that contains a finite set of states \cite{hopcroft2006automata}. At any point in time, the model is in exactly one state. The current state of the automaton is determined by certain events or the fulfilment of certain conditions, e.g.\ if the average confidence score of the last 20 frames is above 0.3, the state machine switches to access denied \cite{harel1987statecharts}. A transition from one state usually also triggers actions; in our case, we would open or close the cat flap \cite{mealy1955method, moore1956gedanken}.
+
+A simple example of a state machine is a traffic light; the model represents whether the traffic light is red, yellow or green. The condition for switching is a timer. The action would be the switching of the traffic light.
+
+In our context, the state machine serves to smooth out inaccuracies of the object detection and segmentation. Instead of immediately changing the state of the cat flap in the case of an outlier, the state transition is tied to conditions (e.g.\ a threshold over a time window).
