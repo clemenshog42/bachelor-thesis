@@ -22,6 +22,36 @@ Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt
 	\end{enumerate}
 \end{enumerate}
 
+Abbildung~\ref{fig:pipeline} zeigt die Verarbeitungskette im Überblick.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[
+		node distance=4mm,
+		box/.style={draw, rounded corners, align=center, minimum width=5.4cm, minimum height=8mm, font=\small},
+		note/.style={font=\footnotesize, align=left, text width=5.2cm},
+		>={Stealth}]
+		\node[box] (cam) {Kamerabild in Graustufen};
+		\node[box, below=of cam] (det) {Gesichtsdetektor (YOLO26n)};
+		\node[box, below=of det] (trk) {Objektverfolgung (ByteTrack)};
+		\node[box, below=of trk] (crop) {Randerweiterung und Bildausschnitt};
+		\node[box, below=of crop] (seg) {Beutesegmentierung (YOLO26n-seg)};
+		\node[box, below=of seg] (sm) {Zustandsautomat je Katze};
+		\node[box, below=of sm] (dec) {Entscheidung über die Klappe};
+		\foreach \a/\b in {cam/det, det/trk, trk/crop, crop/seg, seg/sm, sm/dec}
+			\draw[->] (\a) -- (\b);
+		\node[note, right=5mm of cam] {ca.\ 8 Einzelbilder pro Sekunde};
+		\node[note, right=5mm of det] {Begrenzungsrahmen der Katzengesichter};
+		\node[note, right=5mm of trk] {eindeutige Identität je Katze};
+		\node[note, right=5mm of crop] {seitlich je 80\,\%, nach unten 200\,\% der Gesichtsgröße};
+		\node[note, right=5mm of seg] {höchster Konfidenzwert für Beute};
+		\node[note, right=5mm of sm] {Durchschnitt über 20 Einzelbilder, Schwellenwert 0,3};
+		\node[note, right=5mm of dec] {sperren bei Beute, freigeben bei sauberen Katzen};
+	\end{tikzpicture}
+	\caption{Überblick über die Verarbeitungskette des Systems.}
+	\label{fig:pipeline}
+\end{figure}
+
 \section{Vorverarbeitung für Infrarot-Nachtsicht}
 Da Katzen ihre Beute nicht nur am Tag bei optimaler Belichtung ins Haus bringen, ist eine zentrale Anforderung an das System das es auch Nachts und bei schlechter Belichtung funktioniert. Das bringt eine weitere Schwierigkeit mit sich: Nachtsichtkameras schalten bei Dunkelheit auf Infrarot um, wodurch Graustufenbilder entstehen.
 
@@ -49,7 +79,15 @@ Da der Eingang des Segmentierungsmodells der Ausgang des Detektors ist, müssen 
 
 Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn das Segmentierungsmodell bekommt. Das Katzengesicht wird nach untenhin um die doppelte Gesichtshöhe und seitlich um jeweils 80\,\% der Gesichtsbreite erweitert um sicher zu gehen das die Beute im Bild ist.
 
-Der Detektor erwartet ein 3-Kanal-Bild, daher wird das Graustufenbild dreifach dupliziert (\texttt{cv2.cvtColor(gray, cv2.COLOR\_GRAY2BGR)}). Das Segmentierungsmodell wurde dagegen direkt mit einkanaligen Graustufenbildern trainiert und erhält den Ausschnitt als einkanaliges Bild. Zuvor wird der Ausschnitt mit schwarzen Rändern zu einem Quadrat aufgefüllt.
+Der Detektor erwartet ein 3-Kanal-Bild, daher wird das Graustufenbild dreifach dupliziert (\texttt{cv2.cvtColor(gray, cv2.COLOR\_GRAY2BGR)}). Das Segmentierungsmodell wurde dagegen direkt mit einkanaligen Graustufenbildern trainiert und erhält den Ausschnitt als einkanaliges Bild. Zuvor wird der Ausschnitt mit schwarzen Rändern zu einem Quadrat aufgefüllt. Abbildung~\ref{fig:ausschnitt} zeigt ein Beispiel.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\textwidth]{images/beispiel_ausschnitt.png}
+	\caption{Links: Einzelbild aus einem Testvideo mit dem Begrenzungsrahmen des Gesichtsdetektors (grün) und dem erweiterten Rahmen (orange). Rechts: der quadratisch aufgefüllte Bildausschnitt in Graustufen, den das Segmentierungsmodell erhält.}
+	\label{fig:ausschnitt}
+\end{figure}
+
 
 \section{Training des Segmentierungsmodells (YOLO-Segmentierung)}
 Als Segmentierungsmodell kommt wie beim Detektor ein YOLO-Modell zum Einsatz. Dadurch das wir uns bereits in der Ultralytics Umgebung befinden und moderne YOLO-Versionen hochoptimierte Netzwerke für Segmentierungsaufgaben bereitstellen, war diese Entscheidung naheliegend.
@@ -69,7 +107,31 @@ Damit dieses Problem eingedämpft wird, wurde die Objekterkennung um den ByteTra
     \item \texttt{CAT\_WITH\_PREY}: Eine Katze wurde erkannt und trägt mit hinreichender Sicherheit eine Beute.
 \end{itemize}
 
-Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Segmentierungsmodells der letzten 20 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,3 erreicht oder überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert, sofern bereits 20 Werte gesammelt wurden.
+Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Segmentierungsmodells der letzten 20 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,3 erreicht oder überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert, sofern bereits 20 Werte gesammelt wurden. Die Übergänge zwischen den Zuständen einer Katze sind in Abbildung~\ref{fig:zustaende} dargestellt.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[
+		>={Stealth},
+		st/.style={draw, rounded corners, minimum height=9mm, inner sep=4pt, font=\small\ttfamily},
+		lbl/.style={font=\footnotesize, align=center, fill=white, inner sep=1pt}]
+		\node[st] (g) at (0,0) {GATHERING\_HISTORY};
+		\node[st] (np) at (-4,-3.2) {CAT\_NO\_PREY};
+		\node[st] (wp) at (4,-3.2) {CAT\_WITH\_PREY};
+		\node[st] (nc) at (0,-6.2) {NO\_CAT};
+		\draw[<-] (g.north) -- ++(0,0.7) node[above, font=\footnotesize] {neue Katze erkannt};
+		\draw[->] (g) -- node[lbl, sloped] {Historie voll, $\bar{p} < 0{,}3$} (np);
+		\draw[->] (g) -- node[lbl, sloped] {$\bar{p} \geq 0{,}3$} (wp);
+		\draw[->] (np) to[bend left=12] node[lbl] {$\bar{p} \geq 0{,}3$} (wp);
+		\draw[->] (wp) to[bend left=12] node[lbl] {Historie voll, $\bar{p} < 0{,}3$} (np);
+		\draw[->, dashed] (np) -- (nc);
+		\draw[->, dashed] (wp) -- (nc);
+		\draw[->, dashed] (g) -- node[lbl] {30 Einzelbilder nicht erkannt} (nc);
+	\end{tikzpicture}
+	\caption{Zustände einer verfolgten Katze. $\bar{p}$ bezeichnet den Durchschnitt der Konfidenzwerte über die letzten 20 Einzelbilder. Gestrichelt: Die Katze wird aus dem Speicher entfernt, wenn sie 30 Einzelbilder lang nicht erkannt wurde.}
+	\label{fig:zustaende}
+\end{figure}
+
 
 Der Schwellenwert von 0,3 wurde anhand der Parameterreihe in Abschnitt~\ref{sec:ablation_sm} gewählt. Da der Durchschnitt über 20 Einzelbilder einzelne Ausreißer bereits stark glättet, kann der Schwellenwert niedrig angesetzt werden, ohne dass die Katze zu Unrecht draußen bleiben muss. Dieser Wert ist aber nicht in Stein gemeißelt. Wenn es für den Endanwender wichtiger wäre, dass die Katze im Zweifel ins Haus darf, würde man den Wert höher ansetzen, beispielsweise bei 0,5. Bei einem Zeitfenster von 20 Einzelbildern bringt dies jedoch keinen Vorteil für die Katze, da der Komfortfehler für alle untersuchten Schwellenwerte gleich bleibt (Abschnitt~\ref{sec:ablation_sm}).
 
