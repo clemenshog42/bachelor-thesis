@@ -11,7 +11,7 @@ Die Evaluierung liefert hierauf eine eindeutig Antwort. Ein einzelbildbasierter 
 Durch die hilfe der \texttt{StateMachine} in Kombination mit ByteTrack wird diese Problem elegant gelöst. Die zeitliche Aggregation über eine Historie von Einzelbildern erzeugt ein robustes Signal, das Ausreißer effektiv glättet. Die Ablationsstudie "Relevanz des Zustandsautomaten" zeigt, dass das System selbst dann richtig entscheidet, wenn einzelne Bilder falsch klassifiziert werden. Somit ist der Beweis erbracht, dass der Zustandsautomat in diesem Anwendungsfall ein wesentlicher Teil ist und zwingend für die Zuverlässigkeit im realen Betrieb ist.
 
 \section{Bewertung des Architektur-Ansatzes}
-Die Entscheidung, das Problem in zwei separate neuronale Netze (YOLO-Detektor für das Gesicht und YOLO-Segmentierungsmodell für den Zustand) zu unterteilen, hat sich als äußerst vorteilhaft erwiesen.
+Die Entscheidung, das Problem in zwei separate neuronale Netze (YOLO-Detektor für das Gesicht und YOLO-Segmentierungsmodell für die Beute) zu unterteilen, hat sich als äußerst vorteilhaft erwiesen.
 
 \subsection{Stärken der Verarbeitungsketten-Kaskadierung}
 Der übliche Ansatz im Bereich maschinelles Sehen bestünde darin, ein einziges Objekterkennungsmodell darauf zu trainieren, direkt die Klassen \glqq Katze\grqq\ und \glqq Beutetier\grqq\ im Gesamtbild zu finden. Bei einer Katzenklappe scheitert dieser Ansatz jedoch häufig. Eine Maus im Maul einer Katze nimmt im Gesamtbild der Kamera nur einen verschwindend geringen Bruchteil der Pixel ein und ist durch das Maul und die Schnurrhaare stark verdeckt. Standard-Objektdetektoren haben immense Schwierigkeiten, derart kleine, okkludierte Objekte zuverlässig mit einem Begrenzungsrahmen zu versehen \cite{tong2020small}.
@@ -26,7 +26,7 @@ Aus der Analyse werden die Limitationen des aktuellen Systems genau aufgezeigt. 
 
 \begin{enumerate}
     \item \textbf{Verlust von Tiefeninformationen:} Dadurch das die Kamera ein 2D Bild aufnimmt kann nicht unterschieden werden, wie weit weg sich ein Objekt unterhalb des Katzenmauls befindet. Daraus folgt, dass das Modell den Unterschied zwischen Hintergrund und Beute nicht zuverlässig trennen kann.
-    \item \textbf{Extreme Bewegungsgeschwindigkeit:} Wenn eine Katze fluchtartig durch die Klappe rennt, bleibt sehr wenig Zeit eine klare Aussage zu treffen. Bei einer Laufzeit von ca. 8 FPS verbleiben dem System nur eine Handvoll Einzelbilder zur Analyse.  In diesem Szenario kann die \texttt{StateMachine} ihre Stärke (die zeitliche Glättung) nicht voll ausspielen und die Katze muss warten bis der Zustandsautomat eine klare Entscheidung trifft.
+    \item \textbf{Extreme Bewegungsgeschwindigkeit:} Wenn eine Katze fluchtartig durch die Klappe rennt, bleibt sehr wenig Zeit eine klare Aussage zu treffen. Bei einer Laufzeit von ca. 8 FPS verbleiben dem System nur eine Handvoll Einzelbilder zur Analyse. Da der Zustandsautomat 20 Einzelbilder (2,5 Sekunden) sammelt, bevor er eine Katze freigibt, muss die Katze mindestens so lange im Bild sein.  In diesem Szenario kann die \texttt{StateMachine} ihre Stärke (die zeitliche Glättung) nicht voll ausspielen und die Katze muss warten bis der Zustandsautomat eine klare Entscheidung trifft.
     \item \textbf{Farbe der Katze:} Wenn eine Katze ein sehr dunkles Fell besitzt, hat die Segmentierung Schwierigkeiten und verliert an Genauigkeit. Hier ist es essentiell Daten aus dem Praxisbetrieb zu sammeln, bei denen sich das Modell unsicher war, um genau diese Fälle besser trainieren zu können.
 \end{enumerate}
 
