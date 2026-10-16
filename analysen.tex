@@ -278,7 +278,7 @@ Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwe
 
 \subsection{Detektion und Segmentierung gegenüber Detektion}
 \label{sec:ablation_1stage}
-Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.
+Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten. Der einstufige Detektor wurde mit denselben Bildern trainiert wie das Segmentierungsmodell, damit sich beide Ansätze nur in der Architektur unterscheiden.
 
 \begin{figure}[H]
     \centering
