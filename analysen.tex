@@ -310,4 +310,27 @@ Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetekto
 
 \subsection{Graustufen gegenüber Farbbildern}
 Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
-% TODO: Ergebnisse einfügen, sobald das Graustufenmodell fertig trainiert ist
+Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werden mit denselben Trainingsdaten trainiert. Das Farbmodell erhält dabei die ursprünglichen Farbbilder, das Graustufenmodell die in Graustufen umgewandelten Bilder. Der Gesichtsdetektor und der Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) bleiben in beiden Konfigurationen unverändert. Die Tagaufnahmen umfassen sechs, die Infrarot-Aufnahmen vier Videopaare. Tabelle~\ref{tab:ablation_gray} zeigt die Ergebnisse.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        & \multicolumn{2}{c}{Tag} & \multicolumn{2}{c}{Infrarot} & \multicolumn{2}{c}{Gesamt} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+        Metrik & Grau & Farbe & Grau & Farbe & Grau & Farbe \\
+        \midrule
+        Sicherheitsfehler & 1,9\,\% & 4,4\,\% & 1,2\,\% & 5,6\,\% & 1,6\,\% & 4,9\,\% \\
+        Komfortfehler & 6,8\,\% & 1,3\,\% & 0,0\,\% & 0,0\,\% & 4,1\,\% & 0,8\,\% \\
+        Präzision & 0,967 & 0,994 & 1,000 & 1,000 & 0,980 & 0,996 \\
+        Trefferquote & 0,981 & 0,956 & 0,988 & 0,944 & 0,984 & 0,951 \\
+        F1-Maß & 0,974 & 0,975 & 0,994 & 0,971 & 0,982 & 0,973 \\
+        Durchgelassene Beute & 2 von 6 & 2 von 6 & 1 von 4 & 2 von 4 & 3 von 10 & 4 von 10 \\
+        Entscheidungszeit (Beute) & 0,19\,s & 0,94\,s & 0,03\,s & 0,75\,s & 0,13\,s & 0,86\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Vergleich des Segmentierungsmodells für Graustufenbilder mit dem Segmentierungsmodell für Farbbilder, getrennt nach Tag- und Infrarot-Aufnahmen.}
+    \label{tab:ablation_gray}
+\end{table}
+
+Bei Tagaufnahmen erreichen beide Modelle ein nahezu gleiches F1-Maß (0,974 gegenüber 0,975). Das Graustufenmodell weist einen geringeren Sicherheitsfehler auf (1,9\,\% gegenüber 4,4\,\%), das Farbmodell einen geringeren Komfortfehler (1,3\,\% gegenüber 6,8\,\%). Bei Infrarot-Aufnahmen liegt keine Farbinformation vor. Hier erzielt das Graustufenmodell einen deutlich geringeren Sicherheitsfehler (1,2\,\% gegenüber 5,6\,\%) und ein höheres F1-Maß (0,994 gegenüber 0,971), während beide Modelle keinen Komfortfehler aufweisen. Zudem sperrt das Graustufenmodell die Klappe bei Katzen mit Beute im Mittel nach 0,13~Sekunden, das Farbmodell erst nach 0,86~Sekunden. Über den gesamten Testdatensatz erreicht das Graustufenmodell das höhere F1-Maß und lässt in drei statt vier Videos Beute durch.
