@@ -1,0 +1,53 @@
+\chapter{Verwandte Arbeiten}
+\label{sec:verwandte_arbeiten}
+
+Die Idee, Katzen mit Beute mithilfe einer Kamera am Betreten des Hauses zu hindern, wurde bereits in mehreren Projekten und Produkten aufgegriffen. Dieses Kapitel stellt die bekannten Ansätze vor und grenzt die vorliegende Arbeit davon ab. Unterschieden wird dabei zwischen wissenschaftlich dokumentierten Arbeiten, Eigenbau-Projekten und kommerziellen Produkten.
+
+\section{Cat Prey Analyzer}
+\label{sec:rw_baumann}
+Die dieser Arbeit am nächsten stehende Arbeit ist die Semesterarbeit von Baumann und Ganz an der ETH Zürich \cite{baumann2020smartcatflap}. Das daraus entstandene System \emph{Cat Prey Analyzer} läuft auf einem Raspberry Pi~4 mit Infrarotkamera und verwendet eine Kaskade aus drei Stufen \cite{baumann2020smartcatflap, raspberrypi2020prey}:
+
+\begin{enumerate}
+	\item Ein auf dem COCO-Datensatz \cite{lin2014coco} vortrainierter Objektdetektor (MobileNetV2) erkennt, ob sich eine Katze im Bild befindet.
+	\item Eine Kombination aus klassischen Verfahren (Haar-Kaskaden) und einem eigens trainierten Faltungsnetzwerk lokalisiert die Schnauze der Katze.
+	\item Ein Klassifikator auf Basis der VGG16-Architektur ordnet den Ausschnitt der Schnauze den Klassen \glqq Beute\grqq\ und \glqq keine Beute\grqq\ zu.
+\end{enumerate}
+
+Auch dort werden die Ergebnisse der Einzelbilder zeitlich zusammengefasst. Jedes Einzelbild verändert eine kumulierte Punktzahl: Ein Klassifikationsergebnis unter 0,5 erhöht sie, ein Ergebnis über 0,5 verringert sie. Erst wenn die Punktzahl einen Schwellenwert von 2,93 erreicht, gilt die Katze als sauber. Wie in der vorliegenden Arbeit muss die Katze also beweisen, dass sie keine Beute trägt \cite{baumann2020smartcatflap}.
+
+Die Trainingsdaten stammen aus dem Internet und aus einem eigenen Netzwerk von Kameras, mit dem reale Aufnahmen gesammelt wurden. Der Datensatz umfasst rund 150 Bilder von Schnauzen mit Beute. Da nur etwa 3\,\% aller Heimkehrten einer Katze mit Beute erfolgen, ist der Datensatz stark unausgeglichen. Auf 57 realen Ereignissen mit rund 855 Einzelbildern erreicht das System eine Richtig-Positiv-Rate von etwa 93\,\% bei einer Falsch-Positiv-Rate von etwa 28\,\%. Die Verarbeitung erreicht etwa ein Bild pro Sekunde \cite{baumann2020smartcatflap, raspberrypi2020prey}.
+
+\section{Eigenbau-Projekte}
+\label{sec:rw_diy}
+Neben dem Cat Prey Analyzer existieren weitere Eigenbau-Projekte, die jedoch nicht wissenschaftlich ausgewertet wurden.
+
+Hamm stellte 2019 eine Katzentür vor, die mit einer AWS-DeepLens-Kamera und einem in Amazon SageMaker trainierten Modell erkennt, ob seine Katze Beute trägt. Dafür wurden über 23.000 Bilder der eigenen Katze händisch annotiert. Erkennt das System Beute, wird die Tür gesperrt. Nach Angabe des Entwicklers wird die Katze in etwa 1\,\% der Fälle fälschlicherweise ausgesperrt \cite{hamm2019critterblock}.
+
+Mutel beschreibt ein System auf Basis eines Raspberry Pi~5 mit Infrarotkamera \cite{mutel2025catflap}. Ein YOLO11n-Modell erkennt die Katze, der Bildausschnitt wird anschließend an einen kostenpflichtigen Cloud-Dienst zur Beuteerkennung gesendet. Gesperrt wird eine vorhandene Mikrochip-Katzenklappe, indem ein zusätzliches RFID-Modul das Auslesen des Chips stört. Eine zeitliche Zusammenfassung mehrerer Einzelbilder findet nicht statt, lediglich nahezu identische Bildausschnitte werden übersprungen. Quantitative Ergebnisse werden nicht berichtet.
+
+\section{Kommerzielle Produkte}
+\label{sec:rw_produkte}
+Inzwischen sind auch kommerzielle Katzenklappen mit Beuteerkennung erhältlich:
+
+\begin{itemize}
+	\item \emph{Flappie} der Flappie Technologies AG aus der Schweiz verwendet eine Infrarotkamera mit Infrarotbeleuchtung und einen Bewegungsmelder. Ein Algorithmus untersucht das Gesicht der Katze auf Beute. Der Hersteller gibt eine Genauigkeit von über 90\,\% an \cite{flappie2024}.
+	\item \emph{OnlyCat} ist eine Katzenklappe mit Kamera, die Beute erkennt und die Klappe in diesem Fall sperrt \cite{onlycat2026}.
+	\item \emph{ZeroMOUSE} der Mousebouncer GmbH ist ein Nachrüstsensor für bestehende Mikrochip-Katzenklappen mit Kamera und Nachtsicht. Erkennt der Sensor Beute, sperrt er die Klappe. Der Hersteller gibt eine Genauigkeit von über 99\,\% an \cite{zeromouse2026}.
+\end{itemize}
+
+Keiner der Hersteller veröffentlicht das verwendete Verfahren, die Trainingsdaten oder eine nachvollziehbare Auswertung. Die angegebenen Genauigkeiten sind daher weder untereinander noch mit den Ergebnissen dieser Arbeit vergleichbar.
+
+\section{Abgrenzung dieser Arbeit}
+\label{sec:rw_abgrenzung}
+Die vorliegende Arbeit greift die Grundidee des Cat Prey Analyzer auf, einen Bildausschnitt um den Kopf der Katze gezielt auf Beute zu untersuchen und die Ergebnisse über mehrere Einzelbilder zusammenzufassen. Sie unterscheidet sich jedoch in folgenden Punkten:
+
+\begin{itemize}
+	\item \emph{Zweistufige statt dreistufiger Kaskade}: Ein einziger, feinabgestimmter YOLO26n-Detektor lokalisiert direkt das Gesicht der Katze. Die getrennte Erkennung von Katze und Schnauze entfällt.
+	\item \emph{Segmentierung statt Klassifikation}: Das Beutetier wird im Bildausschnitt segmentiert, anstatt den gesamten Ausschnitt zu klassifizieren.
+	\item \emph{Zeitliche Zusammenfassung pro Katze}: Durch die Objektverfolgung mit ByteTrack besitzt jede Katze eine eigene Historie. Dadurch können auch Szenen mit mehreren Katzen ausgewertet werden.
+	\item \emph{Betrieb bei Nacht}: Das gesamte System arbeitet auf Graustufenbildern, sodass Tag- und Infrarotaufnahmen mit denselben Modellen verarbeitet werden.
+	\item \emph{Synthetische Daten}: Trainings- und Testdaten wurden mit generativer KI erzeugt. Im Gegensatz zum Cat Prey Analyzer, der auf realen Aufnahmen trainiert und ausgewertet wurde, ist die Übertragbarkeit auf reale Aufnahmen damit nicht nachgewiesen.
+	\item \emph{Systematische Ablationsstudien}: Der Beitrag der einzelnen Komponenten wird mit bildweisen Metriken untersucht.
+\end{itemize}
+
+Ein direkter Vergleich der Ergebnisse ist nicht möglich, da sich Datensätze, Hardware (Raspberry Pi~4 gegenüber Raspberry Pi~5) und Metriken (Auswertung pro Ereignis gegenüber Auswertung pro Einzelbild) unterscheiden.
