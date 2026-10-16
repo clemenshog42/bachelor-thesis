@@ -100,7 +100,6 @@ Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die
 Für die Evaluation des Gesamtsystems wird ein eigener Testdatensatz aus KI-generierten Videosequenzen erstellt. Dieses Kapitel beschreibt den Aufbau des Datensatzes, die Annotation der Referenzdaten und die verwendeten Metriken.
 
 \subsection{Testdatensatz}
-% TODO: Anzahl der Videopaare aktualisieren, sobald alle Videos erzeugt sind
 Die Testbasis bilden zehn Videopaare, die mit dem Videomodell Veo über Gemini \cite{geminiteam2023gemini} erzeugt werden. Jedes Video zeigt die Perspektive einer fest montierten Kamera unmittelbar über der Katzenklappe, auf die sich eine oder zwei Katzen zubewegen. Ein Videopaar besteht aus einer Sequenz, in der eine Katze ein Beutetier im Maul trägt, und einem Gegenstück mit identischer Szene und möglichst identischem Bewegungsablauf, in dem keine Katze Beute trägt. Dadurch unterscheiden sich die beiden Videos eines Paares ausschließlich im Vorhandensein der Beute.
 
 Die Videopaare decken unterschiedliche Fellfarben, Beutetiere (Maus, Vogel, Ratte und Wühlmaus), Lichtverhältnisse (Tag, Dämmerung und Infrarot-Nachtsicht) sowie Szenen mit zwei Katzen ab. Die Videos besitzen eine Länge von zehn Sekunden bei 24 Bildern pro Sekunde. Da das System auf dem Raspberry Pi 5 rund 8 Bilder pro Sekunde verarbeitet, werden die Videos für die Evaluation auf 8 Bilder pro Sekunde ausgedünnt. Dadurch entsprechen die gemessenen Entscheidungszeiten dem realen Betrieb.
@@ -135,27 +134,40 @@ Anders als eine Bewertung auf Videoebene erfasst die bildweise Auswertung auch k
 Die Auswertung erfolgt in zwei Schritten. Zunächst werden Detektor und Segmentierungsmodell einmal pro Video und Konfiguration ausgeführt und die Ergebnisse jedes Einzelbildes protokolliert. Anschließend wird der Zustandsautomat auf diesen Protokollen nachgebildet. Dadurch lassen sich unterschiedliche Parameter des Zustandsautomaten ohne erneute Inferenz vergleichen.
 
 \section{Ergebnisse der Evaluation}
-% TODO: Ergebnisse der Evaluation des Gesamtsystems eintragen
+Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor und Segmentierungsmodell arbeiten auf Graustufenbildern, der Zustandsautomat verwendet ein Zeitfenster von 20 Einzelbildern und einen Schwellenwert von 0,3. Die Herleitung dieser Parameter ist in Abschnitt~\ref{sec:ablation_sm} beschrieben. Tabelle~\ref{tab:system_eval} fasst die Ergebnisse auf den 20 Videos des Testdatensatzes zusammen.
+
 \begin{table}[H]
     \centering
     \begin{tabular}{lcc}
         \toprule
         Metrik & Videos mit Beute & Videos ohne Beute \\
         \midrule
-        Sicherheitsfehler & -- & -- \\
-        Komfortfehler & -- & -- \\
-        Durchgelassene Beute & -- & -- \\
-        Entscheidungszeit & -- & -- \\
+        Sicherheitsfehler & 1,6\,\% & -- \\
+        Komfortfehler & -- & 4,1\,\% \\
+        Durchgelassene Beute & 3 von 10 & -- \\
+        Ausgesperrte saubere Katzen & -- & 0 von 10 \\
+        Entscheidungszeit & 0,13\,s & 0,67\,s \\
         \bottomrule
     \end{tabular}
     \caption{Ergebnisse des Gesamtsystems auf dem Testdatensatz.}
     \label{tab:system_eval}
 \end{table}
 
+Über alle Einzelbilder mit sichtbarer Katze erreicht die Entscheidung \glqq Klappe sperren\grqq\ eine Präzision von 0,980, eine Trefferquote von 0,984 und ein F1-Maß von 0,982. In 4,3\,\% der Einzelbilder mit erkennbarem Katzengesicht detektiert das System keine Katze. Getrennt nach Lichtverhältnissen liegt der Sicherheitsfehler bei Tagaufnahmen bei 1,9\,\% und bei Infrarot-Aufnahmen bei 1,2\,\%, der Komfortfehler bei 6,8\,\% beziehungsweise 0,0\,\%.
+
+Keine saubere Katze wird dauerhaft ausgesperrt. In drei der zehn Videos mit Beute wird die Klappe kurzzeitig geöffnet. Die Analyse dieser Videos zeigt drei Ursachen:
+
+\begin{itemize}
+    \item Die Katze ist noch weit von der Kamera entfernt, wodurch die Beute im Bildausschnitt zu klein ist, um vom Segmentierungsmodell erkannt zu werden.
+    \item Die Katze dreht den Kopf weg oder läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
+    \item Der Tracker (ByteTrack) weist derselben Katze eine neue Identität zu. Der neue Track beginnt mit einer leeren Historie, wodurch die bisherigen Beuteerkennungen verloren gehen.
+\end{itemize}
+
 \section{Ablationsstudien}
 In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.
 
 \subsection{Zustandsautomat}
+\label{sec:ablation_sm}
 Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Einige Zustandswechsel sind gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Bei dieser Studie wurde das exakt selbe System zweimal auf eine Auswahl von Testvideos angewendet:
 
 \begin{enumerate}
