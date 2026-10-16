@@ -9,7 +9,7 @@ Die Implementierung erfolgte in der Programmiersprache Python und hält sich str
 \subsection{Das Modul \texttt{models.py}: Die \texttt{CatFlapPipeline}}
 Die Klasse \texttt{CatFlapPipeline} verwaltet Detektor und Segmentierungsmodell und vereinfacht deren Verwendung. Beim Initialisieren des Objekts werden beide Modelle geladen. Dabei werden die Pfade (absolut oder relativ) zu den Modellen ergänzt.
 
-Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Aufruf der Methode \texttt{track} mit dem Parameter \texttt{tracker="bytetrack.yaml"} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert. Der Parameter \texttt{persist=True} sorgt dafür, dass die Tracks zwischen den Aufrufen erhalten bleiben.
+Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Aufruf der Methode \texttt{track} mit dem Parameter \texttt{tracker='bytetrack.yaml'} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert. Der Parameter \texttt{persist=True} sorgt dafür, dass die Tracks zwischen den Aufrufen erhalten bleiben.
 
 Die Methode \texttt{run\_prey\_detector} schneidet das Bild wie in Kapitel 4.5 beschrieben zusammen. Im folgenden Codeausschnitt ist zu sehen, wie dieses Zuschneiden implementiert ist und welche Auswirkungen es auf das Katzengesicht hat. Durch das Erweitern nach unten stellen wir sicher, dass das Modell genügend Informationen über mögliche Beute im Maul der Katze erhält.
 
