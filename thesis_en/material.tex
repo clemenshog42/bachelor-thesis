@@ -1,0 +1,22 @@
+\chapter{Materials and Experimental Basis}
+\label{sec:material}
+
+This chapter describes the specific resources and technologies that were used for training the models and for evaluating the pipeline.
+
+\section{Datasets}
+Different datasets were required for object detection and image segmentation, since each solves a specific problem.
+
+\textbf{Dataset for object detection (cat faces):} \\
+For training the object detection with YOLO26, a public Kaggle dataset was used (``Cat Dataset'' by Crawford \cite{kaggle2024cat}). In this dataset, the location of each cat's face in the image is already marked, and it also contains a large variety of cats in a wide range of lighting conditions, poses and backgrounds. The data only had to be modified slightly so that it was suitable for YOLO training.
+
+\textbf{Dataset for segmentation (prey animals):} \\
+In contrast to object detection, where a ready-made dataset existed, I found hardly any data for this problem. Datasets were either too small or of too low quality. To solve this problem, the training data were generated with the help of AI. This made it possible to produce specific scenarios, that is, different prey animals and poses. Subsequently, the prey animals were annotated as segmentation masks using the AI-assisted annotation of Roboflow \cite{roboflow2025} and checked manually. In this way, the YOLO26 model could be trained with sufficient accuracy.
+
+\section{Hardware and Software Environment}
+Training the models is very resource-intensive compared to their mere use, so I outsourced the training in order to obtain results quickly.
+
+\textbf{Hardware setup:} \\
+The models were trained on the Kaggle platform, which provides a sufficiently powerful GPU that was indispensable for the training. The later tests were first run on my local system architecture and subsequently on a single-board computer, in this case the Raspberry Pi 5.
+
+\textbf{Software environment:} \\
+The system was implemented using the programming language Python \cite{van1995python}. The \texttt{ultralytics} package was used for the detector and the segmentation model. Image processing operations, such as extracting crops, were implemented with OpenCV \cite{bradski2000opencv}. The annotation and management of the segmentation dataset was carried out on the Roboflow platform \cite{roboflow2025}, from which the dataset was exported directly in YOLO format for training. For optimal inference speed, the models were exported to the TensorFlow Lite \cite{abadi2016tensorflow} format, as these are specifically optimised for ARM \cite{arm2026architecture} architectures, which are used by our single-board computer.

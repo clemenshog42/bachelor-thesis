@@ -1,0 +1,89 @@
+\chapter{Design and Implementation}
+\label{sec:implementierung}
+
+Having dealt with the methodology in the previous chapter, this chapter addresses the concrete realisation of the system. It explains how the architecture is structured and how the individual software components interlock. In addition, the data structures used are discussed.
+
+\section{Software Architecture and Core Components}
+The implementation was carried out in the Python programming language and adheres strictly to the rules of object-oriented programming so that the system remains maintainable and extensible. The core system was divided into three main scripts: detection models (\texttt{models.py}), state machine (\texttt{state\_machine.py}) and orchestration (\texttt{processor.py}).
+
+\subsection{The Module \texttt{models.py}: The \texttt{CatFlapPipeline}}
+The class \texttt{CatFlapPipeline} manages the detector and the segmentation model and simplifies their use. When the object is initialised, both models are loaded. In doing so, the paths (absolute or relative) to the models are completed.
+
+The method \texttt{run\_detector} converts the frame to greyscale. The object detection is then called; calling the method \texttt{track} with the parameter \texttt{tracker='bytetrack.yaml'} activates the ByteTrack tracker integrated into Ultralytics, which provides us with the bounding boxes together with object IDs. The parameter \texttt{persist=True} ensures that the tracks are retained between calls.
+
+The method \texttt{run\_prey\_detector} cuts out the crop as described in Section 4.5. The following code excerpt shows how this cropping is implemented and what effect it has on the cat face. By extending the crop downwards, we ensure that the model receives enough information about possible prey in the cat's mouth.
+
+\begin{PythonCode}[caption={Asymmetric padding for the crop}]
+x1, y1, x2, y2 = map(int, box)
+# Add padding (heavy on bottom for dangling prey)
+face_w = x2 - x1
+face_h = y2 - y1
+pad_w = int(face_w * 0.8)
+pad_top = 0
+pad_bottom = int(face_h * 2.0)
+x1 -= pad_w
+y1 -= pad_top
+x2 += pad_w
+y2 += pad_bottom
+\end{PythonCode}
+Subsequently, the crop of the cat face is processed by the segmentation model, which then returns a confidence score for each prey animal found. The highest of these is passed to the state machine. If the model finds no prey, the value is 0.
+
+\subsection{The Module \texttt{state\_machine.py}: Temporal Aggregation}
+The state machine is represented by the class \texttt{StateMachine}. The status of an individual cat is stored in the class \texttt{TrackState}, which stores the history of the confidence scores in a \texttt{collections.deque} with a fixed maximum length (\texttt{history\_length = 20}). This data structure ensures that, when the capacity limit is reached, the oldest value is removed from the queue (``First-In-First-Out''). This completely spares us manual memory management.
+
+The following code excerpt shows the core logic of the \texttt{update} method. For each new frame, it calculates the moving average (\texttt{numpy.mean}) and then switches the state accordingly.
+
+\begin{PythonCode}[caption={State determination using a moving average}]
+def update(self, prey_confidence, frame_idx):
+    self.confidence_history.append(prey_confidence)
+    self.last_seen = frame_idx
+
+    # Calculate moving average
+    avg_confidence = np.mean(self.confidence_history)
+
+    # Determine new state based on aggregated confidence
+    if avg_confidence >= self.threshold:
+        self.current_state = State.CAT_WITH_PREY
+    elif len(self.confidence_history) < self.confidence_history.maxlen:
+        self.current_state = State.GATHERING_HISTORY
+    else:
+        self.current_state = State.CAT_NO_PREY
+\end{PythonCode}
+
+The class \texttt{StateMachine} manages the various \texttt{TrackState} objects in a dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). At the start of each call, the method \texttt{process\_global\_state} iterates over this dictionary and removes the objects that the tracker has not been able to match for more than 30 frames, in order to avoid memory leaks.
+
+As soon as one or more cats are detected with prey in their mouth, the \texttt{StateMachine} object emits an event and reports that cats are not allowed to enter. Otherwise, i.e.\ if all cats are clean, the event reports that entry is allowed. The lock is reported immediately, whereas the release is only reported once all cats visible in the current frame have a complete history and at least five seconds have passed since the last change.
+
+\subsection{The Orchestration (\texttt{processor.py})}
+The actual processing of the frames takes place in the script \texttt{processor.py}. The class \texttt{CatFlapProcessor} manages a \texttt{StateMachine} object, counts how many frames per second can be processed, and offers the method \texttt{process\_frame}. This is the heart of the class; it receives a video frame as a parameter, after which it iterates over all detected cats, performing the segmentation for each object. In the last step, the state machine is then updated and the visualisations (bounding boxes and state) are drawn onto the frame.
+
+How difficult it is to collect high-quality data of cats with prey was already mentioned in Chapter 3. To improve the segmentation model in a targeted way, a mechanism was implemented that saves frames for which the model was uncertain (confidence score between 0.3 and 0.6). This makes it possible to specifically improve the scenarios that the model finds most difficult. This feature is activated with the command-line parameter \texttt{--save\_uncertain}. To save storage space, after the mechanism has been triggered, saving for the same \texttt{track\_id} is locked for 30 frames.
+
+\section{The Connection to the Hardware (\texttt{catflap.py})}
+The class \texttt{Catflap} contained in the script \texttt{catflap.py} provides the hardware environment. Through polymorphism, different variants can be created. The method \texttt{capture\_continuous} returns the next frame from the camera. In addition, the class offers methods for closing (\texttt{lock\_in} / \texttt{lock\_out}) and opening (\texttt{unlock\_in} / \texttt{unlock\_out}) the flap.
+
+\begin{itemize}
+	\item \texttt{lock\_in}: Cat is not allowed to enter the house.
+	\item \texttt{lock\_out}: Cat is not allowed to leave the house.
+	\item \texttt{unlock\_in} and \texttt{unlock\_out}: Remove the respective lock.
+\end{itemize}
+
+The subclass \texttt{SimulationCatflap} is used for simulation; here a video supplies the video frames, and locking and unlocking the flap is simulated by an output to the console. For real operation there are the classes \texttt{ServoCatflap}, which locks by means of a servo motor, and \texttt{SureCatflap}, which can be used as an interface to an existing SureFlap cat flap \cite{surepetcare_microchip}.
+
+\section{Execution Environments}
+Depending on the purpose, the system can be run in different environments, each of which has its own scripts.
+
+\subsection{The Local Test Environment (\texttt{main.py})}
+The script \texttt{main.py} was developed to be able to quickly validate newly trained models in the local environment (e.g.\ a Windows laptop). The script reads in a video file. Each video frame then passes through the \texttt{process\_frame} method of the class \texttt{CatFlapProcessor}. Subsequently, the visualisation is drawn onto the video and played back.
+
+\subsection{The Test Environment on the Raspberry Pi (\texttt{pi\_main.py})}
+To be able to sensibly test the interplay of all components on the target device, the script \texttt{pi\_main.py} was developed. This makes it possible to test each part, that is, the detector, segmentation model, servo and camera, in isolation. In addition, this part is important for testing how many frames per second the Raspberry Pi 5 can process. Otherwise, the script works the same as \texttt{main.py}.
+
+\subsection{The Real World (\texttt{pi\_server.py})}
+For real operation, the previously mentioned scripts are not sufficient. So that the flap can be manually locked / unlocked during operation and the current camera recordings can be viewed, these functions are provided as HTTP endpoints in the script \texttt{pi\_server.py} with the help of the \texttt{flask} package.
+
+Here, too, a \texttt{CatFlapProcessor} object is created and managed, which continuously receives the individual frames from the camera. If the global access state of the \texttt{StateMachine} object contained within it changes, an event is emitted, as described in Section 5.1.2. If all cats are clean, the flap is opened; otherwise it is locked. Once the cat flap has been unlocked, a timer starts that closes the flap again after 30 seconds.
+
+
+
+
