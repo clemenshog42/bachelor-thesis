@@ -12,6 +12,10 @@ In dieser Arbeit wird YOLO \cite{jocher2024yolo} in der Version 26 verwendet \ci
 
 Für diese Arbeit ist YOLO gut geeignet, da ein solches System niedrige Inferrenzzeiten benötigt \cite{terven2023yolo}. Das ist auf der einen Seite wichtig damit das System verlässlich bleibt und die Katze nicht zu lange vor der Klappe warten muss. Das Modell liefert für jede erkannte Katze die exakten Koordinaten dessen Gesichtes, was die Basis für die Objektverfolgung bildet.
 
+\subsection{Transferlernen}
+\label{subsec:transfer}
+Das Training eines tiefen neuronalen Netzes von Grund auf benötigt sehr große, annotierte Datensätze. Beim Transferlernen (\emph{engl. Transfer Learning}) wird stattdessen ein Netz verwendet, das bereits auf einem großen, allgemeinen Datensatz wie COCO \cite{lin2014coco} vortrainiert wurde, und anschließend mit einem kleineren, aufgabenspezifischen Datensatz weitertrainiert \cite{pan2010transfer}. Diese Feinabstimmung (\emph{engl. Fine-Tuning}) funktioniert, weil die ersten Schichten eines Faltungsnetzwerks allgemeine Merkmale wie Kanten und Texturen lernen, die sich auf neue Aufgaben übertragen lassen. Erst die tieferen Schichten sind auf die ursprüngliche Aufgabe spezialisiert \cite{yosinski2014transferable}. In dieser Arbeit werden sowohl der Gesichtsdetektor als auch das Segmentierungsmodell auf diese Weise aus vortrainierten YOLO26-Modellen abgeleitet.
+
 \section{Mehrfach-Objektverfolgung mit ByteTrack}
 \label{subsec:bytetrack}
 
@@ -20,6 +24,12 @@ Eine Objekterkennung wie YOLO alleine bewertet jedes Videoeinzelbild isoliert. W
 In dieser Arbeit erzeugt ein Objektdetektor (in diesem Fall YOLO26) die Begrenzungsrahmen, diese enthalten die genauen Koordinaten der Objekte, in unserem Fall vom Gesicht der Katze. Im zweiten Schritt übernimmt der Tracker. Er versucht die neuen Erkennungen den bekannten zuzuordnen, sollte das nicht möglich sein wird eine neue Identität erzeugt \cite{bewley2016sort, kuhn1955hungarian}. Im Fall von ByteTrack \cite{zhang2022bytetrack} passiert dieses zuordnen durch Bewegungsvorhersagen welche der Kalman-Filter \cite{kalman1960new} trifft.
 
 ByteTrack hebt sich von klassischen Trackern \cite{bewley2016sort, wojke2017deepsort} ab indem er auch Erkennungen mit niedrigem Konfidenzwert verwendet um Identitätswechsel vorzubeugen, damit dies nicht zu Fehlalarmen führt, ordnet er im ersten Schritt die Begrenzungsrahmen mit hohen Konfidenzwerten zu \cite{zhang2022bytetrack}. Anschließend werden die Objekte mit den niedrigen Konfidenzwerten verglichen welche im vorigen Schritt nicht zugeordnet werden konnten. Dadurch wird die Verfolgung robuster bei Verdeckungen \cite{zhang2022bytetrack}. Daher eignet sich ByteTrack gut für unvorhersehbare Bewegungen und Okklusionen beim Anwendungsfall einer Katzenklappe.
+
+\subsection{Bewegungsvorhersage und Zuordnung}
+\label{subsec:kalman}
+Für jede verfolgte Katze schätzt ein Kalman-Filter \cite{kalman1960new} den Zustand ihres Begrenzungsrahmens, also Position, Größe und deren Geschwindigkeit. Der Filter arbeitet in zwei Schritten: Im Vorhersageschritt wird der Zustand unter der Annahme einer konstanten Geschwindigkeit in das nächste Einzelbild fortgeschrieben. Im Korrekturschritt wird die Vorhersage mit der tatsächlich zugeordneten Erkennung abgeglichen, wobei Vorhersage und Messung entsprechend ihrer Unsicherheit gewichtet werden \cite{bewley2016sort}.
+
+Die Zuordnung zwischen vorhergesagten Rahmen und neuen Erkennungen wird als Zuordnungsproblem formuliert. Als Kosten dient die Überlappung der Rahmen, gemessen als Intersection over Union (IoU, siehe Abschnitt~\ref{sec:metriken}). Die Ungarische Methode \cite{kuhn1955hungarian} findet die Zuordnung mit den geringsten Gesamtkosten. Erkennungen, die keinem bestehenden Track zugeordnet werden können, eröffnen einen neuen Track. Tracks, denen über längere Zeit keine Erkennung zugeordnet wird, werden gelöscht \cite{bewley2016sort, zhang2022bytetrack}.
  
 \section{Bildsegmentierung mit YOLO}
 \label{subsec:yolo_class}
@@ -31,6 +41,10 @@ Dieser Ansatz hat den Vorteil dass die Segmentierung nicht mehr das ganze Bild v
 
 Die Aufgabe des Segmentierungsmodells ist somit, die Beute im Maul der Katze pixelgenau zu markieren. Für jedes gefundene Beutetier liefert das Modell eine Maske und einen Konfidenzwert. Der höchste Konfidenzwert eines Bildausschnitts gibt an, wie wahrscheinlich die Katze Beute trägt. Findet das Modell keine Beute, ist der Wert 0.
 
+\subsection{Semantische Segmentierung und Instanzsegmentierung}
+\label{subsec:instanz}
+Bei der Bildsegmentierung wird jedem Pixel eines Bildes eine Klasse zugeordnet. Die semantische Segmentierung unterscheidet dabei nur zwischen Klassen, mehrere Objekte derselben Klasse verschmelzen zu einer gemeinsamen Fläche \cite{long2015fcn}. Die Instanzsegmentierung unterscheidet zusätzlich einzelne Objekte und liefert für jedes erkannte Objekt eine eigene Maske, eine Klasse und einen Konfidenzwert \cite{he2017maskrcnn, minaee2022segmentation}. YOLO-Segmentierungsmodelle gehören zur Instanzsegmentierung: Neben den Begrenzungsrahmen werden einige gemeinsame Prototyp-Masken berechnet, aus denen für jedes Objekt durch eine gewichtete Kombination die eigene Maske entsteht \cite{bolya2019yolact}. Dadurch bleibt die Segmentierung nahezu so schnell wie die reine Objekterkennung.
+
 \section{Zustandsautomaten}
 \label{subsec:fsm}
 
@@ -41,3 +55,27 @@ Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zus
 Ein einfaches Beispiel für einen Zustandsautomaten ist eine Ampel, das Modell repräsentiert ob die Ampel Rot, Gelb oder Grün ist. Bedingung für das Wechseln ist ein Timer. Die Aktion wäre das Umschalten der Ampel.
 
 In unserem Kontext dient der Zustandsautomat Ungenauigkeiten der Objekterkennung und Segmentierung zu glätten. Anstatt bei einem Ausreißer sofort den Zustand der Katzenklappe zu ändern, wird der Zustandsübergang an Bedingungen (z.b. einen Schwellenwert über ein Zeitfenster) gebunden.
+
+\section{Bewertungsmetriken}
+\label{sec:metriken}
+Zur Bewertung von Objekterkennung und Segmentierung werden die folgenden, etablierten Metriken verwendet \cite{everingham2010pascal, lin2014coco}.
+
+\textbf{Intersection over Union (IoU):} Die Überlappung zwischen einem vorhergesagten Bereich $A$ und dem annotierten Bereich $B$ wird als Verhältnis von Schnittmenge zu Vereinigungsmenge angegeben:
+\begin{equation}
+	\mathrm{IoU} = \frac{|A \cap B|}{|A \cup B|}.
+\end{equation}
+Eine Vorhersage gilt als korrekt, wenn ihre IoU mit einem annotierten Objekt derselben Klasse einen Schwellenwert, typischerweise 0,5, überschreitet. Bei Segmentierungsmodellen wird die IoU auf Basis der Masken berechnet.
+
+\textbf{Präzision, Trefferquote und F1-Maß:} Aus der Anzahl der Richtig-Positiv- (TP), Falsch-Positiv- (FP) und Falsch-Negativ-Ergebnisse (FN) ergeben sich
+\begin{equation}
+	\mathrm{Pr\ddot{a}zision} = \frac{TP}{TP + FP}, \qquad
+	\mathrm{Trefferquote} = \frac{TP}{TP + FN}, \qquad
+	F_1 = \frac{2 \cdot \mathrm{Pr\ddot{a}zision} \cdot \mathrm{Trefferquote}}{\mathrm{Pr\ddot{a}zision} + \mathrm{Trefferquote}}.
+\end{equation}
+Die Präzision gibt an, welcher Anteil der Vorhersagen korrekt ist, die Trefferquote, welcher Anteil der tatsächlichen Objekte gefunden wird. Das F1-Maß ist das harmonische Mittel beider Werte. Alle drei hängen vom gewählten Konfidenzschwellenwert ab.
+
+\textbf{Average Precision (AP) und mAP:} Wird der Konfidenzschwellenwert schrittweise verändert, entsteht die Präzision-Trefferquote-Kurve. Die Fläche unter dieser Kurve ergibt die Average Precision einer Klasse, der Mittelwert über alle Klassen die mean Average Precision (mAP). Die Angabe mAP50 bezieht sich auf einen IoU-Schwellenwert von 0,5, die Angabe mAP50-95 auf den Mittelwert über IoU-Schwellenwerte von 0,5 bis 0,95 \cite{lin2014coco}.
+
+\section{Quantisierung für eingebettete Systeme}
+\label{sec:quantisierung}
+Die Gewichte und Zwischenergebnisse neuronaler Netze werden beim Training üblicherweise als 32-Bit-Gleitkommazahlen gespeichert. Bei der Quantisierung werden sie in Formate mit geringerer Genauigkeit umgewandelt, etwa 16-Bit-Gleitkommazahlen oder 8-Bit-Ganzzahlen \cite{jacob2018quantization}. Dadurch sinken Speicherbedarf und Rechenaufwand, sodass Modelle auf Hardware ohne Grafikprozessor, wie dem Raspberry Pi, schneller ausgeführt werden können. Im Gegenzug kann die Genauigkeit des Modells leicht sinken, da Zahlenwerte nur noch gröber dargestellt werden. Laufzeitumgebungen wie TensorFlow Lite \cite{abadi2016tensorflow} unterstützen solche quantisierten Modelle und sind für Prozessoren mit ARM-Architektur optimiert.
