@@ -4,7 +4,7 @@
 In diesem Kapitel wird die konzeptionelle Entwicklung und technische Umsetzung des vorgestellten Erkennungssystems dieser Arbeit erläutert. Es wird der Weg von der Problemstellung bis hin zur Lösung beschrieben. Dabei wird genauer auf die Designentscheidungen und die Architektur der einzelnen Komponenten der Verarbeitungskette eingegangen.
 
 \section{Gesamtarchitektur und Datenfluss}
-Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt, reicht weder eine reine Objekterkennung noch eine reine Bildsegmentierung aus. Da wir nur einen begrenzten Datensatz an Katzen mit Beutetieren zur Verfügung haben, ist es unerlässlich diese Aufgabe auf mehrere Stufen zu teilen \cite{baumann2020smartcatflap}. Daraus ergibt sich eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildsegmentierung und zeitlicher Zustandsmodellierung. Dabei sieht die finale Verarbeitungskette wie folgt aus:
+Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt, reicht weder eine reine Objekterkennung noch eine reine Bildsegmentierung aus. Da wir nur einen begrenzten Datensatz an Katzen mit Beutetieren zur Verfügung haben, ist es sinnvoll diese Aufgabe auf mehrere Stufen zu teilen \cite{baumann2020smartcatflap}. Daraus ergibt sich eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildsegmentierung und zeitlicher Zustandsmodellierung. Dabei sieht die finale Verarbeitungskette wie folgt aus:
 
 \begin{enumerate}
 	\item Ein Einzelbild der Kamera wird aufgenommen.
@@ -35,13 +35,13 @@ Standardmodelle von YOLO26 sind nicht spezifisch auf die Erkennung von Katzenges
 Die Feinabstimmung des YOLO26n-Modells erfolgte über 100 Epochen und einer Bildauflösung von 640x640 Pixeln und der Standard YOLO-Augmentation \cite{ultralytics_augmentation}. Um eine Überanpassung des Modells zu vermeiden, wird das Training abgebrochen, sollte in den letzten zehn Epochen keine Verbesserung mehr eintreten. \cite{goodfellow2016deep}.
 
 \section{Automatisierte Generierung des Segmentierungs-Datensatzes}
-Für die Segmentierung, ob die Katze Beute im Maul trägt, gab es leider keinen brauchbaren Datensatz. Für das Training werden zwei Arten von Bildern benötigt, Katzen mit und Katzen ohne Beute. Die Katzen ohne Beute können wir wieder aus dem Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}) verwenden. Katzen mit Beute auf der anderen Seite sind extrem schwierig zu bekommen, entweder sie sind qualitativ minderwertig oder Urheberrechtlich geschützt. 
+Für die Segmentierung, ob die Katze Beute im Maul trägt, gab es leider keinen brauchbaren Datensatz. Für das Training werden zwei Arten von Bildern benötigt, Katzen mit und Katzen ohne Beute. Die Katzen ohne Beute können wir wieder aus dem Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}) verwenden. Katzen mit Beute auf der anderen Seite sind schwierig zu bekommen, entweder sie sind qualitativ minderwertig oder Urheberrechtlich geschützt. 
 
 Die Bilder von Katzen mit Beute, lies ich mir daher von Gemini \cite{geminiteam2023gemini} generieren. Mithilfe der offiziellen Gemini Application Programming Interface (API), entwickelte ich einen Algorithmus, der unter Berücksichtigung des Benutzungslimits automatisch Bilder von Katzen mit Beute in unterschiedlichen Posen und Entfernungen generiert.
 
 Für die Vorbereitung des Datensatzes zur Feinabstimmung des YOLO26n Segmentierungsmodells, wird der zuvor trainierte Katzengesichts-Detektor verwendet. Er erkennt die Katzengesichter in den Bildern ohne Beute und schneidet sie genauso zu wie später bei der Inferenz. Diese Ausschnitte werden als Negativbeispiele ohne Annotation in den Datensatz aufgenommen. Die Bilder mit Beute wurden mithilfe der KI-gestützten Annotation von Roboflow \cite{roboflow2025} mit Segmentierungsmasken der Beutetiere versehen und anschließend händisch überprüft. 
 
-Das Segmentierungsmodell hat somit immer die gleiche Eingangslage: Es bekommt stets den erweiterten Ausschnitt um das Katzengesicht ohne viel Hintergrund. Das bildet die perfekte Trainingsgrundlage, da die Segmentierung in der späteren Inferenz genau die gleichen Eingangsbilder erhält.
+Das Segmentierungsmodell hat somit immer die gleiche Eingangslage: Es bekommt stets den erweiterten Ausschnitt um das Katzengesicht ohne viel Hintergrund. Das bildet eine geeignete Trainingsgrundlage, da die Segmentierung in der späteren Inferenz genau die gleichen Eingangsbilder erhält.
 
 \section{Bildausschnitt-Extraktion}
 \label{sec:bildausschnitt}
