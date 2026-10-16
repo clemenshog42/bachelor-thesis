@@ -162,7 +162,7 @@ Keine saubere Katze wird dauerhaft ausgesperrt. In zwei der zehn Videos mit Beut
     \item Die Katze läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
 \end{itemize}
 
-In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind. Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Entscheidungszeit.
+In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind (Abschnitt~\ref{sec:methodik_zustand}). Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Entscheidungszeit.
 
 \section{Ablationsstudien}
 In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.
