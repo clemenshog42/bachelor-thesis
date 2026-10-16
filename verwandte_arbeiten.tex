@@ -39,15 +39,14 @@ Keiner der Hersteller veröffentlicht das verwendete Verfahren, die Trainingsdat
 
 \section{Abgrenzung dieser Arbeit}
 \label{sec:rw_abgrenzung}
-Die vorliegende Arbeit greift die Grundidee des Cat Prey Analyzer auf, einen Bildausschnitt um den Kopf der Katze gezielt auf Beute zu untersuchen und die Ergebnisse über mehrere Einzelbilder zusammenzufassen. Sie unterscheidet sich jedoch in folgenden Punkten:
+Die vorliegende Arbeit greift die Grundidee des Cat Prey Analyzer auf, einen Bildausschnitt um den Kopf der Katze gezielt auf Beute zu untersuchen und die Ergebnisse über mehrere Einzelbilder zusammenzufassen. Sie hebt sich in folgenden Punkten davon ab:
 
-\begin{itemize}
-	\item \emph{Zweistufige statt dreistufiger Kaskade}: Ein einziger, feinabgestimmter YOLO26n-Detektor lokalisiert direkt das Gesicht der Katze. Die getrennte Erkennung von Katze und Schnauze entfällt.
-	\item \emph{Segmentierung statt Klassifikation}: Das Beutetier wird im Bildausschnitt segmentiert, anstatt den gesamten Ausschnitt zu klassifizieren.
-	\item \emph{Zeitliche Zusammenfassung pro Katze}: Durch die Objektverfolgung mit ByteTrack besitzt jede Katze eine eigene Historie. Dadurch können auch Szenen mit mehreren Katzen ausgewertet werden.
-	\item \emph{Betrieb bei Nacht}: Das gesamte System arbeitet auf Graustufenbildern, sodass Tag- und Infrarotaufnahmen mit denselben Modellen verarbeitet werden.
-	\item \emph{Synthetische Daten}: Trainings- und Testdaten wurden mit generativer KI erzeugt. Im Gegensatz zum Cat Prey Analyzer, der auf realen Aufnahmen trainiert und ausgewertet wurde, ist die Übertragbarkeit auf reale Aufnahmen damit nicht nachgewiesen.
-	\item \emph{Systematische Ablationsstudien}: Der Beitrag der einzelnen Komponenten wird mit bildweisen Metriken untersucht.
-\end{itemize}
+\begin{enumerate}
+	\item \emph{Moderne Modelle}: Anstelle von MobileNetV2, Haar-Kaskaden und VGG16 kommen aktuelle YOLO26-Modelle zum Einsatz. Ein feinabgestimmter YOLO26n-Detektor lokalisiert direkt das Gesicht der Katze, ein YOLO26n-Segmentierungsmodell untersucht den Bildausschnitt auf Beute.
+	\item \emph{Mehrere Katzen}: Durch die Objektverfolgung mit ByteTrack besitzt jede Katze eine eigene Historie. Dadurch können auch Szenen mit mehreren Katzen gleichzeitig ausgewertet werden.
+	\item \emph{Systematische Auswertung}: Der Beitrag der einzelnen Komponenten wird in Ablationsstudien mit bildweisen Metriken untersucht.
+	\item \emph{Nachtbetrieb}: Das gesamte System arbeitet auf Graustufenbildern, sodass Tag- und Infrarotaufnahmen mit denselben Modellen verarbeitet werden.
+	\item \emph{Größerer Datensatz}: Der Datensatz für die Beuteerkennung wurde mithilfe synthetischer, mit generativer KI erzeugter Daten erweitert.
+\end{enumerate}
 
 Ein direkter Vergleich der Ergebnisse ist nicht möglich, da sich Datensätze, Hardware (Raspberry Pi~4 gegenüber Raspberry Pi~5) und Metriken (Auswertung pro Ereignis gegenüber Auswertung pro Einzelbild) unterscheiden.
