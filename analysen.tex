@@ -277,6 +277,7 @@ Aus der Parameterreihe lassen sich folgende Zusammenhänge ablesen:
 Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwert von 0,3 erreicht den geringsten Sicherheitsfehler (1,0\,\%), das höchste F1-Maß (0,987) und die geringste Anzahl an Videos mit durchgelassener Beute (2 von 10). Der Komfortfehler liegt mit 3,3\,\% auf dem niedrigsten Wert der gesamten Parameterreihe, und keine saubere Katze wird ausgesperrt. Bei 8 Bildern pro Sekunde entspricht das Zeitfenster einer Historie von 2,5~Sekunden. Diese Konfiguration wird daher als finale Parametrisierung des Zustandsautomaten festgelegt und in allen folgenden Ablationsstudien verwendet.
 
 \subsection{Detektion und Segmentierung gegenüber Detektion}
+\label{sec:ablation_1stage}
 Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.
 
 \begin{figure}[H]
