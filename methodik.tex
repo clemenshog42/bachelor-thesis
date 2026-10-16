@@ -28,8 +28,8 @@ Abbildung~\ref{fig:pipeline} zeigt die Verarbeitungskette im Überblick.
 	\centering
 	\begin{tikzpicture}[
 		node distance=4mm,
-		box/.style={draw, rounded corners, align=center, minimum width=5.4cm, minimum height=8mm, font=\small},
-		note/.style={font=\footnotesize, align=left, text width=5.2cm},
+		box/.style={draw, rounded corners, align=center, text width=6cm, minimum height=8mm, font=\small},
+		note/.style={font=\footnotesize, align=left, text width=5cm},
 		>={Stealth}]
 		\node[box] (cam) {Kamerabild in Graustufen};
 		\node[box, below=of cam] (det) {Gesichtsdetektor (YOLO26n)};
@@ -113,20 +113,21 @@ Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen
 	\centering
 	\begin{tikzpicture}[
 		>={Stealth},
-		st/.style={draw, rounded corners, minimum height=9mm, inner sep=4pt, font=\small\ttfamily},
-		lbl/.style={font=\footnotesize, align=center, fill=white, inner sep=1pt}]
+		st/.style={draw, rounded corners, minimum height=9mm, minimum width=3.6cm, inner sep=4pt, font=\small\ttfamily},
+		lbl/.style={font=\footnotesize, align=center}]
 		\node[st] (g) at (0,0) {GATHERING\_HISTORY};
-		\node[st] (np) at (-4,-3.2) {CAT\_NO\_PREY};
-		\node[st] (wp) at (4,-3.2) {CAT\_WITH\_PREY};
-		\node[st] (nc) at (0,-6.2) {NO\_CAT};
+		\node[st] (np) at (-4,-3.6) {CAT\_NO\_PREY};
+		\node[st] (wp) at (4,-3.6) {CAT\_WITH\_PREY};
+		\node[st] (nc) at (0,-6.6) {NO\_CAT};
 		\draw[<-] (g.north) -- ++(0,0.7) node[above, font=\footnotesize] {neue Katze erkannt};
-		\draw[->] (g) -- node[lbl, sloped] {Historie voll, $\bar{p} < 0{,}3$} (np);
-		\draw[->] (g) -- node[lbl, sloped] {$\bar{p} \geq 0{,}3$} (wp);
-		\draw[->] (np) to[bend left=12] node[lbl] {$\bar{p} \geq 0{,}3$} (wp);
-		\draw[->] (wp) to[bend left=12] node[lbl] {Historie voll, $\bar{p} < 0{,}3$} (np);
-		\draw[->, dashed] (np) -- (nc);
-		\draw[->, dashed] (wp) -- (nc);
-		\draw[->, dashed] (g) -- node[lbl] {30 Einzelbilder nicht erkannt} (nc);
+		\draw[->] (g.south west) -- node[lbl, above left] {Historie voll,\\ $\bar{p} < 0{,}3$} (np.north);
+		\draw[->] (g.south east) -- node[lbl, above right, pos=0.4] {$\bar{p} \geq 0{,}3$} (wp.north west);
+		\draw[->] (wp.north) to[out=90, in=0] node[lbl, above right, pos=0.3] {Historie unvollständig,\\ $\bar{p} < 0{,}3$} (g.east);
+		\draw[->] ([yshift=2mm]np.east) -- node[lbl, above, pos=0.25] {$\bar{p} \geq 0{,}3$} ([yshift=2mm]wp.west);
+		\draw[->] ([yshift=-2mm]wp.west) -- node[lbl, below, pos=0.25] {Historie voll,\\ $\bar{p} < 0{,}3$} ([yshift=-2mm]np.east);
+		\draw[->, dashed] (np.south) -- (nc.north west);
+		\draw[->, dashed] (wp.south) -- (nc.north east);
+		\draw[->, dashed] (g.south) -- (nc.north);
 	\end{tikzpicture}
 	\caption{Zustände einer verfolgten Katze. $\bar{p}$ bezeichnet den Durchschnitt der Konfidenzwerte über die letzten 20 Einzelbilder. Gestrichelt: Die Katze wird aus dem Speicher entfernt, wenn sie 30 Einzelbilder lang nicht erkannt wurde.}
 	\label{fig:zustaende}
