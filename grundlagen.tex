@@ -27,16 +27,16 @@ ByteTrack hebt sich von klassischen Trackern \cite{bewley2016sort, wojke2017deep
 Die Segmentierung arbeitet wie die Objekterkennung nach dem Prinzip von Faltungsnetzwerken \cite{lecun1998gradient, long2015fcn}. Moderne YOLO-Versionen, wie in unserem Fall YOLO26, bieten eben nicht nur die Objekterkennung, sondern auch die Segmentierung an \cite{jocher2024yolo}. Diese Netzwerke sind durch ihre Archtitektur für schnelle Inferenz bei hoher Genauigkeit ausgelegt \cite{bolya2019yolact}.
 
 Während die Objekterkennung uns zeigt wo sich eine Katze befindet, wissen wir aber noch nicht ob eine Katze Beute im Mund trägt oder nicht. Hier kommt die Bildsegmentierung zum Einsatz \cite{minaee2022segmentation, he2017maskrcnn}.
-Dieser Ansatz hat den Vorteil dass die Segmentierung nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Segmentierung immer eine ähnliche Aufgabe mit wenig Varianz bekommt.
+Dieser Ansatz hat den Vorteil dass die Segmentierung nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich einen Ausschnitt um das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Segmentierung immer eine ähnliche Aufgabe mit wenig Varianz bekommt.
 
-Die Aufgabe des Segmentierungsmodells ist somit eine binäre Entscheidung, trägt die Katze Beute im Mund oder nicht. Die Ausgabe des Modells ist ein Konfidenzwert wie wahrscheinlich die Katze Beute trägt.
+Die Aufgabe des Segmentierungsmodells ist somit, die Beute im Maul der Katze pixelgenau zu markieren. Für jedes gefundene Beutetier liefert das Modell eine Maske und einen Konfidenzwert. Der höchste Konfidenzwert eines Bildausschnitts gibt an, wie wahrscheinlich die Katze Beute trägt. Findet das Modell keine Beute, ist der Wert 0.
 
 \section{Zustandsautomaten}
 \label{subsec:fsm}
 
 Während der Objektdetektor und die Segmentierung Momentaufnahmen liefern, welche durchaus schwanken können, hilft uns bei der Entscheidung ein Zustandsautomat. Er aggregiert die Ergebnisse von Detektor und Segmentierung zeitlich, dadurch wird das Ergebnis nicht stark durch Ausreißer beeinflusst, und wird robuster gegen Fehler \cite{han2016seqnms, kang2018tcnn}.
 
-Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zuständen beinhaltet \cite{hopcroft2006automata}. Das Modell befindet sich zu einem Zeitpunkt immer in genau einem Zustand. Durch bestimmte Ereignisse oder erfüllen bestimmter Bedingungen, wird der aktuelle Zustand des Automaten bestimmt, z.B. wenn das System die letzten 5 mal Katze mit Maus erkannt hat, dann wechselt der Zustandsautomat auf Zugang verweigert \cite{harel1987statecharts}. Der Übergang von einem Zustand löst für gewöhnlich auch Aktionen aus, in unserem Fall würden wir die Katzenklappe öffnen oder schließen \cite{mealy1955method, moore1956gedanken}.
+Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zuständen beinhaltet \cite{hopcroft2006automata}. Das Modell befindet sich zu einem Zeitpunkt immer in genau einem Zustand. Durch bestimmte Ereignisse oder erfüllen bestimmter Bedingungen, wird der aktuelle Zustand des Automaten bestimmt, z.B. wenn der durchschnittliche Konfidenzwert der letzten 20 Einzelbilder über 0,3 liegt, dann wechselt der Zustandsautomat auf Zugang verweigert \cite{harel1987statecharts}. Der Übergang von einem Zustand löst für gewöhnlich auch Aktionen aus, in unserem Fall würden wir die Katzenklappe öffnen oder schließen \cite{mealy1955method, moore1956gedanken}.
 
 Ein einfaches Beispiel für einen Zustandsautomaten ist eine Ampel, das Modell repräsentiert ob die Ampel Rot, Gelb oder Grün ist. Bedingung für das Wechseln ist ein Timer. Die Aktion wäre das Umschalten der Ampel.
 
