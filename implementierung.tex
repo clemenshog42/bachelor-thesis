@@ -9,7 +9,7 @@ Die Implementierung erfolgte in der Programmiersprache Python und hält sich str
 \subsection{Das Modul \texttt{models.py}: Die \texttt{CatFlapPipeline}}
 Die Klasse \texttt{CatFlapPipeline} verwaltet Detektor und Segmentierungsmodell und vereinfacht deren Verwendung. Beim Initialisieren des Objekts werden beide Modelle geladen. Dabei werden die Pfade (absolut oder relativ) zu den Modellen ergänzt.
 
-Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Parameter \texttt{persist=True} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert.
+Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Aufruf der Methode \texttt{track} mit dem Parameter \texttt{tracker="bytetrack.yaml"} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert. Der Parameter \texttt{persist=True} sorgt dafür, dass die Tracks zwischen den Aufrufen erhalten bleiben.
 
 Die Methode \texttt{run\_prey\_detector} schneidet das Bild wie in Kapitel 4.5 beschrieben zusammen. Im folgenden Codeausschnitt ist zu sehen, wie dieses Zuschneiden implementiert ist und welche Auswirkungen es auf das Katzengesicht hat. Durch das Erweitern nach unten stellen wir sicher, dass das Modell genügend Informationen über mögliche Beute im Maul der Katze erhält.
 
@@ -26,10 +26,10 @@ y1 -= pad_top
 x2 += pad_w
 y2 += pad_bottom
 \end{PythonCode}
-Anschließend wird der Bildausschnitt des Katzengesichtes vom Segmentierungsmodell verarbeitet, dieser liefert uns dann den Konfidenzwert für die Klasse \texttt{CAT\_WITH\_PREY}.
+Anschließend wird der Bildausschnitt des Katzengesichtes vom Segmentierungsmodell verarbeitet, dieser liefert uns dann für jedes gefundene Beutetier einen Konfidenzwert. Der höchste davon wird an den Zustandsautomaten übergeben. Findet das Modell keine Beute, ist der Wert 0.
 
 \subsection{Das Modul \texttt{state\_machine.py}: Zeitliche Aggregation}
-Der Zustandsautomat ist durch die Klasse \texttt{StateMachine} abgebildet. Der Status einer einzelnen Katze wird in der Klasse \texttt{TrackState} gespeichert, diese speichert die Historie der Konfidenzwerte in einer \texttt{collections.deque} mit einer fixen Maximallänge (\texttt{history\_length = 15}). Durch diese Datenstruktur wird sichergestellt, dass beim Erreichen der Kapazitätsgrenze der älteste Wert aus der Warteschlange entfernt wird  (\glqq First-In-First-Out\grqq). Dabei bleibt das manuelle Speicher-Management komplett erspart.
+Der Zustandsautomat ist durch die Klasse \texttt{StateMachine} abgebildet. Der Status einer einzelnen Katze wird in der Klasse \texttt{TrackState} gespeichert, diese speichert die Historie der Konfidenzwerte in einer \texttt{collections.deque} mit einer fixen Maximallänge (\texttt{history\_length = 20}). Durch diese Datenstruktur wird sichergestellt, dass beim Erreichen der Kapazitätsgrenze der älteste Wert aus der Warteschlange entfernt wird  (\glqq First-In-First-Out\grqq). Dabei bleibt das manuelle Speicher-Management komplett erspart.
 
 Der folgende Codeausschnitt zeigt die Kernlogik der \texttt{update}-Methode. Diese berechnet bei jedem neuen Bild den gleitenden Durchschnitt (\texttt{numpy.mean}) und schaltet anschließend den Zustand entsprechend um.
 
@@ -44,18 +44,20 @@ def update(self, prey_confidence, frame_idx):
     # Determine new state based on aggregated confidence
     if avg_confidence >= self.threshold:
         self.current_state = State.CAT_WITH_PREY
+    elif len(self.confidence_history) < self.confidence_history.maxlen:
+        self.current_state = State.GATHERING_HISTORY
     else:
         self.current_state = State.CAT_NO_PREY
 \end{PythonCode}
 
-Die Klasse \texttt{StateMachine} verwaltet die verschiedenen \texttt{TrackState}-Objekte in einem Dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). Die Methode \texttt{cleanup\_stale\_tracks} iteriert regelmäßig über dieses Dictionary und entfernt die Objekte, die seit mehr als 30 Einzelbildern nicht mehr vom Tracker zugeordnet wurden konnten, um Speicherlecks zu vermeiden.
+Die Klasse \texttt{StateMachine} verwaltet die verschiedenen \texttt{TrackState}-Objekte in einem Dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). Die Methode \texttt{process\_global\_state} iteriert zu Beginn jedes Aufrufs über dieses Dictionary und entfernt die Objekte, die seit mehr als 30 Einzelbildern nicht mehr vom Tracker zugeordnet wurden konnten, um Speicherlecks zu vermeiden.
 
-Sobald eine oder mehrere Katzen mit Beute im Maul erkannt werden, wirft das \texttt{StateMachine}-Objekt ein Ereignis und meldet, dass der Eintritt von Katzen nicht erlaubt ist. Andernfalls, d. h. wenn alle Katzen sauber sind, meldet das Ereignis, dass der Eintritt erlaubt ist.
+Sobald eine oder mehrere Katzen mit Beute im Maul erkannt werden, wirft das \texttt{StateMachine}-Objekt ein Ereignis und meldet, dass der Eintritt von Katzen nicht erlaubt ist. Andernfalls, d. h. wenn alle Katzen sauber sind, meldet das Ereignis, dass der Eintritt erlaubt ist. Die Sperre wird dabei sofort gemeldet, die Freigabe hingegen erst, wenn alle Katzen eine vollständige Historie besitzen und seit dem letzten Wechsel mindestens fünf Sekunden vergangen sind.
 
 \subsection{Die Orchestrierung (\texttt{processor.py})}
 Im Skript \texttt{processor.py} geschieht die tatsächliche Verarbeitung der Einzelbilder. Die Klasse \texttt{CatFlapProcessor} verwaltet ein \texttt{StateMachine} Objekt, zählt wie viele Bilder pro Sekunde verarbeitet werden können und bietet die Methode \texttt{process\_frame} an. Diese bildet das Herzstück der Klasse, sie bekommt ein Videoeinzelbild als Parameter übergeben, danach wird über alle erkannten Katzen iteriert, dabei wird für jedes Objekt die Segmentierung durchgeführt. Im letzten Schritt wird dann der Zustandsautomat aktualisiert und die Visualisierungen (Begrenzungsrahmen und Zustand) werden auf das Bild eingezeichnet.
 
-Wie schwierig es ist, qualitativ hochwertige Daten von Katzen mit Beute zu sammeln, wurde im Kapitel 3 bereits erwähnt. Um das Segmentierungsmodell gezielt zu verbessern, wurde ein Mechanismus implementiert, der Bilder speichert, bei denen das Modell unsicher war (Konfidenzwert zwischen 0,3 und 0,7). Dadurch können die Szenarien, die dem Modell am schwersten fallen, gezielt verbessert werden. Dieses Feature wird mit dem Kommandozeilenparameter \texttt{--save\_uncertain} aktiviert. Um Speicher zu schonen, wird nach Auslösung des Mechanismus die Speicherung derselben \texttt{track\_id} für 30 Einzelbilder gesperrt.
+Wie schwierig es ist, qualitativ hochwertige Daten von Katzen mit Beute zu sammeln, wurde im Kapitel 3 bereits erwähnt. Um das Segmentierungsmodell gezielt zu verbessern, wurde ein Mechanismus implementiert, der Bilder speichert, bei denen das Modell unsicher war (Konfidenzwert zwischen 0,3 und 0,6). Dadurch können die Szenarien, die dem Modell am schwersten fallen, gezielt verbessert werden. Dieses Feature wird mit dem Kommandozeilenparameter \texttt{--save\_uncertain} aktiviert. Um Speicher zu schonen, wird nach Auslösung des Mechanismus die Speicherung derselben \texttt{track\_id} für 30 Einzelbilder gesperrt.
 
 \section{Die Verbindung zur Hardware (\texttt{catflap.py})}
 Die im Skript \texttt{catflap.py} enthaltene Klasse \texttt{Catflap} stellt dabei die Hardwareumgebung zur Verfügung. Durch Polymorphismus können verschiedene Arten erzeugt werden. Dabei liefert die Methode \texttt{capture\_continuous} das nächste Bild der Kamera. Außerdem bietet die Klasse Methoden zum schließen \texttt{lock\_in} / \texttt{lock\_out} und öffnen \texttt{unlock\_in} / \texttt{unlock\_out} der Klappe.
@@ -75,12 +77,12 @@ Das System kann je nach Einsatzzweck in verschiedenen Umgebungen ausgeführt wer
 Das Skript \texttt{main.py} wurde entwickelt um neu trainierte Modelle schnell auf der lokalen Umgebung (z.b. Windows Laptop) validieren zu können. Dabei liest das Skript eine Videodatei ein. Danach durchläuft jedes Videoeinzelbild die \texttt{process\_frame} Methode der Klasse \texttt{CatFlapProcessor}. Anschließend wird die Visualisierung auf das Video eingezeichnet und abgespielt.
 
 \subsection{Die Testumgebung auf dem Raspberry Pi (\texttt{pi\_main.py})}
-Um das Zusammenspiel aller Komponenten sinnvoll auf dem Endgerät testen zu können wurde das \texttt{pi\_main.py} Skript entwickeltentwickelt. Dadurch ist es möglich, jeden Teil – also Detektor, Segmentierungsmodell, Servo und Kamera – isoliert zu testen. Außerdem ist dieser teil wichtig zum zu testen wie viele Bilder pro Sekunde der Raspberry Pi 5 verarbeiten kann. Ansonsten funktioniert das Skript gleich wie \texttt{main.py}.
+Um das Zusammenspiel aller Komponenten sinnvoll auf dem Endgerät testen zu können wurde das \texttt{pi\_main.py} Skript entwickelt. Dadurch ist es möglich, jeden Teil – also Detektor, Segmentierungsmodell, Servo und Kamera – isoliert zu testen. Außerdem ist dieser teil wichtig zum zu testen wie viele Bilder pro Sekunde der Raspberry Pi 5 verarbeiten kann. Ansonsten funktioniert das Skript gleich wie \texttt{main.py}.
 
 \subsection{Die Reale Welt (\texttt{pi\_server.py})}
-Für den realen Betrieb reichen die vorher erwähnten Skripte nicht aus. Damit man während des Betriebes die Klappe manuell sperren / entsperren und die aktuellen Kamera-Aufnahmen einsehen kann, werden im Skript \texttt{pi\_main.py} mithilfe des \texttt{flask}-Paketes diese Funktionen als HTTP Endpunkte zur Verfügung gestellt.
+Für den realen Betrieb reichen die vorher erwähnten Skripte nicht aus. Damit man während des Betriebes die Klappe manuell sperren / entsperren und die aktuellen Kamera-Aufnahmen einsehen kann, werden im Skript \texttt{pi\_server.py} mithilfe des \texttt{flask}-Paketes diese Funktionen als HTTP Endpunkte zur Verfügung gestellt.
 
-Auch hier wird ein \texttt{CatFlapProcessor}-Objekt erzeugt und verwaltet, dieses bekommt kontinuierlich die Einzelaufnahmen der Kamera. Sollte sich der Zustand des darin enthaltenen \texttt{TrackState}-Objekts ändern, wird, wie in Kapitel 5.1.2 beschrieben, ein Ereignis geworfen. Sind alle Katzen sauber, wird die Klappe geöffnet, ansonsten wird sie gesperrt. Wurde die Katzenklappe entsperrt, so startet ein Zeitmesser, der die Klappe nach 30 Sekunden wieder schließt.
+Auch hier wird ein \texttt{CatFlapProcessor}-Objekt erzeugt und verwaltet, dieses bekommt kontinuierlich die Einzelaufnahmen der Kamera. Sollte sich der globale Zugangszustand des darin enthaltenen \texttt{StateMachine}-Objekts ändern, wird, wie in Kapitel 5.1.2 beschrieben, ein Ereignis geworfen. Sind alle Katzen sauber, wird die Klappe geöffnet, ansonsten wird sie gesperrt. Wurde die Katzenklappe entsperrt, so startet ein Zeitmesser, der die Klappe nach 30 Sekunden wieder schließt.
 
 
 
