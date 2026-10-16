@@ -67,11 +67,11 @@ Zur Bewertung von Objekterkennung und Segmentierung werden die folgenden, etabli
 Eine Vorhersage gilt als korrekt, wenn ihre IoU mit einem annotierten Objekt derselben Klasse einen Schwellenwert, typischerweise 0,5, überschreitet. Bei Segmentierungsmodellen wird die IoU auf Basis der Masken berechnet.
 
 \textbf{Präzision, Trefferquote und F1-Maß:} Aus der Anzahl der Richtig-Positiv- (TP), Falsch-Positiv- (FP) und Falsch-Negativ-Ergebnisse (FN) ergeben sich
-\begin{equation}
-	\mathrm{Pr\ddot{a}zision} = \frac{TP}{TP + FP}, \qquad
-	\mathrm{Trefferquote} = \frac{TP}{TP + FN}, \qquad
-	F_1 = \frac{2 \cdot \mathrm{Pr\ddot{a}zision} \cdot \mathrm{Trefferquote}}{\mathrm{Pr\ddot{a}zision} + \mathrm{Trefferquote}}.
-\end{equation}
+\begin{gather}
+	\text{Präzision} = \frac{TP}{TP + FP}, \qquad
+	\text{Trefferquote} = \frac{TP}{TP + FN}, \\
+	F_1 = \frac{2 \cdot \text{Präzision} \cdot \text{Trefferquote}}{\text{Präzision} + \text{Trefferquote}}.
+\end{gather}
 Die Präzision gibt an, welcher Anteil der Vorhersagen korrekt ist, die Trefferquote, welcher Anteil der tatsächlichen Objekte gefunden wird. Das F1-Maß ist das harmonische Mittel beider Werte. Alle drei hängen vom gewählten Konfidenzschwellenwert ab.
 
 \textbf{Average Precision (AP) und mAP:} Wird der Konfidenzschwellenwert schrittweise verändert, entsteht die Präzision-Trefferquote-Kurve. Die Fläche unter dieser Kurve ergibt die Average Precision einer Klasse, der Mittelwert über alle Klassen die mean Average Precision (mAP). Die Angabe mAP50 bezieht sich auf einen IoU-Schwellenwert von 0,5, die Angabe mAP50-95 auf den Mittelwert über IoU-Schwellenwerte von 0,5 bis 0,95 \cite{lin2014coco}.

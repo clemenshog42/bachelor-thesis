@@ -42,7 +42,7 @@ Keiner der Hersteller veröffentlicht das verwendete Verfahren, die Trainingsdat
 Die vorliegende Arbeit greift die Grundidee des Cat Prey Analyzer auf, einen Bildausschnitt um den Kopf der Katze gezielt auf Beute zu untersuchen und die Ergebnisse über mehrere Einzelbilder zusammenzufassen. Sie hebt sich in folgenden Punkten davon ab:
 
 \begin{enumerate}
-	\item \emph{Moderne Modelle}: Anstelle von MobileNetV2, Haar-Kaskaden und VGG16 kommen aktuelle YOLO26-Modelle zum Einsatz. Ein feinabgestimmter YOLO26n-Detektor lokalisiert direkt das Gesicht der Katze, ein YOLO26n-Segmentierungsmodell untersucht den Bildausschnitt auf Beute.
+	\item \emph{Moderne Modelle}: Anstelle von MobileNetV2, Haar-Kaskaden und VGG16 kommen aktuelle YOLO26-Modelle zum Einsatz. Ein feinabgestimmter YOLO26n-Detektor lokalisiert direkt das Gesicht der Katze, ein Segmentierungsmodell (YOLO26n-seg) untersucht den Bildausschnitt auf Beute.
 	\item \emph{Mehrere Katzen}: Durch die Objektverfolgung mit ByteTrack besitzt jede Katze eine eigene Historie. Dadurch können auch Szenen mit mehreren Katzen gleichzeitig ausgewertet werden.
 	\item \emph{Systematische Auswertung}: Der Beitrag der einzelnen Komponenten wird in Ablationsstudien mit bildweisen Metriken untersucht.
 	\item \emph{Nachtbetrieb}: Das gesamte System arbeitet auf Graustufenbildern, sodass Tag- und Infrarotaufnahmen mit denselben Modellen verarbeitet werden.
