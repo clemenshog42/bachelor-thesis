@@ -1,0 +1,847 @@
+<!doctype html><meta charset="utf-8"><title>Vergleich DE / EN</title><style>body{font-family:system-ui,sans-serif;margin:16px;background:#fff;color:#222}table{border-collapse:collapse;width:100%;table-layout:fixed}td{vertical-align:top;border-top:1px solid #ddd;padding:8px;white-space:pre-wrap;font-size:13px;line-height:1.45}td.n{width:3em;color:#888}h2{margin-top:2em}.warn{background:#fff3cd}nav a{margin-right:1em}</style><h1>Bachelorarbeit: Vergleich Deutsch / Englisch</h1><p>Jede Zeile zeigt einen Absatz des deutschen Originals neben der englischen Übersetzung. Kurzfassung und Abstract sind nicht enthalten, da die Kurzfassung deutsch bleibt und das Abstract bereits englisch war. Gelb markiert: Anzahl der Absätze stimmt nicht überein.</p><nav>
+<a href="#einleitung.tex">einleitung.tex</a>
+<a href="#grundlagen.tex">grundlagen.tex</a>
+<a href="#material.tex">material.tex</a>
+<a href="#methodik.tex">methodik.tex</a>
+<a href="#implementierung.tex">implementierung.tex</a>
+<a href="#analysen.tex">analysen.tex</a>
+<a href="#diskussion.tex">diskussion.tex</a>
+<a href="#zusammenfassung.tex">zusammenfassung.tex</a>
+</nav>
+<h2 id="einleitung.tex">einleitung.tex &nbsp; (4 / 4 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Einleitung}
+\label{sec:einleitung}</td><td>\chapter{Introduction}
+\label{sec:einleitung}</td></tr>
+<tr><td class="n">2</td><td>Freigänger-Katzen bringen von Zeit zu Zeit Beutetiere, wie z.b. Mäuse oder Vögel, mit ins Haus, was für den Besitzer sehr unangenehm sein kann. Diese Beutetiere sind auf Kameraaufnahmen oft schwer erkennbar, da sie klein sind oder verdeckt werden. Wenn man versucht, dieses Problem mit reiner Objekterkennung zu lösen, erweisen sich reine Einzelbilder oft als fehleranfällig \cite{jiao2022video}. Bewegungsunschärfe oder Verdeckungen führen dazu, dass die Beute nicht mit der benötigten Genauigkeit erkannt werden kann. Eine Momentaufnahme ist hier nicht ausreichend, weshalb eine Analyse über mehrere Einzelbilder erforderlich ist.</td><td>Outdoor cats occasionally bring prey animals, such as mice or birds, into the house, which can be very unpleasant for the owner. These prey animals are often difficult to recognise in camera footage because they are small or occluded. When one tries to solve this problem with pure object detection, individual frames alone often prove to be error-prone \cite{jiao2022video}. Motion blur or occlusions mean that the prey cannot be recognised with the required accuracy. A snapshot is not sufficient here, which is why an analysis across several frames is required.</td></tr>
+<tr><td class="n">3</td><td>Diese Bachelorarbeit beschäftigt sich mit der durch künstliche Intelligenz gestützter Erkennung von Beutetieren im Maul einer Katze. Das Ziel dieses Projektes ist es, eine Alternative zu den herrkömlichen Katzenklappen zu bieten und dem Katzenbesitzer das lästige fangen von Beute im Wohnraum zu ersparen.</td><td>This bachelor thesis deals with the detection of prey animals in a cat&#x27;s mouth supported by artificial intelligence. The goal of this project is to offer an alternative to conventional cat flaps and to spare the cat owner the annoying task of catching prey in the living space.</td></tr>
+<tr><td class="n">4</td><td>Da die Bilderkennung unter anderem das Herzstück dieses Projektes ist, habe ich mich intensiv mit verschiedenen Algorithmen beschäftigt. Im ersten Schritt wird das Objektdetektionsmodell YOLO26 \cite{jocher2024yolo} eingesetzt. YOLO26 erreicht eine hohe Genauigkeit während es auch auf Endgeräten echtzeitfähig bleibt. Anschließend kommt der ByteTrack \cite{zhang2022bytetrack} Algorithmus zum Einsatz. Dieser Algorithmus verfolgt die erkannten Begrenzungsrahmen über die Zeit und sorgt dafür, dass das System die Katze auch bei kurzzeitigen Verdeckungen nicht aus den Augen verliert. ByteTrack sorgt auch dafür, dass jede Katze eindeutig ist sollten sich mehrere Katzen auf dem Videoeinzelbild befinden. Die erkannten Bereiche werden anschließend durch eine weitere künstliche Intelligenz (YOLO-Segmentierung) ausgewertet, welche die Beute im Bild segmentiert und daraus einen Konfidenzwert für Beute liefert. Um die Zuverlässigkeit zu erhöhen und Fehlalarme zu vermeiden, trifft man nicht für jedes Videoeinzelbild eine Entscheidung sondern sammelt Daten über mehrere Videoeinzelbilder hinweg und trifft für diese Daten als gesamtes eine Entscheidung. Dafür wurde ein eigener Zustandsautomat (State Machine) eingebunden. Dieser wertet die Historie der Bilder über ein gleitendes Zeitfenster aus und trifft dann eine Entscheidung, ob die Katze beute im Mund trägt oder nicht. In dieser Arbeit wird evaluiert, inwiefern diese Kombination aus Objekterkennung, Segmentierung, Objektverfolgung und Zustandsautomaten eine bessere Lösung ist als die reine Bewertung durch Einzelbilder.</td><td>Since image recognition is, among other things, the centrepiece of this project, I have worked intensively with various algorithms. In the first step, the object detection model YOLO26 \cite{jocher2024yolo} is used. YOLO26 achieves a high accuracy while also remaining real-time capable on edge devices. Subsequently, the ByteTrack \cite{zhang2022bytetrack} algorithm is used. This algorithm tracks the detected bounding boxes over time and ensures that the system does not lose sight of the cat, even during brief occlusions. ByteTrack also ensures that each cat is uniquely identified should several cats be in the video frame. The detected regions are then evaluated by a further artificial intelligence (YOLO segmentation), which segments the prey in the image and derives a confidence score for prey from this. To increase reliability and to avoid false alarms, a decision is not made for every video frame; instead, data are collected over several video frames and a decision is made for these data as a whole. For this purpose, a custom state machine was integrated. It evaluates the history of the frames over a sliding time window and then decides whether or not the cat is carrying prey in its mouth. This thesis evaluates to what extent this combination of object detection, segmentation, object tracking and a state machine is a better solution than evaluation based purely on individual frames.</td></tr>
+</table>
+<h2 id="grundlagen.tex">grundlagen.tex &nbsp; (19 / 19 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Theoretische Grundlagen}
+\label{sec:grundlagen}</td><td>\chapter{Theoretical Background}
+\label{sec:grundlagen}</td></tr>
+<tr><td class="n">2</td><td>In diesem Kapitel werden die theoretischen Grundlagen erläutert, diese bilden dass Fundament dieser Arbeit. Es werden ausschließlich Technologien und Algorithmen erklärt, welche in der finalen Arbeit verwendet werden. Dazu zählen Objekterkennung, Objektverfolgung, Bildsegmentierung und Zustandsautomaten.</td><td>This chapter explains the theoretical background, which forms the foundation of this thesis. Only technologies and algorithms that are used in the final work are explained. These include object detection, object tracking, image segmentation and state machines.</td></tr>
+<tr><td class="n">3</td><td>\section{Objekterkennung mit YOLO}
+\label{subsec:yolo_det}</td><td>\section{Object Detection with YOLO}
+\label{subsec:yolo_det}</td></tr>
+<tr><td class="n">4</td><td>Die automatische Bildanalyse lässt sich grundsätzlich in verschiedene Problemklassen unterteilen \cite{szeliski2022computer}. Während die reine Bildklassifikation lediglich die Frage beantwortet, ob ein bestimmtes Objekt in einem Bild vorhanden ist, geht die Objekterkennung einen Schritt weiter \cite{zou2023object}. Sie ermittelt nicht nur die Klasse des Objekts, sondern auch die genaue Position an der sich das Objekt befindet.</td><td>Automatic image analysis can fundamentally be divided into different problem classes \cite{szeliski2022computer}. While pure image classification merely answers the question of whether a certain object is present in an image, object detection goes one step further \cite{zou2023object}. It determines not only the class of the object but also the exact position at which the object is located.</td></tr>
+<tr><td class="n">5</td><td>In dieser Arbeit wird YOLO \cite{jocher2024yolo} in der Version 26 verwendet \cite{sapkota2025yolo26}. Im Gegensatz zu zweistufigen Detektoren, welche zuerst interessante Bildregionen extrahieren und erst im zweiten Schritt klassifizieren \cite{ren2015faster}, ist YOLO ein einstufiger Detektor, welcher das gesamte Bild in einem Durchlauf mithilfe eines Faltungsnetzwerk \cite{lecun1998gradient, krizhevsky2012imagenet} analysiert \cite{redmon2016yolo}. Das Bild wird in Raster unterteilt, jede Rasterzelle gibt das Netzwerk mehrere Begrenzungsrahmen und die zugehörigen Klassenwahrscheinlichkeiten und Konfidenzwerte voraus \cite{redmon2016yolo}. Der Begrenzungsrahmen ist der Rahmen in dem sich ein Objekt befindet. Die Klassenwahrscheinlichkeit gibt an wie wahrscheinlich das erkannte Objekt zur Klasse Katze gehört. Der Konfidenzwert hingegen gibt an, wie sicher sich das Netzwerk ist, dass es sich überhaupt um ein Objekt handelt \cite{ultralytics_confidence}.</td><td>In this thesis, YOLO \cite{jocher2024yolo} in version 26 is used \cite{sapkota2025yolo26}. In contrast to two-stage detectors, which first extract interesting image regions and only classify them in the second step \cite{ren2015faster}, YOLO is a single-stage detector that analyses the entire image in one pass using a convolutional neural network \cite{lecun1998gradient, krizhevsky2012imagenet} \cite{redmon2016yolo}. The image is divided into a grid, and for each grid cell the network predicts several bounding boxes and the associated class probabilities and confidence scores \cite{redmon2016yolo}. The bounding box is the frame in which an object is located. The class probability indicates how likely it is that the detected object belongs to the class cat. The confidence score, on the other hand, indicates how certain the network is that there is an object at all \cite{ultralytics_confidence}.</td></tr>
+<tr><td class="n">6</td><td>Für diese Arbeit ist YOLO unerlässlich, da ein solches System niedrige Inferrenzzeiten benötigt \cite{terven2023yolo}. Das ist auf der einen Seite wichtig damit das System verlässlich bleibt und die Katze nicht zu lange vor der Klappe warten muss. Das Modell liefert für jede erkannte Katze die exakten Koordinaten dessen Gesichtes, was die Basis für die Objektverfolgung bildet.</td><td>YOLO is indispensable for this thesis, since such a system requires low inference times \cite{terven2023yolo}. On the one hand, this is important so that the system remains reliable and the cat does not have to wait in front of the flap for too long. For each detected cat, the model delivers the exact coordinates of its face, which forms the basis for object tracking.</td></tr>
+<tr><td class="n">7</td><td>\section{Mehrfach-Objektverfolgung mit ByteTrack}
+\label{subsec:bytetrack}</td><td>\section{Multi-Object Tracking with ByteTrack}
+\label{subsec:bytetrack}</td></tr>
+<tr><td class="n">8</td><td>Eine Objekterkennung wie YOLO alleine bewertet jedes Videoeinzelbild isoliert. Wenn sich eine Katze auf einem Video befindet, dann wird jedes Einzelbild des Videos separat betrachtet. Jede erkannte Katze ist also eine neue Katze. Durch eine Objektverfolgung wird es möglich, eine Katze über ein ganzes Video eindeutig zuzuordnen. Eine Mehrfach-Objektverfolgung ist dann die Erweiterung auf mehrere Katzen pro Video \cite{luo2021mot}. Das ist zwingend erforderlich um eine zeitliche Analyse einer bestimmten Katze durchführen zu können.</td><td>An object detection model such as YOLO on its own evaluates each video frame in isolation. If a cat is in a video, each frame of the video is considered separately. Every detected cat is therefore a new cat. Object tracking makes it possible to uniquely assign a cat across an entire video. Multi-object tracking is then the extension to several cats per video \cite{luo2021mot}. This is absolutely necessary in order to be able to carry out a temporal analysis of a specific cat.</td></tr>
+<tr><td class="n">9</td><td>In dieser Arbeit erzeugt ein Objektdetektor (in diesem Fall YOLO26) die Begrenzungsrahmen, diese enthalten die genauen Koordinaten der Objekte, in unserem Fall vom Gesicht der Katze. Im zweiten Schritt übernimmt der Tracker. Er versucht die neuen Erkennungen den bekannten zuzuordnen, sollte das nicht möglich sein wird eine neue Identität erzeugt \cite{bewley2016sort, kuhn1955hungarian}. Im Fall von ByteTrack \cite{zhang2022bytetrack} passiert dieses zuordnen durch Bewegungsvorhersagen welche der Kalman-Filter \cite{kalman1960new} trifft.</td><td>In this thesis, an object detector (in this case YOLO26) produces the bounding boxes, which contain the exact coordinates of the objects, in our case of the cat&#x27;s face. In the second step, the tracker takes over. It tries to assign the new detections to the known ones; if this is not possible, a new identity is created \cite{bewley2016sort, kuhn1955hungarian}. In the case of ByteTrack \cite{zhang2022bytetrack}, this assignment is done using motion predictions made by the Kalman filter \cite{kalman1960new}.</td></tr>
+<tr><td class="n">10</td><td>ByteTrack hebt sich von klassischen Trackern \cite{bewley2016sort, wojke2017deepsort} ab indem er auch Erkennungen mit niedrigem Konfidenzwert verwendet um Identitätswechsel vorzubeugen, damit dies nicht zu Fehlalarmen führt, ordnet er im ersten Schritt die Begrenzungsrahmen mit hohen Konfidenzwerten zu \cite{zhang2022bytetrack}. Anschließend werden die Objekte mit den niedrigen Konfidenzwerten verglichen welche im vorigen Schritt nicht zugeordnet werden konnten. Dadurch wird die Verfolgung robuster bei Verdeckungen \cite{zhang2022bytetrack}. Daher eignet sich ByteTrack ideal für unvorhersehbare Bewegungen und Okklusionen beim Anwendungsfall einer Katzenklappe.</td><td>ByteTrack differs from classic trackers \cite{bewley2016sort, wojke2017deepsort} in that it also uses detections with a low confidence score in order to prevent identity switches. So that this does not lead to false alarms, it first assigns the bounding boxes with high confidence scores \cite{zhang2022bytetrack}. Subsequently, the objects with low confidence scores that could not be assigned in the previous step are compared. This makes the tracking more robust against occlusions \cite{zhang2022bytetrack}. ByteTrack is therefore ideally suited to unpredictable movements and occlusions in the use case of a cat flap.</td></tr>
+<tr><td class="n">11</td><td>\section{Bildsegmentierung mit YOLO}
+\label{subsec:yolo_class}</td><td>\section{Image Segmentation with YOLO}
+\label{subsec:yolo_class}</td></tr>
+<tr><td class="n">12</td><td>Die Segmentierung arbeitet wie die Objekterkennung nach dem Prinzip von Faltungsnetzwerken \cite{lecun1998gradient, long2015fcn}. Moderne YOLO-Versionen, wie in unserem Fall YOLO26, bieten eben nicht nur die Objekterkennung, sondern auch die Segmentierung an \cite{jocher2024yolo}. Diese Netzwerke sind durch ihre Archtitektur für schnelle Inferenz bei hoher Genauigkeit ausgelegt \cite{bolya2019yolact}.</td><td>Like object detection, segmentation works on the principle of convolutional neural networks \cite{lecun1998gradient, long2015fcn}. Modern YOLO versions, such as YOLO26 in our case, offer not only object detection but also segmentation \cite{jocher2024yolo}. Owing to their architecture, these networks are designed for fast inference at high accuracy \cite{bolya2019yolact}.</td></tr>
+<tr><td class="n">13</td><td>Während die Objekterkennung uns zeigt wo sich eine Katze befindet, wissen wir aber noch nicht ob eine Katze Beute im Mund trägt oder nicht. Hier kommt die Bildsegmentierung zum Einsatz \cite{minaee2022segmentation, he2017maskrcnn}.
+Dieser Ansatz hat den Vorteil dass die Segmentierung nicht mehr das ganze Bild verstehen muss, das Modell bekommt lediglich einen Ausschnitt um das Gesicht der Katze, dieser Ansatz benötigt einen wesentlich kleineren Datensatz, da die Segmentierung immer eine ähnliche Aufgabe mit wenig Varianz bekommt.</td><td>While object detection shows us where a cat is located, we still do not know whether or not a cat is carrying prey in its mouth. This is where image segmentation comes into play \cite{minaee2022segmentation, he2017maskrcnn}.
+This approach has the advantage that the segmentation no longer has to understand the whole image; the model only receives a crop around the cat&#x27;s face. This approach requires a considerably smaller dataset, since the segmentation always receives a similar task with little variance.</td></tr>
+<tr><td class="n">14</td><td>Die Aufgabe des Segmentierungsmodells ist somit, die Beute im Maul der Katze pixelgenau zu markieren. Für jedes gefundene Beutetier liefert das Modell eine Maske und einen Konfidenzwert. Der höchste Konfidenzwert eines Bildausschnitts gibt an, wie wahrscheinlich die Katze Beute trägt. Findet das Modell keine Beute, ist der Wert 0.</td><td>The task of the segmentation model is thus to mark the prey in the cat&#x27;s mouth with pixel accuracy. For each prey animal found, the model delivers a mask and a confidence score. The highest confidence score of a crop indicates how likely it is that the cat is carrying prey. If the model finds no prey, the value is 0.</td></tr>
+<tr><td class="n">15</td><td>\section{Zustandsautomaten}
+\label{subsec:fsm}</td><td>\section{State Machines}
+\label{subsec:fsm}</td></tr>
+<tr><td class="n">16</td><td>Während der Objektdetektor und die Segmentierung Momentaufnahmen liefern, welche durchaus schwanken können, hilft uns bei der Entscheidung ein Zustandsautomat. Er aggregiert die Ergebnisse von Detektor und Segmentierung zeitlich, dadurch wird das Ergebnis nicht stark durch Ausreißer beeinflusst, und wird robuster gegen Fehler \cite{han2016seqnms, kang2018tcnn}.</td><td>While the object detector and the segmentation deliver snapshots, which can certainly fluctuate, a state machine helps us with the decision. It aggregates the results of the detector and the segmentation over time, so that the result is not strongly influenced by outliers and becomes more robust against errors \cite{han2016seqnms, kang2018tcnn}.</td></tr>
+<tr><td class="n">17</td><td>Ein endlicher Zustandsautomat ist ein Modell, welches eine endliche Menge an Zuständen beinhaltet \cite{hopcroft2006automata}. Das Modell befindet sich zu einem Zeitpunkt immer in genau einem Zustand. Durch bestimmte Ereignisse oder erfüllen bestimmter Bedingungen, wird der aktuelle Zustand des Automaten bestimmt, z.B. wenn der durchschnittliche Konfidenzwert der letzten 20 Einzelbilder über 0,3 liegt, dann wechselt der Zustandsautomat auf Zugang verweigert \cite{harel1987statecharts}. Der Übergang von einem Zustand löst für gewöhnlich auch Aktionen aus, in unserem Fall würden wir die Katzenklappe öffnen oder schließen \cite{mealy1955method, moore1956gedanken}.</td><td>A finite state machine is a model that contains a finite set of states \cite{hopcroft2006automata}. At any point in time, the model is in exactly one state. The current state of the automaton is determined by certain events or the fulfilment of certain conditions, e.g.\ if the average confidence score of the last 20 frames is above 0.3, the state machine switches to access denied \cite{harel1987statecharts}. A transition from one state usually also triggers actions; in our case, we would open or close the cat flap \cite{mealy1955method, moore1956gedanken}.</td></tr>
+<tr><td class="n">18</td><td>Ein einfaches Beispiel für einen Zustandsautomaten ist eine Ampel, das Modell repräsentiert ob die Ampel Rot, Gelb oder Grün ist. Bedingung für das Wechseln ist ein Timer. Die Aktion wäre das Umschalten der Ampel.</td><td>A simple example of a state machine is a traffic light; the model represents whether the traffic light is red, yellow or green. The condition for switching is a timer. The action would be the switching of the traffic light.</td></tr>
+<tr><td class="n">19</td><td>In unserem Kontext dient der Zustandsautomat Ungenauigkeiten der Objekterkennung und Segmentierung zu glätten. Anstatt bei einem Ausreißer sofort den Zustand der Katzenklappe zu ändern, wird der Zustandsübergang an Bedingungen (z.b. einen Schwellenwert über ein Zeitfenster) gebunden.</td><td>In our context, the state machine serves to smooth out inaccuracies of the object detection and segmentation. Instead of immediately changing the state of the cat flap in the case of an outlier, the state transition is tied to conditions (e.g.\ a threshold over a time window).</td></tr>
+</table>
+<h2 id="material.tex">material.tex &nbsp; (8 / 8 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Material und Versuchsgrundlage}
+\label{sec:material}</td><td>\chapter{Materials and Experimental Basis}
+\label{sec:material}</td></tr>
+<tr><td class="n">2</td><td>In diesem Kapitel werden die konkreten Ressourcen und Technologien erläutert, welche für das Training der Modelle und die Evaluation der Verarbeitungskette verwendet wurden.</td><td>This chapter describes the specific resources and technologies that were used for training the models and for evaluating the pipeline.</td></tr>
+<tr><td class="n">3</td><td>\section{Datensätze}
+Für die Objekterkennung und Bildsegmentierung wurden unterschiedliche Datensätze benötigt, da beide ein spezifisches Problem lösen.</td><td>\section{Datasets}
+Different datasets were required for object detection and image segmentation, since each solves a specific problem.</td></tr>
+<tr><td class="n">4</td><td>\textbf{Datensatz für die Objekterkennung (Katzengesichter):} \\
+Für das Training der Objekterkennung mit YOLO26 wurde ein öffentlicher Kaggle-Datensatz verwendet (\glqq Cat Dataset\grqq\ von Crawford \cite{kaggle2024cat}). In diesem Datensatz ist bereits für jede Katze gekennzeichnet wo sich dessen Gesicht im Bild befindet, außerdem enthält er eine große Variation an Katzen in verschiedensten Lichtverhältnissen, Posen und Hintergründen. Die Daten mussten nur noch leicht umgeändert werden damit sie für das YOLO-Training geeignet waren.</td><td>\textbf{Dataset for object detection (cat faces):} \\
+For training the object detection with YOLO26, a public Kaggle dataset was used (``Cat Dataset&#x27;&#x27; by Crawford \cite{kaggle2024cat}). In this dataset, the location of each cat&#x27;s face in the image is already marked, and it also contains a large variety of cats in a wide range of lighting conditions, poses and backgrounds. The data only had to be modified slightly so that it was suitable for YOLO training.</td></tr>
+<tr><td class="n">5</td><td>\textbf{Datensatz für die Segmentierung (Beutetiere):} \\
+Im Gegensatz zur Objekterkennung wo es bereits einen fertigen Datensatz gab, fand ich zu diesem Problem kaum Daten. Entweder waren Datensätze quantitativ oder qualitativ zu niederwertig. Um dieses Problem zu lösen wurden die Trainingsdaten mit hilfe von KI-generiert. Dadurch konnten gezielt verschiedene Szenarien, sprich unterschiedliche Beutetiere und Posen, erzeugt werden. Anschließend wurden die Beutetiere mithilfe der KI-gestützten Annotation von Roboflow \cite{roboflow2025} als Segmentierungsmasken annotiert und händisch überprüft. Durch diese Art und Weise konnte das YOLO26 Modell mit ausreichender Genauigkeit trainiert werden.</td><td>\textbf{Dataset for segmentation (prey animals):} \\
+In contrast to object detection, where a ready-made dataset existed, I found hardly any data for this problem. Datasets were either too small or of too low quality. To solve this problem, the training data were generated with the help of AI. This made it possible to produce specific scenarios, that is, different prey animals and poses. Subsequently, the prey animals were annotated as segmentation masks using the AI-assisted annotation of Roboflow \cite{roboflow2025} and checked manually. In this way, the YOLO26 model could be trained with sufficient accuracy.</td></tr>
+<tr><td class="n">6</td><td>\section{Hardware und Softwareumgebung}
+Das Training der Modelle benötigt im Vergleich zur reinen Verwendung sehr ressourcenintensiv, daher habe ich das Training ausgelagert um schnell an Ergebnisse zu kommen.</td><td>\section{Hardware and Software Environment}
+Training the models is very resource-intensive compared to their mere use, so I outsourced the training in order to obtain results quickly.</td></tr>
+<tr><td class="n">7</td><td>\textbf{Hardware-Setup:} \\
+Das Training der Modell wurde auf der Plattform Kaggle durchgeführt, diese stellt eine ausreichend starke GPU zur Verfügung welche für das Training unerlässlich war. Die späteren Tests wurden zuerst auf meiner lokalen Systemarchitektur und anschließend noch auf einem Einplatinencomputer, in diesem Fall auf dem Raspberry Pi 5, getestet.</td><td>\textbf{Hardware setup:} \\
+The models were trained on the Kaggle platform, which provides a sufficiently powerful GPU that was indispensable for the training. The later tests were first run on my local system architecture and subsequently on a single-board computer, in this case the Raspberry Pi 5.</td></tr>
+<tr><td class="n">8</td><td>\textbf{Softwareumgebung:} \\
+Die Implementierung des Systems erfolgte mit Hilfe der Programmiersprache Python \cite{van1995python}. Für Detektor und Segmentierungsmodell wurde das \texttt{ultralytics}-Paket verwendet. Bilderverarbeitungsoperationen wie z.b. Extrahieren von Bildausschnitten, wurden mit OpenCV \cite{bradski2000opencv} realisiert. Die Annotation und Verwaltung des Segmentierungsdatensatzes erfolgte mit der Plattform Roboflow \cite{roboflow2025}, von der der Datensatz direkt im YOLO-Format für das Training exportiert wurde. Für die optimale Inferrenzgeschwindigkeit wurden die Modelle in das TensorFlow Lite \cite{abadi2016tensorflow} Format exportiert, da diese extra für ARM \cite{arm2026architecture} Architekturen optimiert sind, welche von unserem Einplatinencomputer verwendet wird.</td><td>\textbf{Software environment:} \\
+The system was implemented using the programming language Python \cite{van1995python}. The \texttt{ultralytics} package was used for the detector and the segmentation model. Image processing operations, such as extracting crops, were implemented with OpenCV \cite{bradski2000opencv}. The annotation and management of the segmentation dataset was carried out on the Roboflow platform \cite{roboflow2025}, from which the dataset was exported directly in YOLO format for training. For optimal inference speed, the models were exported to the TensorFlow Lite \cite{abadi2016tensorflow} format, as these are specifically optimised for ARM \cite{arm2026architecture} architectures, which are used by our single-board computer.</td></tr>
+</table>
+<h2 id="methodik.tex">methodik.tex &nbsp; (25 / 25 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Methodik und Entwicklung}
+\label{sec:methodik}</td><td>\chapter{Methodology and Development}
+\label{sec:methodik}</td></tr>
+<tr><td class="n">2</td><td>In diesem Kapitel wird die konzeptionelle Entwicklung und technische Umsetzung des vorgestellten Erkennungssystems dieser Arbeit erläutert. Es wird der Weg von der Problemstellung bis hin zur Lösung beschrieben. Dabei wird genauer auf die Designentscheidungen und die Architektur der einzelnen Komponenten der Verarbeitungskette eingegangen.</td><td>This chapter describes the conceptual development and technical implementation of the detection system presented in this thesis. It describes the path from the problem statement to the solution. In doing so, it examines in more detail the design decisions and the architecture of the individual components of the pipeline.</td></tr>
+<tr><td class="n">3</td><td>\section{Gesamtarchitektur und Datenfluss}
+Um zuverlässig beurteilen zu können ob eine Katze ein Beutetier im Maul trägt, reicht weder eine reine Objekterkennung noch eine reine Bildsegmentierung aus. Da wir nur einen begrenzten Datensatz an Katzen mit Beutetieren zur Verfügung haben, ist es unerlässlich diese Aufgabe auf mehrere Stufen zu teilen \cite{baumann2020smartcatflap}. Daraus ergibt sich eine Verarbeitungskette aus Objekterkennung, Objektverfolgung, Bildsegmentierung und zeitlicher Zustandsmodellierung. Dabei sieht die finale Verarbeitungskette wie folgt aus:</td><td>\section{Overall Architecture and Data Flow}
+To reliably judge whether a cat is carrying a prey animal in its mouth, neither pure object detection nor pure image segmentation is sufficient. Since we only have a limited dataset of cats with prey animals available, it is essential to divide this task into several stages \cite{baumann2020smartcatflap}. This results in a pipeline consisting of object detection, object tracking, image segmentation and temporal state modelling. The final pipeline looks as follows:</td></tr>
+<tr><td class="n">4</td><td>\begin{enumerate}
+	\item Ein Einzelbild der Kamera wird aufgenommen.
+	\item Die YOLO Objekterkennung analysiert das Bild.
+	\begin{enumerate}
+		\item Wenn keine Katze gefunden wurde, endet die Kette hier.
+		\item Wird mindestens eine Katze gefunden, so wird jedes Katzengesicht aus dem Bild extrahiert.
+	\end{enumerate}
+	\item Der ByteTrack-Algorithmus ordnet den Katzengesichtern eine Identität zu oder erstellt eine neue, sollte die Katze frisch ins Bild gekommen sein.
+	\item Das YOLO-Segmentierungsmodell untersucht jeden Bildausschnitt einzeln und liefert für jede Katze einen Konfidenzwert, dass sie Beute trägt.
+	\item Der Zustandsautomat aggregiert die Ergebnisse der Bildsegmentierung über die Zeit und trifft dann eine finale Entscheidung, in welchem Zustand (z.\,B. \glqq Katze mit Beute\grqq) sich die verfolgten Objekte befindet.
+	\begin{enumerate}
+		\item Trägt eine Katze Beute im Maul so wird die Klappe geschlossen.
+		\item Sind alle Katzen über das gesamte Zeitfenster als sauber erkannt worden, so wird die Klappe geöffnet.
+	\end{enumerate}
+\end{enumerate}</td><td>\begin{enumerate}
+	\item A frame is captured by the camera.
+	\item The YOLO object detection analyses the frame.
+	\begin{enumerate}
+		\item If no cat was found, the pipeline ends here.
+		\item If at least one cat is found, each cat face is extracted from the frame.
+	\end{enumerate}
+	\item The ByteTrack algorithm assigns an identity to the cat faces or creates a new one if the cat has only just entered the frame.
+	\item The YOLO segmentation model examines each crop individually and returns for each cat a confidence score that it is carrying prey.
+	\item The state machine aggregates the results of the image segmentation over time and then makes a final decision about which state (e.g.\ ``cat with prey&#x27;&#x27;) the tracked objects are in.
+	\begin{enumerate}
+		\item If a cat is carrying prey in its mouth, the flap is closed.
+		\item If all cats have been recognised as clean over the entire time window, the flap is opened.
+	\end{enumerate}
+\end{enumerate}</td></tr>
+<tr><td class="n">5</td><td>\section{Vorverarbeitung für Infrarot-Nachtsicht}
+Da Katzen ihre Beute nicht nur am Tag bei optimaler Belichtung ins Haus bringen, ist eine zentrale Anforderung an das System das es auch Nachts und bei schlechter Belichtung funktioniert. Das bringt eine weitere Schwierigkeit mit sich: Nachtsichtkameras schalten bei Dunkelheit auf Infrarot um, wodurch Graustufenbilder entstehen.</td><td>\section{Preprocessing for Infrared Night Vision}
+Since cats do not only bring their prey home during the day under optimal lighting, a central requirement for the system is that it also works at night and in poor lighting. This brings a further difficulty: night vision cameras switch to infrared in the dark, which produces greyscale images.</td></tr>
+<tr><td class="n">6</td><td>Damit das neuronale Netz die Farbinformationen nicht erlernt, werden alle Bilder vor dem Training und der Inferenz zu Graustufenbildern konvertiert. Andernfalls würde weder Objekterkennung noch Bildsegmentierung bei Nacht zuverlässig funktionieren.</td><td>So that the neural network does not learn the colour information, all images are converted to greyscale images before training and inference. Otherwise, neither object detection nor image segmentation would work reliably at night.</td></tr>
+<tr><td class="n">7</td><td>\section{Training und Anpassung des Objektdetektors (YOLO26n)}
+Für die Objekterkennung kommt die Archtitektur YOLO26 in der Ausführung \texttt{yolo26n} zum Einsatz. Sie ist die kleinste und bietet hohe Erkennungsgenauigkeit während es die notwendige Inferenzgeschwindigkeit für Einplatinencomputer liefert.</td><td>\section{Training and Adaptation of the Object Detector (YOLO26n)}
+For object detection, the YOLO26 architecture in the \texttt{yolo26n} variant is used. It is the smallest one and offers high detection accuracy while providing the inference speed necessary for single-board computers.</td></tr>
+<tr><td class="n">8</td><td>Standardmodelle von YOLO26 sind nicht spezifisch auf die Erkennung von Katzengesichtern abgestimmt. Daher wurde eine Feinabstimmung für genau dieses Problem durchgeführt \cite{yosinski2014transferable}. Grundlage hierfür ist der Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}), da dieser bereits Annotationen für das Gesicht enthält. Der Datensatz beinhaltet die Koordinaten für Augen, Ohren und Mund. Um diese für YOLO nutzbar zu machen, müssen sie in ein Begrenzungsrahmen-Format umgewandelt werden. Dafür wurde ein Algorithmus entwickelt, der die Breite des Rahmens durch die Ohren und die Höhe durch die Ohren und den Mund vorgibt.</td><td>Standard YOLO26 models are not specifically tuned to the detection of cat faces. Therefore, fine-tuning was carried out for exactly this problem \cite{yosinski2014transferable}. The basis for this is the Kaggle dataset (Cat Dataset by Crawford \cite{kaggle2024cat}), since it already contains annotations for the face. The dataset contains the coordinates for eyes, ears and mouth. To make these usable for YOLO, they have to be converted into a bounding box format. For this purpose, an algorithm was developed that determines the width of the box from the ears and the height from the ears and the mouth.</td></tr>
+<tr><td class="n">9</td><td>Die Feinabstimmung des YOLO26n-Modells erfolgte über 100 Epochen und einer Bildauflösung von 640x640 Pixeln und der Standard YOLO-Augmentation \cite{ultralytics_augmentation}. Um eine Überanpassung des Modells zu vermeiden, wird das Training abgebrochen, sollte in den letzten zehn Epochen keine Verbesserung mehr eintreten. \cite{goodfellow2016deep}.</td><td>The fine-tuning of the YOLO26n model was carried out over 100 epochs at an image resolution of 640x640 pixels and with the standard YOLO data augmentation \cite{ultralytics_augmentation}. To avoid overfitting of the model, the training is stopped if no improvement occurs in the last ten epochs \cite{goodfellow2016deep}.</td></tr>
+<tr><td class="n">10</td><td>\section{Automatisierte Generierung des Segmentierungs-Datensatzes}
+Für die Segmentierung, ob die Katze Beute im Maul trägt, gab es leider keinen brauchbaren Datensatz. Für das Training werden zwei Arten von Bildern benötigt, Katzen mit und Katzen ohne Beute. Die Katzen ohne Beute können wir wieder aus dem Kaggle-Datensatz (Cat Dataset von Crawford \cite{kaggle2024cat}) verwenden. Katzen mit Beute auf der anderen Seite sind extrem schwierig zu bekommen, entweder sie sind qualitativ minderwertig oder Urheberrechtlich geschützt.</td><td>\section{Automated Generation of the Segmentation Dataset}
+Unfortunately, there was no usable dataset for the segmentation of whether the cat is carrying prey in its mouth. Two kinds of images are required for the training: cats with and cats without prey. The cats without prey can again be taken from the Kaggle dataset (Cat Dataset by Crawford \cite{kaggle2024cat}). Cats with prey, on the other hand, are extremely difficult to obtain; they are either of poor quality or protected by copyright.</td></tr>
+<tr><td class="n">11</td><td>Die Bilder von Katzen mit Beute, lies ich mir daher von Gemini \cite{geminiteam2023gemini} generieren. Mithilfe der offiziellen Gemini Application Programming Interface (API), entwickelte ich einen Algorithmus, der unter Berücksichtigung des Benutzungslimits automatisch Bilder von Katzen mit Beute in unterschiedlichen Posen und Entfernungen generiert.</td><td>I therefore had the images of cats with prey generated by Gemini \cite{geminiteam2023gemini}. Using the official Gemini Application Programming Interface (API), I developed an algorithm that, taking the usage limit into account, automatically generates images of cats with prey in different poses and at different distances.</td></tr>
+<tr><td class="n">12</td><td>Für die Vorbereitung des Datensatzes zur Feinabstimmung des YOLO26n Segmentierungsmodells, wird der zuvor trainierte Katzengesichts-Detektor verwendet. Er erkennt die Katzengesichter in den Bildern ohne Beute und schneidet sie genauso zu wie später bei der Inferenz. Diese Ausschnitte werden als Negativbeispiele ohne Annotation in den Datensatz aufgenommen. Die Bilder mit Beute wurden mithilfe der KI-gestützten Annotation von Roboflow \cite{roboflow2025} mit Segmentierungsmasken der Beutetiere versehen und anschließend händisch überprüft.</td><td>To prepare the dataset for fine-tuning the YOLO26n segmentation model, the previously trained cat face detector is used. It detects the cat faces in the images without prey and crops them in exactly the same way as later during inference. These crops are added to the dataset as negative examples without annotation. The images with prey were provided with segmentation masks of the prey animals using the AI-assisted annotation of Roboflow \cite{roboflow2025} and subsequently checked manually.</td></tr>
+<tr><td class="n">13</td><td>Das Segmentierungsmodell hat somit immer die gleiche Eingangslage: Es bekommt stets den erweiterten Ausschnitt um das Katzengesicht ohne viel Hintergrund. Das bildet die perfekte Trainingsgrundlage, da die Segmentierung in der späteren Inferenz genau die gleichen Eingangsbilder erhält.</td><td>The segmentation model thus always has the same input conditions: it always receives the enlarged crop around the cat face without much background. This forms the perfect training basis, since during later inference the segmentation receives exactly the same input images.</td></tr>
+<tr><td class="n">14</td><td>\section{Bildausschnitt-Extraktion}
+Da der Eingang des Segmentierungsmodells der Ausgang des Detektors ist, müssen beide die erforderlichen Informationen erhalten. Während der Detektor am besten funktioniert, wenn er nur auf das Katzengesicht trainiert wird, benötigt er auch die Information, was sich unter dem Maul des Katzengesichts befindet.</td><td>\section{Crop Extraction}
+Since the input of the segmentation model is the output of the detector, both must receive the required information. While the detector works best when it is trained only on the cat face, it also needs the information about what is located below the mouth of the cat face.</td></tr>
+<tr><td class="n">15</td><td>Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn das Segmentierungsmodell bekommt. Das Katzengesicht wird nach untenhin um die doppelte Gesichtshöhe und seitlich um jeweils 80\,\% der Gesichtsbreite erweitert um sicher zu gehen das die Beute im Bild ist.</td><td>Therefore, the bounding box of the detector is modified before the segmentation model receives it. The cat face is extended downwards by twice the face height and sideways by 80\,\% of the face width on each side to make sure that the prey is in the image.</td></tr>
+<tr><td class="n">16</td><td>Der Detektor erwartet ein 3-Kanal-Bild, daher wird das Graustufenbild dreifach dupliziert (\texttt{cv2.cvtColor(gray, cv2.COLOR\_GRAY2BGR)}). Das Segmentierungsmodell wurde dagegen direkt mit einkanaligen Graustufenbildern trainiert und erhält den Ausschnitt als einkanaliges Bild. Zuvor wird der Ausschnitt mit schwarzen Rändern zu einem Quadrat aufgefüllt.</td><td>The detector expects a 3-channel image, so the greyscale image is duplicated three times (\texttt{cv2.cvtColor(gray, cv2.COLOR\_GRAY2BGR)}). The segmentation model, by contrast, was trained directly on single-channel greyscale images and receives the crop as a single-channel image. Beforehand, the crop is padded with black borders to form a square.</td></tr>
+<tr><td class="n">17</td><td>\section{Training des Segmentierungsmodells (YOLO-Segmentierung)}
+Als Segmentierungsmodell kommt wie beim Detektor ein YOLO-Modell zum Einsatz. Dadurch das wir uns bereits in der Ultralytics Umgebung befinden und moderne YOLO-Versionen hochoptimierte Netzwerke für Segmentierungsaufgaben bereitstellen, war diese Entscheidung naheliegend.</td><td>\section{Training of the Segmentation Model (YOLO Segmentation)}
+As in the case of the detector, a YOLO model is used as the segmentation model. Since we are already in the Ultralytics environment and modern YOLO versions provide highly optimised networks for segmentation tasks, this decision was an obvious one.</td></tr>
+<tr><td class="n">18</td><td>Das Modell bekommt ein 640x640 Pixel großes Bild und liefert für jedes erkannte Beutetier eine Segmentierungsmaske und einen Konfidenzwert. Dadurch dass der Datensatz des Modells relativ klein ist, wird hier stark auf Datenvervielfältigung gesetzt (zufällige Rotation des Bildes um bis zu 10°, horizontale Spiegelung, Variation von Helligkeit und Sättigung). Die Mosaik-Augmentation, bei der vier Bilder zu einem zusammengesetzt werden, ist deaktiviert, damit kleine Beutetiere nicht verloren gehen. Durch diese Augmentationsschritte wird das Modell robuster gegen unbekannte Posen der Katzen.</td><td>The model receives an image of 640x640 pixels and returns a segmentation mask and a confidence score for each detected prey animal. Because the model&#x27;s dataset is relatively small, strong emphasis is placed on data augmentation (random rotation of the image by up to 10°, horizontal flipping, variation of brightness and saturation). Mosaic augmentation, in which four images are combined into one, is deactivated so that small prey animals are not lost. These augmentation steps make the model more robust against unfamiliar poses of the cats.</td></tr>
+<tr><td class="n">19</td><td>\section{Objektverfolgung und Entwicklung des Zustandsmodells}
+Wenn sich eine Katze der Klappe nähert, ändert sich die Qualität der Bilder durch Bewegungsunschärfe oder ungünstige Winkel stark. Das hat zur Folge, dass die Ausgaben des Segmentierungsmodells schwanken. Wenn z.b. die Beute kurzzeitig verdeckt ist, würde das zur Folge haben das die Katze ins Haus darf.</td><td>\section{Object Tracking and Development of the State Model}
+When a cat approaches the flap, the quality of the images changes considerably due to motion blur or unfavourable angles. As a result, the outputs of the segmentation model fluctuate. If, for example, the prey is briefly occluded, this would mean that the cat is allowed into the house.</td></tr>
+<tr><td class="n">20</td><td>Damit dieses Problem eingedämpft wird, wurde die Objekterkennung um den ByteTrack-Algorithmus erweitert. Dadurch bekommt eine Katze beim ersten auftreten im Bild eine eindeutige Objekt-ID, diese ID bleibt in den darauffolgenden Bildern für diese Katze gleich. Basierend auf der Eindeutigkeit jeder Katze konnte nun ein Zustandsautomat entwickelt werden. Diese Klasse \texttt{StateMachine} verwaltet für jede erkannte Katze (\texttt{track\_id}) ein \texttt{TrackState}-Objekt. Das Modell kennt vier Zustände:</td><td>To mitigate this problem, the object detection was extended with the ByteTrack algorithm. As a result, a cat receives a unique object ID when it first appears in the frame, and this ID remains the same for that cat in the following frames. Based on the uniqueness of each cat, a state machine could now be developed. This class \texttt{StateMachine} manages a \texttt{TrackState} object for each detected cat (\texttt{track\_id}). The model knows four states:</td></tr>
+<tr><td class="n">21</td><td>\begin{itemize}
+    \item \texttt{NO\_CAT}: Es befindet sich kein relevantes Objekt im Sichtfeld.
+    \item \texttt{GATHERING\_HISTORY}: Eine Katze wurde erkannt, es liegen aber noch nicht genügend Einzelbilder für eine Entscheidung vor.
+    \item \texttt{CAT\_NO\_PREY}: Eine Katze wurde erkannt, trägt jedoch keine Beute.
+    \item \texttt{CAT\_WITH\_PREY}: Eine Katze wurde erkannt und trägt mit hinreichender Sicherheit eine Beute.
+\end{itemize}</td><td>\begin{itemize}
+    \item \texttt{NO\_CAT}: There is no relevant object in the field of view.
+    \item \texttt{GATHERING\_HISTORY}: A cat has been detected, but there are not yet enough frames for a decision.
+    \item \texttt{CAT\_NO\_PREY}: A cat has been detected but is not carrying prey.
+    \item \texttt{CAT\_WITH\_PREY}: A cat has been detected and is carrying prey with sufficient certainty.
+\end{itemize}</td></tr>
+<tr><td class="n">22</td><td>Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Segmentierungsmodells der letzten 20 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,3 erreicht oder überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert, sofern bereits 20 Werte gesammelt wurden.</td><td>So that the system&#x27;s decision is not made on the basis of the most recent frame alone, the \texttt{TrackState} object stores a history of the confidence scores of the segmentation model for the last 20 frames. The current state is recalculated for every frame, simply by computing the moving average of the history. If the threshold of 0.3 is reached or exceeded, the cat is marked as \texttt{CAT\_WITH\_PREY}. If the value falls below it, the cat is marked as \texttt{CAT\_NO\_PREY}, provided that 20 values have already been collected.</td></tr>
+<tr><td class="n">23</td><td>Der Schwellenwert von 0,3 wurde anhand der Parameterreihe in Abschnitt~\ref{sec:ablation_sm} gewählt. Da der Durchschnitt über 20 Einzelbilder einzelne Ausreißer bereits stark glättet, kann der Schwellenwert niedrig angesetzt werden, ohne dass die Katze zu Unrecht draußen bleiben muss. Dieser Wert ist aber nicht in Stein gemeißelt. Wenn es für den Endanwender wichtiger wäre, dass die Katze im Zweifel ins Haus darf, würde man den Wert höher ansetzen, beispielsweise bei 0,5.</td><td>The threshold of 0.3 was chosen on the basis of the parameter series in Section~\ref{sec:ablation_sm}. Since the average over 20 frames already smooths out individual outliers considerably, the threshold can be set low without the cat having to stay outside unjustly. However, this value is not set in stone. If it were more important to the end user that the cat is allowed in when in doubt, the value would be set higher, for example at 0.5.</td></tr>
+<tr><td class="n">24</td><td>Aus den Zuständen aller Katzen ergibt sich die Entscheidung über die Klappe. Trägt mindestens eine Katze Beute, wird die Klappe sofort gesperrt. Freigegeben wird sie erst, wenn alle Katzen im Bild eine vollständige Historie besitzen und als sauber gelten. Dabei werden nur Katzen berücksichtigt, die im aktuellen Einzelbild sichtbar sind. Vergibt der Tracker einer Katze eine neue Identität, blockiert der zurückgebliebene, kurzlebige Track die Freigabe somit nicht. Eine Katze mit Beute hält die Sperre hingegen aufrecht, bis sie aus dem Speicher entfernt wird. Damit die Klappe nicht ständig auf- und zugeht, wird eine erneute Freigabe frühestens fünf Sekunden nach dem letzten Wechsel erlaubt.</td><td>The decision about the flap results from the states of all cats. If at least one cat is carrying prey, the flap is locked immediately. It is only unlocked when all cats in the frame have a complete history and are considered clean. Only cats that are visible in the current frame are taken into account. If the tracker assigns a new identity to a cat, the short-lived track left behind therefore does not block the release. A cat with prey, on the other hand, maintains the lock until it is removed from memory. So that the flap does not constantly open and close, a renewed release is permitted at the earliest five seconds after the last change.</td></tr>
+<tr><td class="n">25</td><td>Um Speicherlecks in der Zustandsmaschine zu verhindern, werden Katzen die das Bildfeld verlassen haben oder die länger als 30 Bilder nicht mehr gefunden werden (\texttt{max\_missed\_frames}) aus dem Speicher entfernt.</td><td>To prevent memory leaks in the state machine, cats that have left the field of view or that have not been found for more than 30 frames (\texttt{max\_missed\_frames}) are removed from memory.</td></tr>
+</table>
+<h2 id="implementierung.tex">implementierung.tex &nbsp; (24 / 24 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Design und Implementierung}
+\label{sec:implementierung}</td><td>\chapter{Design and Implementation}
+\label{sec:implementierung}</td></tr>
+<tr><td class="n">2</td><td>Nachdem sich das vorherige Kapitel mit der Methodik beschäftigt hat, geht dieses Kapitel auf die konkrete Realisierung des Systems ein. Dabei wird erläutert, wie die Architektur aufgebaut ist und wie die einzelnen Softwarekomponenten ineinandergreifen. Darüber hinaus wird auf die verwendeten Datenstrukturen eingegangen.</td><td>Having dealt with the methodology in the previous chapter, this chapter addresses the concrete realisation of the system. It explains how the architecture is structured and how the individual software components interlock. In addition, the data structures used are discussed.</td></tr>
+<tr><td class="n">3</td><td>\section{Softwarearchitektur und Kernkomponenten}
+Die Implementierung erfolgte in der Programmiersprache Python und hält sich streng an die Regeln der objektorientierten Programmierung, damit das System wart- und erweiterbar bleibt. Dabei wurde das Kernsystem in drei wesentliche Skripte unterteilt: Erkennungsmodelle (\texttt{models.py}), Zustandsautomat (\texttt{state\_machine.py}) und die Orchestrierung (\texttt{processor.py}).</td><td>\section{Software Architecture and Core Components}
+The implementation was carried out in the Python programming language and adheres strictly to the rules of object-oriented programming so that the system remains maintainable and extensible. The core system was divided into three main scripts: detection models (\texttt{models.py}), state machine (\texttt{state\_machine.py}) and orchestration (\texttt{processor.py}).</td></tr>
+<tr><td class="n">4</td><td>\subsection{Das Modul \texttt{models.py}: Die \texttt{CatFlapPipeline}}
+Die Klasse \texttt{CatFlapPipeline} verwaltet Detektor und Segmentierungsmodell und vereinfacht deren Verwendung. Beim Initialisieren des Objekts werden beide Modelle geladen. Dabei werden die Pfade (absolut oder relativ) zu den Modellen ergänzt.</td><td>\subsection{The Module \texttt{models.py}: The \texttt{CatFlapPipeline}}
+The class \texttt{CatFlapPipeline} manages the detector and the segmentation model and simplifies their use. When the object is initialised, both models are loaded. In doing so, the paths (absolute or relative) to the models are completed.</td></tr>
+<tr><td class="n">5</td><td>Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Aufruf der Methode \texttt{track} mit dem Parameter \texttt{tracker=&#x27;bytetrack.yaml&#x27;} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert. Der Parameter \texttt{persist=True} sorgt dafür, dass die Tracks zwischen den Aufrufen erhalten bleiben.</td><td>The method \texttt{run\_detector} converts the frame to greyscale. The object detection is then called; calling the method \texttt{track} with the parameter \texttt{tracker=&#x27;bytetrack.yaml&#x27;} activates the ByteTrack tracker integrated into Ultralytics, which provides us with the bounding boxes together with object IDs. The parameter \texttt{persist=True} ensures that the tracks are retained between calls.</td></tr>
+<tr><td class="n">6</td><td>Die Methode \texttt{run\_prey\_detector} schneidet das Bild wie in Kapitel 4.5 beschrieben zusammen. Im folgenden Codeausschnitt ist zu sehen, wie dieses Zuschneiden implementiert ist und welche Auswirkungen es auf das Katzengesicht hat. Durch das Erweitern nach unten stellen wir sicher, dass das Modell genügend Informationen über mögliche Beute im Maul der Katze erhält.</td><td>The method \texttt{run\_prey\_detector} cuts out the crop as described in Section 4.5. The following code excerpt shows how this cropping is implemented and what effect it has on the cat face. By extending the crop downwards, we ensure that the model receives enough information about possible prey in the cat&#x27;s mouth.</td></tr>
+<tr><td class="n">7</td><td>\begin{PythonCode}[caption={Asymmetrische Randerweiterung für den Bildausschnitt}]
+x1, y1, x2, y2 = map(int, box)
+# Add padding (heavy on bottom for dangling prey)
+face_w = x2 - x1
+face_h = y2 - y1
+pad_w = int(face_w * 0.8)
+pad_top = 0
+pad_bottom = int(face_h * 2.0)
+x1 -= pad_w
+y1 -= pad_top
+x2 += pad_w
+y2 += pad_bottom
+\end{PythonCode}
+Anschließend wird der Bildausschnitt des Katzengesichtes vom Segmentierungsmodell verarbeitet, dieser liefert uns dann für jedes gefundene Beutetier einen Konfidenzwert. Der höchste davon wird an den Zustandsautomaten übergeben. Findet das Modell keine Beute, ist der Wert 0.</td><td>\begin{PythonCode}[caption={Asymmetric padding for the crop}]
+x1, y1, x2, y2 = map(int, box)
+# Add padding (heavy on bottom for dangling prey)
+face_w = x2 - x1
+face_h = y2 - y1
+pad_w = int(face_w * 0.8)
+pad_top = 0
+pad_bottom = int(face_h * 2.0)
+x1 -= pad_w
+y1 -= pad_top
+x2 += pad_w
+y2 += pad_bottom
+\end{PythonCode}
+Subsequently, the crop of the cat face is processed by the segmentation model, which then returns a confidence score for each prey animal found. The highest of these is passed to the state machine. If the model finds no prey, the value is 0.</td></tr>
+<tr><td class="n">8</td><td>\subsection{Das Modul \texttt{state\_machine.py}: Zeitliche Aggregation}
+Der Zustandsautomat ist durch die Klasse \texttt{StateMachine} abgebildet. Der Status einer einzelnen Katze wird in der Klasse \texttt{TrackState} gespeichert, diese speichert die Historie der Konfidenzwerte in einer \texttt{collections.deque} mit einer fixen Maximallänge (\texttt{history\_length = 20}). Durch diese Datenstruktur wird sichergestellt, dass beim Erreichen der Kapazitätsgrenze der älteste Wert aus der Warteschlange entfernt wird  (\glqq First-In-First-Out\grqq). Dabei bleibt das manuelle Speicher-Management komplett erspart.</td><td>\subsection{The Module \texttt{state\_machine.py}: Temporal Aggregation}
+The state machine is represented by the class \texttt{StateMachine}. The status of an individual cat is stored in the class \texttt{TrackState}, which stores the history of the confidence scores in a \texttt{collections.deque} with a fixed maximum length (\texttt{history\_length = 20}). This data structure ensures that, when the capacity limit is reached, the oldest value is removed from the queue (``First-In-First-Out&#x27;&#x27;). This completely spares us manual memory management.</td></tr>
+<tr><td class="n">9</td><td>Der folgende Codeausschnitt zeigt die Kernlogik der \texttt{update}-Methode. Diese berechnet bei jedem neuen Bild den gleitenden Durchschnitt (\texttt{numpy.mean}) und schaltet anschließend den Zustand entsprechend um.</td><td>The following code excerpt shows the core logic of the \texttt{update} method. For each new frame, it calculates the moving average (\texttt{numpy.mean}) and then switches the state accordingly.</td></tr>
+<tr><td class="n">10</td><td>\begin{PythonCode}[caption={Zustandsermittlung mittels gleitendem Durchschnitt}]
+def update(self, prey_confidence, frame_idx):
+    self.confidence_history.append(prey_confidence)
+    self.last_seen = frame_idx</td><td>\begin{PythonCode}[caption={State determination using a moving average}]
+def update(self, prey_confidence, frame_idx):
+    self.confidence_history.append(prey_confidence)
+    self.last_seen = frame_idx</td></tr>
+<tr><td class="n">11</td><td># Calculate moving average
+    avg_confidence = np.mean(self.confidence_history)</td><td># Calculate moving average
+    avg_confidence = np.mean(self.confidence_history)</td></tr>
+<tr><td class="n">12</td><td># Determine new state based on aggregated confidence
+    if avg_confidence &gt;= self.threshold:
+        self.current_state = State.CAT_WITH_PREY
+    elif len(self.confidence_history) &lt; self.confidence_history.maxlen:
+        self.current_state = State.GATHERING_HISTORY
+    else:
+        self.current_state = State.CAT_NO_PREY
+\end{PythonCode}</td><td># Determine new state based on aggregated confidence
+    if avg_confidence &gt;= self.threshold:
+        self.current_state = State.CAT_WITH_PREY
+    elif len(self.confidence_history) &lt; self.confidence_history.maxlen:
+        self.current_state = State.GATHERING_HISTORY
+    else:
+        self.current_state = State.CAT_NO_PREY
+\end{PythonCode}</td></tr>
+<tr><td class="n">13</td><td>Die Klasse \texttt{StateMachine} verwaltet die verschiedenen \texttt{TrackState}-Objekte in einem Dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). Die Methode \texttt{process\_global\_state} iteriert zu Beginn jedes Aufrufs über dieses Dictionary und entfernt die Objekte, die seit mehr als 30 Einzelbildern nicht mehr vom Tracker zugeordnet wurden konnten, um Speicherlecks zu vermeiden.</td><td>The class \texttt{StateMachine} manages the various \texttt{TrackState} objects in a dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). At the start of each call, the method \texttt{process\_global\_state} iterates over this dictionary and removes the objects that the tracker has not been able to match for more than 30 frames, in order to avoid memory leaks.</td></tr>
+<tr><td class="n">14</td><td>Sobald eine oder mehrere Katzen mit Beute im Maul erkannt werden, wirft das \texttt{StateMachine}-Objekt ein Ereignis und meldet, dass der Eintritt von Katzen nicht erlaubt ist. Andernfalls, d. h. wenn alle Katzen sauber sind, meldet das Ereignis, dass der Eintritt erlaubt ist. Die Sperre wird dabei sofort gemeldet, die Freigabe hingegen erst, wenn alle im aktuellen Einzelbild sichtbaren Katzen eine vollständige Historie besitzen und seit dem letzten Wechsel mindestens fünf Sekunden vergangen sind.</td><td>As soon as one or more cats are detected with prey in their mouth, the \texttt{StateMachine} object emits an event and reports that cats are not allowed to enter. Otherwise, i.e.\ if all cats are clean, the event reports that entry is allowed. The lock is reported immediately, whereas the release is only reported once all cats visible in the current frame have a complete history and at least five seconds have passed since the last change.</td></tr>
+<tr><td class="n">15</td><td>\subsection{Die Orchestrierung (\texttt{processor.py})}
+Im Skript \texttt{processor.py} geschieht die tatsächliche Verarbeitung der Einzelbilder. Die Klasse \texttt{CatFlapProcessor} verwaltet ein \texttt{StateMachine} Objekt, zählt wie viele Bilder pro Sekunde verarbeitet werden können und bietet die Methode \texttt{process\_frame} an. Diese bildet das Herzstück der Klasse, sie bekommt ein Videoeinzelbild als Parameter übergeben, danach wird über alle erkannten Katzen iteriert, dabei wird für jedes Objekt die Segmentierung durchgeführt. Im letzten Schritt wird dann der Zustandsautomat aktualisiert und die Visualisierungen (Begrenzungsrahmen und Zustand) werden auf das Bild eingezeichnet.</td><td>\subsection{The Orchestration (\texttt{processor.py})}
+The actual processing of the frames takes place in the script \texttt{processor.py}. The class \texttt{CatFlapProcessor} manages a \texttt{StateMachine} object, counts how many frames per second can be processed, and offers the method \texttt{process\_frame}. This is the heart of the class; it receives a video frame as a parameter, after which it iterates over all detected cats, performing the segmentation for each object. In the last step, the state machine is then updated and the visualisations (bounding boxes and state) are drawn onto the frame.</td></tr>
+<tr><td class="n">16</td><td>Wie schwierig es ist, qualitativ hochwertige Daten von Katzen mit Beute zu sammeln, wurde im Kapitel 3 bereits erwähnt. Um das Segmentierungsmodell gezielt zu verbessern, wurde ein Mechanismus implementiert, der Bilder speichert, bei denen das Modell unsicher war (Konfidenzwert zwischen 0,3 und 0,6). Dadurch können die Szenarien, die dem Modell am schwersten fallen, gezielt verbessert werden. Dieses Feature wird mit dem Kommandozeilenparameter \texttt{--save\_uncertain} aktiviert. Um Speicher zu schonen, wird nach Auslösung des Mechanismus die Speicherung derselben \texttt{track\_id} für 30 Einzelbilder gesperrt.</td><td>How difficult it is to collect high-quality data of cats with prey was already mentioned in Chapter 3. To improve the segmentation model in a targeted way, a mechanism was implemented that saves frames for which the model was uncertain (confidence score between 0.3 and 0.6). This makes it possible to specifically improve the scenarios that the model finds most difficult. This feature is activated with the command-line parameter \texttt{--save\_uncertain}. To save storage space, after the mechanism has been triggered, saving for the same \texttt{track\_id} is locked for 30 frames.</td></tr>
+<tr><td class="n">17</td><td>\section{Die Verbindung zur Hardware (\texttt{catflap.py})}
+Die im Skript \texttt{catflap.py} enthaltene Klasse \texttt{Catflap} stellt dabei die Hardwareumgebung zur Verfügung. Durch Polymorphismus können verschiedene Arten erzeugt werden. Dabei liefert die Methode \texttt{capture\_continuous} das nächste Bild der Kamera. Außerdem bietet die Klasse Methoden zum schließen \texttt{lock\_in} / \texttt{lock\_out} und öffnen \texttt{unlock\_in} / \texttt{unlock\_out} der Klappe.</td><td>\section{The Connection to the Hardware (\texttt{catflap.py})}
+The class \texttt{Catflap} contained in the script \texttt{catflap.py} provides the hardware environment. Through polymorphism, different variants can be created. The method \texttt{capture\_continuous} returns the next frame from the camera. In addition, the class offers methods for closing (\texttt{lock\_in} / \texttt{lock\_out}) and opening (\texttt{unlock\_in} / \texttt{unlock\_out}) the flap.</td></tr>
+<tr><td class="n">18</td><td>\begin{itemize}
+	\item \texttt{lock\_in}: Katze darf Haus nicht betreten.
+	\item \texttt{lock\_out}: Katze darf Haus nicht verlassen.
+	\item \texttt{unlock\_in} und \texttt{unlock\_out}: Heben die jeweilige Sperre auf.
+\end{itemize}</td><td>\begin{itemize}
+	\item \texttt{lock\_in}: Cat is not allowed to enter the house.
+	\item \texttt{lock\_out}: Cat is not allowed to leave the house.
+	\item \texttt{unlock\_in} and \texttt{unlock\_out}: Remove the respective lock.
+\end{itemize}</td></tr>
+<tr><td class="n">19</td><td>Die Ableitung \texttt{SimulationCatflap} wird zur Simulation verwendet, die Videoeinzelbilder liefert hier ein Video, sperren und entsperren der Klappe wird durch eine Ausgabe auf die Konsole simuliert. Für den realen Betrieb gibt es die Klassen \texttt{ServoCatflap}, die mithilfe eines Servo-Motors sperrt, und \texttt{SureCatflap}, die als Anbindung zu einer vorhandenen SureFlap-Katzenklappe \cite{surepetcare_microchip} verwendet werden kann.</td><td>The subclass \texttt{SimulationCatflap} is used for simulation; here a video supplies the video frames, and locking and unlocking the flap is simulated by an output to the console. For real operation there are the classes \texttt{ServoCatflap}, which locks by means of a servo motor, and \texttt{SureCatflap}, which can be used as an interface to an existing SureFlap cat flap \cite{surepetcare_microchip}.</td></tr>
+<tr><td class="n">20</td><td>\section{Ausführungsumgebungen}
+Das System kann je nach Einsatzzweck in verschiedenen Umgebungen ausgeführt werden, die jeweils eigene Skripte besitzen.</td><td>\section{Execution Environments}
+Depending on the purpose, the system can be run in different environments, each of which has its own scripts.</td></tr>
+<tr><td class="n">21</td><td>\subsection{Die lokale Testumgebung (\texttt{main.py})}
+Das Skript \texttt{main.py} wurde entwickelt um neu trainierte Modelle schnell auf der lokalen Umgebung (z.b. Windows Laptop) validieren zu können. Dabei liest das Skript eine Videodatei ein. Danach durchläuft jedes Videoeinzelbild die \texttt{process\_frame} Methode der Klasse \texttt{CatFlapProcessor}. Anschließend wird die Visualisierung auf das Video eingezeichnet und abgespielt.</td><td>\subsection{The Local Test Environment (\texttt{main.py})}
+The script \texttt{main.py} was developed to be able to quickly validate newly trained models in the local environment (e.g.\ a Windows laptop). The script reads in a video file. Each video frame then passes through the \texttt{process\_frame} method of the class \texttt{CatFlapProcessor}. Subsequently, the visualisation is drawn onto the video and played back.</td></tr>
+<tr><td class="n">22</td><td>\subsection{Die Testumgebung auf dem Raspberry Pi (\texttt{pi\_main.py})}
+Um das Zusammenspiel aller Komponenten sinnvoll auf dem Endgerät testen zu können wurde das \texttt{pi\_main.py} Skript entwickelt. Dadurch ist es möglich, jeden Teil – also Detektor, Segmentierungsmodell, Servo und Kamera – isoliert zu testen. Außerdem ist dieser teil wichtig zum zu testen wie viele Bilder pro Sekunde der Raspberry Pi 5 verarbeiten kann. Ansonsten funktioniert das Skript gleich wie \texttt{main.py}.</td><td>\subsection{The Test Environment on the Raspberry Pi (\texttt{pi\_main.py})}
+To be able to sensibly test the interplay of all components on the target device, the script \texttt{pi\_main.py} was developed. This makes it possible to test each part, that is, the detector, segmentation model, servo and camera, in isolation. In addition, this part is important for testing how many frames per second the Raspberry Pi 5 can process. Otherwise, the script works the same as \texttt{main.py}.</td></tr>
+<tr><td class="n">23</td><td>\subsection{Die Reale Welt (\texttt{pi\_server.py})}
+Für den realen Betrieb reichen die vorher erwähnten Skripte nicht aus. Damit man während des Betriebes die Klappe manuell sperren / entsperren und die aktuellen Kamera-Aufnahmen einsehen kann, werden im Skript \texttt{pi\_server.py} mithilfe des \texttt{flask}-Paketes diese Funktionen als HTTP Endpunkte zur Verfügung gestellt.</td><td>\subsection{The Real World (\texttt{pi\_server.py})}
+For real operation, the previously mentioned scripts are not sufficient. So that the flap can be manually locked / unlocked during operation and the current camera recordings can be viewed, these functions are provided as HTTP endpoints in the script \texttt{pi\_server.py} with the help of the \texttt{flask} package.</td></tr>
+<tr><td class="n">24</td><td>Auch hier wird ein \texttt{CatFlapProcessor}-Objekt erzeugt und verwaltet, dieses bekommt kontinuierlich die Einzelaufnahmen der Kamera. Sollte sich der globale Zugangszustand des darin enthaltenen \texttt{StateMachine}-Objekts ändern, wird, wie in Kapitel 5.1.2 beschrieben, ein Ereignis geworfen. Sind alle Katzen sauber, wird die Klappe geöffnet, ansonsten wird sie gesperrt. Wurde die Katzenklappe entsperrt, so startet ein Zeitmesser, der die Klappe nach 30 Sekunden wieder schließt.</td><td>Here, too, a \texttt{CatFlapProcessor} object is created and managed, which continuously receives the individual frames from the camera. If the global access state of the \texttt{StateMachine} object contained within it changes, an event is emitted, as described in Section 5.1.2. If all cats are clean, the flap is opened; otherwise it is locked. Once the cat flap has been unlocked, a timer starts that closes the flap again after 30 seconds.</td></tr>
+</table>
+<h2 id="analysen.tex">analysen.tex &nbsp; (59 / 59 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Tests und Analysen}
+\label{sec:analysen}</td><td>\chapter{Tests and Analyses}
+\label{sec:analysen}</td></tr>
+<tr><td class="n">2</td><td>In diesem Kapitel wird die Leistungsfähigkeit des gesamten Systems evaluiert. Die Beurteilung erfolgt anhand von KI-generierten Videodaten, die dem System während der Trainingsphase nicht präsentiert wurden. Im Fokus steht dabei die Frage, ob die Verbesserungen durch zeitliche Aggregation und die zweistufige Verarbeitungskette zuverlässiger sind als die alleinige Verwendung der Objekterkennung und Segmentierung. Dabei ist es interessant zu sehen, in welchen Szenarien diese Zusätze das System deutlich beeinflussen.</td><td>This chapter evaluates the performance of the entire system. The assessment is based on AI-generated video data that was not presented to the system during the training phase. The focus is on the question of whether the improvements through temporal aggregation and the two-stage pipeline are more reliable than using object detection and segmentation alone. It is also of interest in which scenarios these additions have a clear influence on the system.</td></tr>
+<tr><td class="n">3</td><td>\section{Modell-Performance (Training \&amp; Validation)}
+Da die YOLO-Modelle einen wesentlichen Teil der Zuverlässigkeit des Systems beeinflussen, werfen wir zuerst einen Blick auf deren isolierte Leistung.</td><td>\section{Model Performance (Training \&amp; Validation)}
+Since the YOLO models have a significant influence on the reliability of the system, we first take a look at their isolated performance.</td></tr>
+<tr><td class="n">4</td><td>In diesem Unterkapitel wird vor allem auf die Trainingsmetriken eingegangen. Besonders Interessant sind dabei die Verlustfunktionen, welche angeben wie viele Fehler auf den jeweiligen Datensatz (Training oder Validierung) passiert sind. Die Informationen der Wahrheitsmatrizzen geben dabei Einsicht wie viele Objekte erkannt, fälschlicherweise erkannt oder vom Modell erfunden wurden.</td><td>This section mainly addresses the training metrics. Of particular interest are the loss functions, which indicate how many errors occurred on the respective dataset (training or validation). The information from the confusion matrices provides insight into how many objects were detected, falsely detected or invented by the model.</td></tr>
+<tr><td class="n">5</td><td>\subsection{Leistung der Objekterkennung}
+Die Trainingsmetriken (Abbildung \ref{fig:training_det}) für den Katzengesicht-Detektor, zeigen einen kontinuierlich sinkenden Trainingsfehler (\emph{engl. Loss}) und eine hohe Genauigkeit (\emph{engl. Precision}) in der Validierung im Verlauf von 100 Epochen.</td><td>\subsection{Performance of Object Detection}
+The training metrics (Figure \ref{fig:training_det}) for the cat face detector show a continuously decreasing training loss and a high precision in validation over the course of 100 epochs.</td></tr>
+<tr><td class="n">6</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/results.png}
+    \caption{Trainingsverlauf und Metriken des YOLO-Objektdetektors.}
+    \label{fig:training_det}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/results.png}
+    \caption{Training progress and metrics of the YOLO object detector.}
+    \label{fig:training_det}
+\end{figure}</td></tr>
+<tr><td class="n">7</td><td>Die Wahrheitsmatrix (\emph{engl. Confusion Matrix}) der Objekterkennung (Abbildung \ref{fig:confusion_det}) verdeutlicht die Präzision bei der Lokalisierung. Sie zeigt, dass bei der Validierung 1.676 Katzengesichter korrekt erkannt wurden. Das Modell hat jedoch zwei Katzengesichter erkannt, obwohl dort keines war, und eines hat es komplett übersehen. Die Matrix belegt also dass der Detektor nahezu fehlerfrei auf den Validierungsdaten funktionierte.</td><td>The confusion matrix of the object detection (Figure \ref{fig:confusion_det}) illustrates the precision of the localisation. It shows that 1,676 cat faces were correctly detected during validation. However, the model detected two cat faces where there was none, and it missed one completely. The matrix thus proves that the detector worked almost without errors on the validation data.</td></tr>
+<tr><td class="n">8</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/confusion_matrix.png}
+    \caption{Wahrheitsmatrix (Detektor).}
+    \label{fig:confusion_det}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/confusion_matrix.png}
+    \caption{Confusion matrix (detector).}
+    \label{fig:confusion_det}
+\end{figure}</td></tr>
+<tr><td class="n">9</td><td>Eine wichtige Metrik, welche auch auf den Validierungsdaten beruht, ist die Präzision-Trefferquote-Kurve (\emph{engl. Precision-Recall-Curve}), sie gibt das Verhältnis zwischen richtig erkannten Objekten und Fehlalarmen an wie sicher  das Modell ist \cite{everingham2010pascal, lin2014coco}. In diesem Fall zeigt der Verlauf, dass das Modell extrem sicher ist und nicht raten muss, wenn es ein Katzengesicht sieht.</td><td>An important metric, which is also based on the validation data, is the precision-recall curve; it indicates how confident the model is, through the ratio between correctly detected objects and false alarms \cite{everingham2010pascal, lin2014coco}. In this case, the curve shows that the model is extremely confident and does not have to guess when it sees a cat face.</td></tr>
+<tr><td class="n">10</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/BoxPR_curve.png}
+    \caption{Präzision-Trefferquote-Kurve (\emph{engl. Precision-Recall-Curve}).}
+    \label{fig:pr_curve_det}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/BoxPR_curve.png}
+    \caption{Precision-recall curve.}
+    \label{fig:pr_curve_det}
+\end{figure}</td></tr>
+<tr><td class="n">11</td><td>Die F1-Maß-Kurve (Abbildung \ref{fig:f1_curve_det}) zeigt wie sich die Leistung des Modells bei Änderung des Konfidenzschwellenwerts \cite{ultralytics_confidence} verändert. Dadurch können wir den optimalen Schwellenwert für den realen Betrieb des Modells ermitteln. Da die Kurve bis $\approx 0,85$ flach bleibt, d.h. hier wird keine Katze übersehen, fällt sie $&gt; 0{,}85$ stark ab. Das zeigt, dass ab diesem Schwellenwert auch reale Katzen leicht übersehen werden. In der Praxis zeigt sich, dass bei einem Konfidenzschwellwert von $\approx 0,75$ ein gutes Verhältnis zwischen „Katze wird nicht erkannt“ und „es wird eine Katze erkannt, wo sich keine befindet“ entsteht. Im Betrieb wird der Detektor dennoch mit einem niedrigen Schwellenwert von 0,1 ausgeführt, da ByteTrack auch Erkennungen mit niedrigem Konfidenzwert für die Zuordnung verwendet \cite{zhang2022bytetrack}.</td><td>The F1 curve (Figure \ref{fig:f1_curve_det}) shows how the performance of the model changes when the confidence threshold \cite{ultralytics_confidence} is varied. This allows us to determine the optimal threshold for the real operation of the model. Since the curve stays flat up to $\approx 0.85$, i.e. no cat is missed here, it drops sharply above $0.85$. This shows that beyond this threshold, real cats are also easily missed. In practice, a confidence threshold of $\approx 0.75$ yields a good balance between ``cat is not detected&#x27;&#x27; and ``a cat is detected where there is none&#x27;&#x27;. In operation, the detector is nevertheless run with a low threshold of 0.1, since ByteTrack also uses detections with a low confidence score for the association \cite{zhang2022bytetrack}.</td></tr>
+<tr><td class="n">12</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/BoxF1_curve.png}
+    \caption{F1-Maß-Kurve.}
+    \label{fig:f1_curve_det}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/BoxF1_curve.png}
+    \caption{F1 curve.}
+    \label{fig:f1_curve_det}
+\end{figure}</td></tr>
+<tr><td class="n">13</td><td>Die Abbildung \ref{fig:val_pred_det} liefert einen Eindruck auf die Erkennungsleistung des Modells, wenn man es auf die Validierungsdaten ansetzt.</td><td>Figure \ref{fig:val_pred_det} gives an impression of the detection performance of the model when it is applied to the validation data.</td></tr>
+<tr><td class="n">14</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/val_batch0_pred.jpg}
+    \caption{Vorhersagen des Detektors auf dem Validierungsdatensatz.}
+    \label{fig:val_pred_det}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/val_batch0_pred.jpg}
+    \caption{Predictions of the detector on the validation dataset.}
+    \label{fig:val_pred_det}
+\end{figure}</td></tr>
+<tr><td class="n">15</td><td>\subsection{Leistung der Bildsegmentierung}
+Die folgenden Trainingsmetriken des Beute-Segmentierungsmodells zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
+Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass das Segmentierungsmodell lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.</td><td>\subsection{Performance of Image Segmentation}
+The following training metrics of the prey segmentation model show that the model has successfully learned its task.
+Looking at the loss functions, it becomes apparent that the model makes fewer errors over the epochs in both training and validation; from this we can conclude that the segmentation model learns without overfitting too much to the training dataset.</td></tr>
+<tr><td class="n">16</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/seg_results.png}
+    \caption{Trainingsverlauf und Metriken des YOLO-Segmentierungsmodells.}
+    \label{fig:training_cls}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/seg_results.png}
+    \caption{Training progress and metrics of the YOLO segmentation model.}
+    \label{fig:training_cls}
+\end{figure}</td></tr>
+<tr><td class="n">17</td><td>Die Präzision-Trefferquote-Kurve der Segmentierungsmasken (Abbildung \ref{fig:pr_curve_seg}) zeigt, dass das Modell bis zu einer Trefferquote von etwa 94\,\% keine einzige Fehlerkennung liefert. Auf dem Validierungsdatensatz erreicht es eine mAP50 von 0,945.</td><td>The precision-recall curve of the segmentation masks (Figure \ref{fig:pr_curve_seg}) shows that the model produces not a single false detection up to a recall of about 94\,\%. On the validation dataset, it achieves an mAP50 of 0.945.</td></tr>
+<tr><td class="n">18</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/seg_pr_curve.png}
+    \caption{Präzision-Trefferquote-Kurve der Segmentierungsmasken.}
+    \label{fig:pr_curve_seg}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/seg_pr_curve.png}
+    \caption{Precision-recall curve of the segmentation masks.}
+    \label{fig:pr_curve_seg}
+\end{figure}</td></tr>
+<tr><td class="n">19</td><td>Die F1-Maß-Kurve (Abbildung \ref{fig:f1_curve_seg}) erreicht ihr Maximum von 0,97 bei einem Konfidenzschwellenwert von 0,728. Zwischen etwa 0,1 und 0,85 bleibt sie nahezu konstant, das Modell reagiert in diesem Bereich also kaum empfindlich auf die Wahl des Schwellenwerts.</td><td>The F1 curve (Figure \ref{fig:f1_curve_seg}) reaches its maximum of 0.97 at a confidence threshold of 0.728. Between about 0.1 and 0.85 it remains nearly constant, so in this range the model is hardly sensitive to the choice of threshold.</td></tr>
+<tr><td class="n">20</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/seg_f1_curve.png}
+    \caption{F1-Maß-Kurve des Segmentierungsmodells.}
+    \label{fig:f1_curve_seg}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/seg_f1_curve.png}
+    \caption{F1 curve of the segmentation model.}
+    \label{fig:f1_curve_seg}
+\end{figure}</td></tr>
+<tr><td class="n">21</td><td>Mithilfe der Abbildung \ref{fig:val_pred_cls} lässt sich gut erkennen, wie gut das Modell mit unbekannten Daten umgeht.</td><td>Figure \ref{fig:val_pred_cls} makes it easy to see how well the model handles unknown data.</td></tr>
+<tr><td class="n">22</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/seg_val_pred.jpg}
+    \caption{Beispielhafte Vorhersagen des Segmentierungsmodells auf dem Validierungsdatensatz.}
+    \label{fig:val_pred_cls}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/seg_val_pred.jpg}
+    \caption{Example predictions of the segmentation model on the validation dataset.}
+    \label{fig:val_pred_cls}
+\end{figure}</td></tr>
+<tr><td class="n">23</td><td>Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die entscheidende Frage ist jedoch, wie verhält sich das System im Praxiseinsatz und welche Vorteile bietet die Verarbeitungskette gegenüber der reinen Detektion und Segmentierung.</td><td>On paper alone, these models would make almost error-free predictions. The decisive question, however, is how the system behaves in practical use and which advantages the pipeline offers over pure detection and segmentation.</td></tr>
+<tr><td class="n">24</td><td>\section{Evaluationsmethodik und Datensatz}
+\label{sec:evaluationsmethodik}
+Für die Evaluation des Gesamtsystems wird ein eigener Testdatensatz aus KI-generierten Videosequenzen erstellt. Dieses Kapitel beschreibt den Aufbau des Datensatzes, die Annotation der Referenzdaten und die verwendeten Metriken.</td><td>\section{Evaluation Methodology and Dataset}
+\label{sec:evaluationsmethodik}
+For the evaluation of the overall system, a dedicated test dataset of AI-generated video sequences is created. This section describes the structure of the dataset, the annotation of the reference data and the metrics used.</td></tr>
+<tr><td class="n">25</td><td>\subsection{Testdatensatz}
+Die Testbasis bilden zehn Videopaare, die mit dem Videomodell Veo über Gemini \cite{geminiteam2023gemini} erzeugt werden. Jedes Video zeigt die Perspektive einer fest montierten Kamera unmittelbar über der Katzenklappe, auf die sich eine oder zwei Katzen zubewegen. Ein Videopaar besteht aus einer Sequenz, in der eine Katze ein Beutetier im Maul trägt, und einem Gegenstück mit identischer Szene und möglichst identischem Bewegungsablauf, in dem keine Katze Beute trägt. Dadurch unterscheiden sich die beiden Videos eines Paares ausschließlich im Vorhandensein der Beute.</td><td>\subsection{Test Dataset}
+The test basis consists of ten video pairs generated with the video model Veo via Gemini \cite{geminiteam2023gemini}. Each video shows the perspective of a fixed camera mounted directly above the cat flap, towards which one or two cats are moving. A video pair consists of a sequence in which a cat carries a prey animal in its mouth, and a counterpart with an identical scene and, as far as possible, an identical movement sequence, in which no cat carries prey. The two videos of a pair therefore differ solely in the presence of the prey.</td></tr>
+<tr><td class="n">26</td><td>Die Videopaare decken unterschiedliche Fellfarben, Beutetiere (Maus, Vogel, Ratte und Wühlmaus), Lichtverhältnisse (Tag, Dämmerung und Infrarot-Nachtsicht) sowie Szenen mit zwei Katzen ab. Die Videos besitzen eine Länge von zehn Sekunden bei 24 Bildern pro Sekunde. Da das System auf dem Raspberry Pi 5 rund 8 Bilder pro Sekunde verarbeitet, werden die Videos für die Evaluation auf 8 Bilder pro Sekunde ausgedünnt. Dadurch entsprechen die gemessenen Entscheidungszeiten dem realen Betrieb.</td><td>The video pairs cover different fur colours, prey animals (mouse, bird, rat and vole), lighting conditions (day, dusk and infrared night vision) as well as scenes with two cats. The videos have a length of ten seconds at 24 frames per second. Since the system on the Raspberry Pi 5 processes around 8 frames per second, the videos are thinned out to 8 frames per second for the evaluation. As a result, the measured decision times correspond to real operation.</td></tr>
+<tr><td class="n">27</td><td>\subsection{Annotation der Referenzdaten}
+Für jedes Video wird eine Referenzannotation erstellt. Sie legt für jede Katze die Zeitintervalle fest, in denen die Katze im Bild sichtbar ist, in denen ihr Gesicht erkennbar ist und in denen sie Beute trägt. Aus diesen Intervallen ergibt sich für jedes Einzelbild der korrekte Zustand der Katzenklappe: Befindet sich mindestens eine Katze mit Beute im Bild, muss die Klappe gesperrt sein, andernfalls darf sie geöffnet werden.</td><td>\subsection{Annotation of the Reference Data}
+A reference annotation is created for each video. For each cat, it specifies the time intervals in which the cat is visible in the image, in which its face is recognisable and in which it is carrying prey. From these intervals, the correct state of the cat flap results for each frame: if at least one cat with prey is in the image, the flap must be locked; otherwise it may be opened.</td></tr>
+<tr><td class="n">28</td><td>\subsection{Definition der System-Metriken}
+Nachdem alle Videosequenzen die Verarbeitungskette durchlaufen sind, kann man die Metriken für das gesamte System erstellen. Diese leiten sich aus Wahrheitsmatrix ab:</td><td>\subsection{Definition of the System Metrics}
+After all video sequences have passed through the pipeline, the metrics for the entire system can be computed. These are derived from the confusion matrix:</td></tr>
+<tr><td class="n">29</td><td>\begin{itemize}
+    \item \textbf{Richtig-Positiv-Ergebnis (\emph{engl. True Positive}) (TP):} Katze mit Beute darf nicht ins Haus (korrekte Sperrung).
+    \item \textbf{Falsch-Negativ-Ergebnis (\emph{engl. False Negative}) (FN):} Katze mit Beute darf ins Haus (Beute gelangt fälschlicherweise hinein).
+    \item \textbf{Richtig-Negativ-Ergebnis (\emph{engl. True Negative}) (TN):} Katze ohne Beute darf ins Haus (korrekter Durchlass).
+    \item \textbf{Falsch-Positiv-Ergebnis (\emph{engl. False Positive}) (FP):} Katze ohne Beute darf nicht ins Haus (Fehlalarm).
+\end{itemize}</td><td>\begin{itemize}
+    \item \textbf{True Positive (TP):} A cat with prey is not allowed into the house (correct locking).
+    \item \textbf{False Negative (FN):} A cat with prey is allowed into the house (prey wrongly gets in).
+    \item \textbf{True Negative (TN):} A cat without prey is allowed into the house (correct passage).
+    \item \textbf{False Positive (FP):} A cat without prey is not allowed into the house (false alarm).
+\end{itemize}</td></tr>
+<tr><td class="n">30</td><td>Im Kontext einer Katzenklappe besitzt die Katze aus Nutzersicht die höchste Priorität. Ein Falsch-Positiv-Ergebnis (Fehlalarm) bedeutet, dass das Haustier grundlos vor einer verschlossenen Tür steht. Um das Vertrauen des Tieres in die Klappe nicht zu zerstören, liegt der Fokus der Evaluierung primär auf der Vermeidung solcher Fehlalarme (hohe Präzision). Ein seltenes Falsch-Negativ-Ergebnis (\emph{engl. False Negative}) (eine Maus gelangt ins Haus) wird im Tausch für eine stressfreie Nutzung der Klappe durch die Katze bewusst in Kauf genommen.</td><td>In the context of a cat flap, the cat has the highest priority from the user&#x27;s point of view. A false positive (false alarm) means that the pet stands in front of a closed door for no reason. In order not to destroy the animal&#x27;s trust in the flap, the evaluation focuses primarily on avoiding such false alarms (high precision). An occasional false negative (a mouse gets into the house) is deliberately accepted in exchange for stress-free use of the flap by the cat.</td></tr>
+<tr><td class="n">31</td><td>Anders als eine Bewertung auf Videoebene erfasst die bildweise Auswertung auch kurzzeitige Fehlentscheidungen. Für jedes Einzelbild mit sichtbarer Katze wird der Zustand der Klappe mit der Referenzannotation verglichen. Daraus ergeben sich folgende Kennzahlen:</td><td>In contrast to an evaluation at video level, the frame-wise evaluation also captures brief wrong decisions. For each frame with a visible cat, the state of the flap is compared with the reference annotation. This yields the following indicators:</td></tr>
+<tr><td class="n">32</td><td>\begin{itemize}
+    \item \emph{Sicherheitsfehler}: Anteil der Einzelbilder, in denen die Klappe geöffnet ist, obwohl eine Katze mit Beute sichtbar ist.
+    \item \emph{Komfortfehler}: Anteil der Einzelbilder, in denen die Klappe gesperrt ist, obwohl nur saubere Katzen sichtbar sind. Gezählt wird erst nach einer Entscheidungszeit von drei Sekunden ab dem Erkennen des Katzengesichts, da der Zustandsautomat zu Beginn bewusst sperrt.
+    \item \emph{Präzision}, \emph{Trefferquote} und \emph{F1-Maß} der Entscheidung \glqq Klappe sperren\grqq\ über alle Einzelbilder mit sichtbarer Katze. Einzelbilder mit sauberen Katzen innerhalb der Entscheidungszeit werden dabei nicht berücksichtigt.
+    \item \emph{Durchgelassene Beute}: Anzahl der Videos mit Beute, in denen die Klappe mindestens einmal geöffnet wurde.
+    \item \emph{Entscheidungszeit}: Zeit vom Erkennen des Katzengesichts bis zur ersten korrekten Entscheidung, also bis zur Sperrung bei einer Katze mit Beute beziehungsweise bis zur Freigabe bei einer sauberen Katze.
+    \item \emph{Übersehene Katzen}: Anteil der Einzelbilder mit erkennbarem Katzengesicht, in denen das System keine Katze detektiert.
+\end{itemize}</td><td>\begin{itemize}
+    \item \emph{Safety error}: Proportion of frames in which the flap is open although a cat with prey is visible.
+    \item \emph{Comfort error}: Proportion of frames in which the flap is locked although only clean cats are visible. Counting only starts after a decision time of three seconds from the detection of the cat face, since the state machine deliberately locks at the beginning.
+    \item \emph{Precision}, \emph{recall} and \emph{F1 score} of the decision ``lock flap&#x27;&#x27; over all frames with a visible cat. Frames with clean cats within the decision time are not taken into account.
+    \item \emph{Prey let through}: Number of videos with prey in which the flap was opened at least once.
+    \item \emph{Decision time}: Time from the detection of the cat face until the first correct decision, i.e. until locking in the case of a cat with prey or until release in the case of a clean cat.
+    \item \emph{Missed cats}: Proportion of frames with a recognisable cat face in which the system detects no cat.
+\end{itemize}</td></tr>
+<tr><td class="n">33</td><td>Die Auswertung erfolgt in zwei Schritten. Zunächst werden Detektor und Segmentierungsmodell einmal pro Video und Konfiguration ausgeführt und die Ergebnisse jedes Einzelbildes protokolliert. Anschließend wird der Zustandsautomat auf diesen Protokollen nachgebildet. Dadurch lassen sich unterschiedliche Parameter des Zustandsautomaten ohne erneute Inferenz vergleichen.</td><td>The evaluation takes place in two steps. First, the detector and the segmentation model are run once per video and configuration, and the results of each frame are logged. Subsequently, the state machine is replicated on these logs. This makes it possible to compare different parameters of the state machine without repeating inference.</td></tr>
+<tr><td class="n">34</td><td>\section{Ergebnisse der Evaluation}
+Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor und Segmentierungsmodell arbeiten auf Graustufenbildern, der Zustandsautomat verwendet ein Zeitfenster von 20 Einzelbildern und einen Schwellenwert von 0,3. Die Herleitung dieser Parameter ist in Abschnitt~\ref{sec:ablation_sm} beschrieben. Tabelle~\ref{tab:system_eval} fasst die Ergebnisse auf den 20 Videos des Testdatensatzes zusammen.</td><td>\section{Evaluation Results}
+The overall system is evaluated in its final configuration: the face detector and the segmentation model work on greyscale images, and the state machine uses a time window of 20 frames and a threshold of 0.3. The derivation of these parameters is described in Section~\ref{sec:ablation_sm}. Table~\ref{tab:system_eval} summarises the results on the 20 videos of the test dataset.</td></tr>
+<tr><td class="n">35</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lcc}
+        \toprule
+        Metrik &amp; Videos mit Beute &amp; Videos ohne Beute \\
+        \midrule
+        Sicherheitsfehler &amp; 1,0\,\% &amp; -- \\
+        Komfortfehler &amp; -- &amp; 3,3\,\% \\
+        Durchgelassene Beute &amp; 2 von 10 &amp; -- \\
+        Ausgesperrte saubere Katzen &amp; -- &amp; 0 von 10 \\
+        Entscheidungszeit &amp; 0,13\,s &amp; 0,60\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Ergebnisse des Gesamtsystems auf dem Testdatensatz.}
+    \label{tab:system_eval}
+\end{table}</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lcc}
+        \toprule
+        Metric &amp; Videos with prey &amp; Videos without prey \\
+        \midrule
+        Safety error &amp; 1.0\,\% &amp; -- \\
+        Comfort error &amp; -- &amp; 3.3\,\% \\
+        Prey let through &amp; 2 of 10 &amp; -- \\
+        Clean cats locked out &amp; -- &amp; 0 of 10 \\
+        Decision time &amp; 0.13\,s &amp; 0.60\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Results of the overall system on the test dataset.}
+    \label{tab:system_eval}
+\end{table}</td></tr>
+<tr><td class="n">36</td><td>Über alle Einzelbilder mit sichtbarer Katze erreicht die Entscheidung \glqq Klappe sperren\grqq\ eine Präzision von 0,984, eine Trefferquote von 0,990 und ein F1-Maß von 0,987. In 4,3\,\% der Einzelbilder mit erkennbarem Katzengesicht detektiert das System keine Katze. Getrennt nach Lichtverhältnissen liegt der Sicherheitsfehler bei Tagaufnahmen bei 0,8\,\% und bei Infrarot-Aufnahmen bei 1,2\,\%, der Komfortfehler bei 5,6\,\% beziehungsweise 0,0\,\%.</td><td>Over all frames with a visible cat, the decision ``lock flap&#x27;&#x27; achieves a precision of 0.984, a recall of 0.990 and an F1 score of 0.987. In 4.3\,\% of the frames with a recognisable cat face, the system detects no cat. Broken down by lighting conditions, the safety error is 0.8\,\% for daytime recordings and 1.2\,\% for infrared recordings, and the comfort error is 5.6\,\% and 0.0\,\% respectively.</td></tr>
+<tr><td class="n">37</td><td>Keine saubere Katze wird dauerhaft ausgesperrt. In zwei der zehn Videos mit Beute wird die Klappe kurzzeitig für jeweils vier Einzelbilder (0,5~Sekunden) geöffnet. Die Analyse dieser Videos zeigt zwei Ursachen:</td><td>No clean cat is locked out permanently. In two of the ten videos with prey, the flap is briefly opened for four frames each (0.5~seconds). The analysis of these videos shows two causes:</td></tr>
+<tr><td class="n">38</td><td>\begin{itemize}
+    \item Die Katze ist zu Beginn noch weit von der Kamera entfernt, wodurch die Beute im Bildausschnitt zu klein ist, um vom Segmentierungsmodell erkannt zu werden. Liegt der Durchschnitt nach 20 Einzelbildern noch unter dem Schwellenwert, wird die Katze kurz freigegeben, bis die Beute erkannt wird.
+    \item Die Katze läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
+\end{itemize}</td><td>\begin{itemize}
+    \item At the beginning, the cat is still far from the camera, so the prey in the crop is too small to be detected by the segmentation model. If the average after 20 frames is still below the threshold, the cat is briefly released until the prey is detected.
+    \item At the end of the video, the cat walks underneath the camera. The segmentation model returns no prey for these frames, and after the time window has elapsed, the cat is considered clean.
+\end{itemize}</td></tr>
+<tr><td class="n">39</td><td>In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind. Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Entscheidungszeit.</td><td>In the scenes with two cats, the tracker (ByteTrack) sometimes assigns the same cat a new identity several times. The resulting short-lived tracks do not block the release, since only cats that are visible in the current frame are taken into account. The release is thereby delayed in these scenes by up to 2.6~seconds, but remains within the decision time.</td></tr>
+<tr><td class="n">40</td><td>\section{Ablationsstudien}
+In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.</td><td>\section{Ablation Studies}
+In the following ablation studies, one component of the system is removed or replaced in each case, while all other components remain unchanged. All studies use the test dataset and the metrics from Section~\ref{sec:evaluationsmethodik}.</td></tr>
+<tr><td class="n">41</td><td>\subsection{Zustandsautomat}
+\label{sec:ablation_sm}
+Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Eine anfängliche Sperre ist gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Deshalb werden Komfortfehler erst nach der Entscheidungszeit von drei Sekunden gezählt. Bei dieser Studie wurde das exakt selbe System zweimal auf alle 20 Testvideos angewendet:</td><td>\subsection{State Machine}
+\label{sec:ablation_sm}
+To validate the effectiveness and absolute necessity of the temporal aggregation (state machine), an ablation study was carried out. Note: An initial lock is intended: even if the cat is not carrying prey, it is denied access until it proves that it is clean. Comfort errors are therefore only counted after the decision time of three seconds. In this study, the exact same system was applied twice to all 20 test videos:</td></tr>
+<tr><td class="n">42</td><td>\begin{enumerate}
+    \item \textbf{Volles System:} Mit aktivem Zustandsautomaten und einem \glqq gleitenden Durchschnitt\grqq\ (\emph{engl. moving average})\ über 20 Einzelbilder (\texttt{history\_length=20}).
+    \item \textbf{Ablation:} Da der Zustandsautomat deaktiviert wurde, basierte die Entscheidung über die Klappensperre ausschließlich auf dem Ergebnis des aktuellen Einzelbildes. (\texttt{history\_length=1}).
+\end{enumerate}</td><td>\begin{enumerate}
+    \item \textbf{Full system:} With the state machine active and a moving average over 20 frames (\texttt{history\_length=20}).
+    \item \textbf{Ablation:} Since the state machine was deactivated, the decision about locking the flap was based exclusively on the result of the current frame (\texttt{history\_length=1}).
+\end{enumerate}</td></tr>
+<tr><td class="n">43</td><td>Tabelle~\ref{tab:sm_ablation} stellt beide Konfigurationen gegenüber. Für die Entscheidung auf Basis des aktuellen Einzelbildes wird ein Schwellenwert von 0,5 verwendet, für das volle System der Schwellenwert 0,3 aus der nachfolgenden Parameterreihe.</td><td>Table~\ref{tab:sm_ablation} compares both configurations. For the decision based on the current frame, a threshold of 0.5 is used; for the full system, the threshold of 0.3 from the subsequent parameter sweep.</td></tr>
+<tr><td class="n">44</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lrr}
+        \toprule
+        Metrik &amp; Ohne Zustandsautomat &amp; Mit Zustandsautomat \\
+        \midrule
+        Sicherheitsfehler &amp; 17,0\,\% &amp; 1,0\,\% \\
+        Komfortfehler &amp; 19,7\,\% &amp; 3,3\,\% \\
+        Präzision &amp; 0,896 &amp; 0,984 \\
+        Trefferquote &amp; 0,830 &amp; 0,990 \\
+        F1-Maß &amp; 0,862 &amp; 0,987 \\
+        Durchgelassene Beute &amp; 10 von 10 &amp; 2 von 10 \\
+        Ausgesperrte saubere Katzen &amp; 0 von 10 &amp; 0 von 10 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Zweistufiges System ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3).}
+    \label{tab:sm_ablation}
+\end{table}</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lrr}
+        \toprule
+        Metric &amp; Without state machine &amp; With state machine \\
+        \midrule
+        Safety error &amp; 17.0\,\% &amp; 1.0\,\% \\
+        Comfort error &amp; 19.7\,\% &amp; 3.3\,\% \\
+        Precision &amp; 0.896 &amp; 0.984 \\
+        Recall &amp; 0.830 &amp; 0.990 \\
+        F1 score &amp; 0.862 &amp; 0.987 \\
+        Prey let through &amp; 10 of 10 &amp; 2 of 10 \\
+        Clean cats locked out &amp; 0 of 10 &amp; 0 of 10 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Two-stage system without state machine (time window of one frame, threshold 0.5) and with state machine (time window of 20 frames, threshold 0.3).}
+    \label{tab:sm_ablation}
+\end{table}</td></tr>
+<tr><td class="n">45</td><td>Ohne Zustandsautomat ist die Klappe in 17,0\,\% der Einzelbilder mit Beute geöffnet, und in jedem der zehn Videos mit Beute wird die Klappe mindestens einmal freigegeben. Gleichzeitig ist die Klappe in 19,7\,\% der Einzelbilder mit sauberen Katzen gesperrt. Einzelne Fehlentscheidungen des Segmentierungsmodells wirken sich ohne zeitliche Aggregation unmittelbar auf den Zustand der Klappe aus. Mit Zustandsautomat sinkt der Sicherheitsfehler auf 1,0\,\% und der Komfortfehler auf 3,3\,\%.</td><td>Without the state machine, the flap is open in 17.0\,\% of the frames with prey, and in each of the ten videos with prey the flap is released at least once. At the same time, the flap is locked in 19.7\,\% of the frames with clean cats. Individual wrong decisions of the segmentation model directly affect the state of the flap without temporal aggregation. With the state machine, the safety error drops to 1.0\,\% and the comfort error to 3.3\,\%.</td></tr>
+<tr><td class="n">46</td><td>Zusätzlich wird eine Parameterreihe über die Länge des Zeitfensters (1, 3, 5, 8, 10, 15 und 20 Einzelbilder) und den Schwellenwert (0,3 bis 0,8) ausgewertet. Sie zeigt den Zielkonflikt zwischen Sicherheitsfehlern, Komfortfehlern und Entscheidungszeit und dient der Festlegung der finalen Parameter. Tabelle~\ref{tab:sm_sweep} enthält die Ergebnisse aller Kombinationen. Der Anteil übersehener Katzen beträgt in allen Kombinationen 4,3\,\%, da er nur vom Detektor abhängt. In keiner Kombination wird eine saubere Katze dauerhaft ausgesperrt.</td><td>In addition, a parameter sweep over the length of the time window (1, 3, 5, 8, 10, 15 and 20 frames) and the threshold (0.3 to 0.8) is evaluated. It shows the trade-off between safety errors, comfort errors and decision time and serves to determine the final parameters. Table~\ref{tab:sm_sweep} contains the results of all combinations. The proportion of missed cats is 4.3\,\% in all combinations, since it depends only on the detector. In no combination is a clean cat locked out permanently.</td></tr>
+<tr><td class="n">47</td><td>\begin{table}[H]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{0.92}
+    \begin{tabular}{rrrrrrrr}
+        \toprule
+        &amp; &amp; &amp; &amp; &amp; Durchgel. &amp; \multicolumn{2}{c}{Entscheidungszeit [s]} \\
+        \cmidrule(lr){7-8}
+        Fenster &amp; Schwelle &amp; Sicherheitsf. &amp; Komfortf. &amp; F1 &amp; Beute &amp; Beute &amp; sauber \\
+        \midrule
+        1 &amp; 0,3 &amp; 11,6\,\% &amp; 19,2\,\% &amp; 0,894 &amp; 9/10 &amp; 0,03 &amp; 0,00 \\
+        1 &amp; 0,4 &amp; 12,5\,\% &amp; 19,2\,\% &amp; 0,889 &amp; 10/10 &amp; 0,03 &amp; 0,00 \\
+        1 &amp; 0,5 &amp; 17,0\,\% &amp; 19,7\,\% &amp; 0,862 &amp; 10/10 &amp; 0,46 &amp; 0,00 \\
+        1 &amp; 0,6 &amp; 17,2\,\% &amp; 20,3\,\% &amp; 0,859 &amp; 10/10 &amp; 0,46 &amp; 0,00 \\
+        1 &amp; 0,7 &amp; 18,5\,\% &amp; 20,3\,\% &amp; 0,852 &amp; 10/10 &amp; 0,46 &amp; 0,00 \\
+        1 &amp; 0,8 &amp; 23,8\,\% &amp; 20,3\,\% &amp; 0,819 &amp; 10/10 &amp; 0,58 &amp; 0,00 \\
+        \midrule
+        3 &amp; 0,3 &amp; 10,5\,\% &amp; 20,0\,\% &amp; 0,898 &amp; 9/10 &amp; 0,03 &amp; 0,00 \\
+        3 &amp; 0,4 &amp; 11,2\,\% &amp; 20,3\,\% &amp; 0,894 &amp; 9/10 &amp; 0,03 &amp; 0,00 \\
+        3 &amp; 0,5 &amp; 16,2\,\% &amp; 20,5\,\% &amp; 0,865 &amp; 9/10 &amp; 0,46 &amp; 0,00 \\
+        3 &amp; 0,6 &amp; 20,2\,\% &amp; 12,3\,\% &amp; 0,859 &amp; 10/10 &amp; 0,46 &amp; 0,00 \\
+        3 &amp; 0,7 &amp; 25,8\,\% &amp; 10,5\,\% &amp; 0,828 &amp; 10/10 &amp; 0,46 &amp; 0,00 \\
+        3 &amp; 0,8 &amp; 31,1\,\% &amp; 10,5\,\% &amp; 0,792 &amp; 10/10 &amp; 0,06 &amp; 0,00 \\
+        \midrule
+        5 &amp; 0,3 &amp; 7,1\,\% &amp; 20,8\,\% &amp; 0,915 &amp; 9/10 &amp; 0,03 &amp; 0,00 \\
+        5 &amp; 0,4 &amp; 7,8\,\% &amp; 20,5\,\% &amp; 0,912 &amp; 9/10 &amp; 0,03 &amp; 0,00 \\
+        5 &amp; 0,5 &amp; 21,2\,\% &amp; 10,5\,\% &amp; 0,857 &amp; 9/10 &amp; 0,51 &amp; 0,00 \\
+        5 &amp; 0,6 &amp; 24,1\,\% &amp; 3,3\,\% &amp; 0,855 &amp; 10/10 &amp; 0,54 &amp; 0,00 \\
+        5 &amp; 0,7 &amp; 25,6\,\% &amp; 3,3\,\% &amp; 0,845 &amp; 10/10 &amp; 0,61 &amp; 0,00 \\
+        5 &amp; 0,8 &amp; 30,8\,\% &amp; 3,3\,\% &amp; 0,811 &amp; 10/10 &amp; 0,43 &amp; 0,00 \\
+        \midrule
+        8 &amp; 0,3 &amp; 5,4\,\% &amp; 18,7\,\% &amp; 0,929 &amp; 8/10 &amp; 0,04 &amp; 0,11 \\
+        8 &amp; 0,4 &amp; 9,6\,\% &amp; 12,6\,\% &amp; 0,920 &amp; 9/10 &amp; 0,05 &amp; 0,11 \\
+        8 &amp; 0,5 &amp; 16,4\,\% &amp; 3,3\,\% &amp; 0,903 &amp; 9/10 &amp; 0,55 &amp; 0,11 \\
+        8 &amp; 0,6 &amp; 19,5\,\% &amp; 3,3\,\% &amp; 0,884 &amp; 9/10 &amp; 0,57 &amp; 0,11 \\
+        8 &amp; 0,7 &amp; 23,1\,\% &amp; 3,3\,\% &amp; 0,861 &amp; 10/10 &amp; 0,65 &amp; 0,11 \\
+        8 &amp; 0,8 &amp; 33,6\,\% &amp; 3,3\,\% &amp; 0,790 &amp; 10/10 &amp; 0,36 &amp; 0,11 \\
+        \midrule
+        10 &amp; 0,3 &amp; 4,0\,\% &amp; 12,6\,\% &amp; 0,950 &amp; 6/10 &amp; 0,05 &amp; 0,14 \\
+        10 &amp; 0,4 &amp; 5,9\,\% &amp; 3,3\,\% &amp; 0,962 &amp; 8/10 &amp; 0,06 &amp; 0,14 \\
+        10 &amp; 0,5 &amp; 11,9\,\% &amp; 3,3\,\% &amp; 0,929 &amp; 9/10 &amp; 0,54 &amp; 0,14 \\
+        10 &amp; 0,6 &amp; 16,4\,\% &amp; 3,3\,\% &amp; 0,903 &amp; 9/10 &amp; 0,64 &amp; 0,14 \\
+        10 &amp; 0,7 &amp; 19,1\,\% &amp; 3,3\,\% &amp; 0,886 &amp; 9/10 &amp; 0,73 &amp; 0,14 \\
+        10 &amp; 0,8 &amp; 36,2\,\% &amp; 3,3\,\% &amp; 0,771 &amp; 10/10 &amp; 0,39 &amp; 0,14 \\
+        \midrule
+        15 &amp; 0,3 &amp; 1,8\,\% &amp; 3,3\,\% &amp; 0,983 &amp; 4/10 &amp; 0,08 &amp; 0,20 \\
+        15 &amp; 0,4 &amp; 4,1\,\% &amp; 3,3\,\% &amp; 0,971 &amp; 5/10 &amp; 0,16 &amp; 0,20 \\
+        15 &amp; 0,5 &amp; 11,4\,\% &amp; 3,3\,\% &amp; 0,932 &amp; 6/10 &amp; 0,66 &amp; 0,20 \\
+        15 &amp; 0,6 &amp; 13,1\,\% &amp; 3,3\,\% &amp; 0,922 &amp; 8/10 &amp; 0,79 &amp; 0,20 \\
+        15 &amp; 0,7 &amp; 14,9\,\% &amp; 3,3\,\% &amp; 0,912 &amp; 9/10 &amp; 0,96 &amp; 0,20 \\
+        15 &amp; 0,8 &amp; 28,7\,\% &amp; 3,3\,\% &amp; 0,824 &amp; 10/10 &amp; 0,67 &amp; 0,20 \\
+        \midrule
+        \textbf{20} &amp; \textbf{0,3} &amp; \textbf{1,0\,\%} &amp; \textbf{3,3\,\%} &amp; \textbf{0,987} &amp; \textbf{2/10} &amp; \textbf{0,13} &amp; \textbf{0,60} \\
+        20 &amp; 0,4 &amp; 1,8\,\% &amp; 3,3\,\% &amp; 0,983 &amp; 3/10 &amp; 0,21 &amp; 0,60 \\
+        20 &amp; 0,5 &amp; 6,9\,\% &amp; 3,3\,\% &amp; 0,956 &amp; 6/10 &amp; 0,78 &amp; 0,60 \\
+        20 &amp; 0,6 &amp; 8,4\,\% &amp; 3,3\,\% &amp; 0,948 &amp; 6/10 &amp; 1,00 &amp; 0,60 \\
+        20 &amp; 0,7 &amp; 11,0\,\% &amp; 3,3\,\% &amp; 0,934 &amp; 9/10 &amp; 1,31 &amp; 0,60 \\
+        20 &amp; 0,8 &amp; 24,4\,\% &amp; 3,3\,\% &amp; 0,853 &amp; 10/10 &amp; 1,19 &amp; 0,60 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Parameterreihe des Zustandsautomaten über die Länge des Zeitfensters (in Einzelbildern) und den Schwellenwert. Die gewählte Konfiguration ist fett hervorgehoben. Ein Zeitfenster von einem Einzelbild entspricht einem System ohne Zustandsautomat.}
+    \label{tab:sm_sweep}
+\end{table}</td><td>\begin{table}[H]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{0.92}
+    \begin{tabular}{rrrrrrrr}
+        \toprule
+        &amp; &amp; &amp; &amp; &amp; Prey let &amp; \multicolumn{2}{c}{Decision time [s]} \\
+        \cmidrule(lr){7-8}
+        Window &amp; Threshold &amp; Safety err. &amp; Comfort err. &amp; F1 &amp; through &amp; Prey &amp; clean \\
+        \midrule
+        1 &amp; 0.3 &amp; 11.6\,\% &amp; 19.2\,\% &amp; 0.894 &amp; 9/10 &amp; 0.03 &amp; 0.00 \\
+        1 &amp; 0.4 &amp; 12.5\,\% &amp; 19.2\,\% &amp; 0.889 &amp; 10/10 &amp; 0.03 &amp; 0.00 \\
+        1 &amp; 0.5 &amp; 17.0\,\% &amp; 19.7\,\% &amp; 0.862 &amp; 10/10 &amp; 0.46 &amp; 0.00 \\
+        1 &amp; 0.6 &amp; 17.2\,\% &amp; 20.3\,\% &amp; 0.859 &amp; 10/10 &amp; 0.46 &amp; 0.00 \\
+        1 &amp; 0.7 &amp; 18.5\,\% &amp; 20.3\,\% &amp; 0.852 &amp; 10/10 &amp; 0.46 &amp; 0.00 \\
+        1 &amp; 0.8 &amp; 23.8\,\% &amp; 20.3\,\% &amp; 0.819 &amp; 10/10 &amp; 0.58 &amp; 0.00 \\
+        \midrule
+        3 &amp; 0.3 &amp; 10.5\,\% &amp; 20.0\,\% &amp; 0.898 &amp; 9/10 &amp; 0.03 &amp; 0.00 \\
+        3 &amp; 0.4 &amp; 11.2\,\% &amp; 20.3\,\% &amp; 0.894 &amp; 9/10 &amp; 0.03 &amp; 0.00 \\
+        3 &amp; 0.5 &amp; 16.2\,\% &amp; 20.5\,\% &amp; 0.865 &amp; 9/10 &amp; 0.46 &amp; 0.00 \\
+        3 &amp; 0.6 &amp; 20.2\,\% &amp; 12.3\,\% &amp; 0.859 &amp; 10/10 &amp; 0.46 &amp; 0.00 \\
+        3 &amp; 0.7 &amp; 25.8\,\% &amp; 10.5\,\% &amp; 0.828 &amp; 10/10 &amp; 0.46 &amp; 0.00 \\
+        3 &amp; 0.8 &amp; 31.1\,\% &amp; 10.5\,\% &amp; 0.792 &amp; 10/10 &amp; 0.06 &amp; 0.00 \\
+        \midrule
+        5 &amp; 0.3 &amp; 7.1\,\% &amp; 20.8\,\% &amp; 0.915 &amp; 9/10 &amp; 0.03 &amp; 0.00 \\
+        5 &amp; 0.4 &amp; 7.8\,\% &amp; 20.5\,\% &amp; 0.912 &amp; 9/10 &amp; 0.03 &amp; 0.00 \\
+        5 &amp; 0.5 &amp; 21.2\,\% &amp; 10.5\,\% &amp; 0.857 &amp; 9/10 &amp; 0.51 &amp; 0.00 \\
+        5 &amp; 0.6 &amp; 24.1\,\% &amp; 3.3\,\% &amp; 0.855 &amp; 10/10 &amp; 0.54 &amp; 0.00 \\
+        5 &amp; 0.7 &amp; 25.6\,\% &amp; 3.3\,\% &amp; 0.845 &amp; 10/10 &amp; 0.61 &amp; 0.00 \\
+        5 &amp; 0.8 &amp; 30.8\,\% &amp; 3.3\,\% &amp; 0.811 &amp; 10/10 &amp; 0.43 &amp; 0.00 \\
+        \midrule
+        8 &amp; 0.3 &amp; 5.4\,\% &amp; 18.7\,\% &amp; 0.929 &amp; 8/10 &amp; 0.04 &amp; 0.11 \\
+        8 &amp; 0.4 &amp; 9.6\,\% &amp; 12.6\,\% &amp; 0.920 &amp; 9/10 &amp; 0.05 &amp; 0.11 \\
+        8 &amp; 0.5 &amp; 16.4\,\% &amp; 3.3\,\% &amp; 0.903 &amp; 9/10 &amp; 0.55 &amp; 0.11 \\
+        8 &amp; 0.6 &amp; 19.5\,\% &amp; 3.3\,\% &amp; 0.884 &amp; 9/10 &amp; 0.57 &amp; 0.11 \\
+        8 &amp; 0.7 &amp; 23.1\,\% &amp; 3.3\,\% &amp; 0.861 &amp; 10/10 &amp; 0.65 &amp; 0.11 \\
+        8 &amp; 0.8 &amp; 33.6\,\% &amp; 3.3\,\% &amp; 0.790 &amp; 10/10 &amp; 0.36 &amp; 0.11 \\
+        \midrule
+        10 &amp; 0.3 &amp; 4.0\,\% &amp; 12.6\,\% &amp; 0.950 &amp; 6/10 &amp; 0.05 &amp; 0.14 \\
+        10 &amp; 0.4 &amp; 5.9\,\% &amp; 3.3\,\% &amp; 0.962 &amp; 8/10 &amp; 0.06 &amp; 0.14 \\
+        10 &amp; 0.5 &amp; 11.9\,\% &amp; 3.3\,\% &amp; 0.929 &amp; 9/10 &amp; 0.54 &amp; 0.14 \\
+        10 &amp; 0.6 &amp; 16.4\,\% &amp; 3.3\,\% &amp; 0.903 &amp; 9/10 &amp; 0.64 &amp; 0.14 \\
+        10 &amp; 0.7 &amp; 19.1\,\% &amp; 3.3\,\% &amp; 0.886 &amp; 9/10 &amp; 0.73 &amp; 0.14 \\
+        10 &amp; 0.8 &amp; 36.2\,\% &amp; 3.3\,\% &amp; 0.771 &amp; 10/10 &amp; 0.39 &amp; 0.14 \\
+        \midrule
+        15 &amp; 0.3 &amp; 1.8\,\% &amp; 3.3\,\% &amp; 0.983 &amp; 4/10 &amp; 0.08 &amp; 0.20 \\
+        15 &amp; 0.4 &amp; 4.1\,\% &amp; 3.3\,\% &amp; 0.971 &amp; 5/10 &amp; 0.16 &amp; 0.20 \\
+        15 &amp; 0.5 &amp; 11.4\,\% &amp; 3.3\,\% &amp; 0.932 &amp; 6/10 &amp; 0.66 &amp; 0.20 \\
+        15 &amp; 0.6 &amp; 13.1\,\% &amp; 3.3\,\% &amp; 0.922 &amp; 8/10 &amp; 0.79 &amp; 0.20 \\
+        15 &amp; 0.7 &amp; 14.9\,\% &amp; 3.3\,\% &amp; 0.912 &amp; 9/10 &amp; 0.96 &amp; 0.20 \\
+        15 &amp; 0.8 &amp; 28.7\,\% &amp; 3.3\,\% &amp; 0.824 &amp; 10/10 &amp; 0.67 &amp; 0.20 \\
+        \midrule
+        \textbf{20} &amp; \textbf{0.3} &amp; \textbf{1.0\,\%} &amp; \textbf{3.3\,\%} &amp; \textbf{0.987} &amp; \textbf{2/10} &amp; \textbf{0.13} &amp; \textbf{0.60} \\
+        20 &amp; 0.4 &amp; 1.8\,\% &amp; 3.3\,\% &amp; 0.983 &amp; 3/10 &amp; 0.21 &amp; 0.60 \\
+        20 &amp; 0.5 &amp; 6.9\,\% &amp; 3.3\,\% &amp; 0.956 &amp; 6/10 &amp; 0.78 &amp; 0.60 \\
+        20 &amp; 0.6 &amp; 8.4\,\% &amp; 3.3\,\% &amp; 0.948 &amp; 6/10 &amp; 1.00 &amp; 0.60 \\
+        20 &amp; 0.7 &amp; 11.0\,\% &amp; 3.3\,\% &amp; 0.934 &amp; 9/10 &amp; 1.31 &amp; 0.60 \\
+        20 &amp; 0.8 &amp; 24.4\,\% &amp; 3.3\,\% &amp; 0.853 &amp; 10/10 &amp; 1.19 &amp; 0.60 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Parameter sweep of the state machine over the length of the time window (in frames) and the threshold. The selected configuration is highlighted in bold. A time window of one frame corresponds to a system without a state machine.}
+    \label{tab:sm_sweep}
+\end{table}</td></tr>
+<tr><td class="n">48</td><td>Aus der Parameterreihe lassen sich folgende Zusammenhänge ablesen:</td><td>The following relationships can be read from the parameter sweep:</td></tr>
+<tr><td class="n">49</td><td>\begin{itemize}
+    \item \emph{Länge des Zeitfensters}: Bei einem Schwellenwert von 0,3 sinken mit zunehmender Länge des Zeitfensters sowohl der Sicherheitsfehler (von 11,6\,\% auf 1,0\,\%) als auch die Anzahl der Videos, in denen Beute durchgelassen wird (von 9 auf 2). Kurze Fehlentscheidungen des Segmentierungsmodells werden über mehr Einzelbilder gemittelt und führen seltener zu einer Freigabe. Bei hohen Schwellenwerten ist dieser Zusammenhang nicht zu beobachten. Ab einem Zeitfenster von zehn Einzelbildern bleibt der Komfortfehler bei Schwellenwerten ab 0,4 konstant bei 3,3\,\%.
+    \item \emph{Schwellenwert}: Ein niedriger Schwellenwert sperrt die Klappe bereits bei einem geringen mittleren Beuteanteil. Dadurch sinkt der Sicherheitsfehler, bei Zeitfenstern von drei bis zehn Einzelbildern steigt jedoch der Komfortfehler. Bei langen Zeitfenstern bleibt der Komfortfehler auch bei einem Schwellenwert von 0,3 bei 3,3\,\%.
+    \item \emph{Entscheidungszeit}: Längere Zeitfenster verzögern die Freigabe für saubere Katzen, da der Zustandsautomat zuerst eine ausreichende Historie sammeln muss. Gleichzeitig steigt mit dem Schwellenwert in der Regel die Zeit bis zur Sperrung bei Katzen mit Beute. Bei 20 Einzelbildern beträgt die mittlere Entscheidungszeit für saubere Katzen 0,60~Sekunden und liegt damit deutlich unter der Entscheidungszeit von drei Sekunden.
+\end{itemize}</td><td>\begin{itemize}
+    \item \emph{Length of the time window}: At a threshold of 0.3, both the safety error (from 11.6\,\% to 1.0\,\%) and the number of videos in which prey is let through (from 9 to 2) decrease as the time window grows longer. Brief wrong decisions of the segmentation model are averaged over more frames and less often lead to a release. This relationship cannot be observed at high thresholds. From a time window of ten frames onwards, the comfort error remains constant at 3.3\,\% for thresholds of 0.4 and above.
+    \item \emph{Threshold}: A low threshold locks the flap even at a small average proportion of prey. This reduces the safety error, but for time windows of three to ten frames the comfort error increases. For long time windows, the comfort error remains at 3.3\,\% even at a threshold of 0.3.
+    \item \emph{Decision time}: Longer time windows delay the release for clean cats, since the state machine first has to collect a sufficient history. At the same time, the time until locking for cats with prey generally increases with the threshold. At 20 frames, the mean decision time for clean cats is 0.60~seconds and is thus clearly below the decision time of three seconds.
+\end{itemize}</td></tr>
+<tr><td class="n">50</td><td>Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwert von 0,3 erreicht den geringsten Sicherheitsfehler (1,0\,\%), das höchste F1-Maß (0,987) und die geringste Anzahl an Videos mit durchgelassener Beute (2 von 10). Der Komfortfehler liegt mit 3,3\,\% auf dem niedrigsten Wert der gesamten Parameterreihe, und keine saubere Katze wird ausgesperrt. Bei 8 Bildern pro Sekunde entspricht das Zeitfenster einer Historie von 2,5~Sekunden. Diese Konfiguration wird daher als finale Parametrisierung des Zustandsautomaten festgelegt und in allen folgenden Ablationsstudien verwendet.</td><td>The combination of a time window of 20 frames and a threshold of 0.3 achieves the lowest safety error (1.0\,\%), the highest F1 score (0.987) and the lowest number of videos with prey let through (2 of 10). The comfort error of 3.3\,\% is the lowest value of the entire parameter sweep, and no clean cat is locked out. At 8 frames per second, the time window corresponds to a history of 2.5~seconds. This configuration is therefore set as the final parametrisation of the state machine and used in all following ablation studies.</td></tr>
+<tr><td class="n">51</td><td>\subsection{Detektion und Segmentierung gegenüber Detektion}
+\label{sec:ablation_1stage}
+Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentierungsmodell) wurde für diese Studie ein einstufiger Objektdetektor (YOLO26) trainiert. Dieser besitzt zwei Klassen: „Katze mit Beute” und „Katze ohne Beute”. Beide Klassen besitzen gleich viele Daten.</td><td>\subsection{Detection and Segmentation versus Detection}
+\label{sec:ablation_1stage}
+To validate the architecture of our two-stage chain (detector + segmentation model), a single-stage object detector (YOLO26) was trained for this study. It has two classes: ``cat with prey&#x27;&#x27; and ``cat without prey&#x27;&#x27;. Both classes contain the same amount of data.</td></tr>
+<tr><td class="n">52</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/1stage_ablation_results.png}
+    \caption{Trainingsmetriken des einstufigen Objektdetektors.}
+    \label{fig:ablation_1stage_train}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/1stage_ablation_results.png}
+    \caption{Training metrics of the single-stage object detector.}
+    \label{fig:ablation_1stage_train}
+\end{figure}</td></tr>
+<tr><td class="n">53</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/1stage_ablation_confusionmatrix.png}
+    \caption{Konfusionsmatrix des einstufigen Objektdetektors auf den Validierungsdaten.}
+    \label{fig:ablation_1stage_conf}
+\end{figure}</td><td>\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/1stage_ablation_confusionmatrix.png}
+    \caption{Confusion matrix of the single-stage object detector on the validation data.}
+    \label{fig:ablation_1stage_conf}
+\end{figure}</td></tr>
+<tr><td class="n">54</td><td>Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Sicherheits- und Komfortfehler beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
+Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfiguration (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) ausgewertet. Tabelle~\ref{tab:ablation_1stage} zeigt die Ergebnisse beider Varianten.</td><td>To compare the models in isolation, the state machine was deactivated again (\texttt{history\_length=1}). We evaluated how many safety and comfort errors both systems made, as well as how many cats were missed in the video overall.
+In addition, both systems are evaluated with the state machine in the final configuration (time window of 20 frames, threshold 0.3). Table~\ref{tab:ablation_1stage} shows the results of both variants.</td></tr>
+<tr><td class="n">55</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrr}
+        \toprule
+        &amp; \multicolumn{2}{c}{Ohne Zustandsautomat} &amp; \multicolumn{2}{c}{Mit Zustandsautomat} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+        Metrik &amp; Zweistufig &amp; Einstufig &amp; Zweistufig &amp; Einstufig \\
+        \midrule
+        Sicherheitsfehler &amp; 17,0\,\% &amp; 9,9\,\% &amp; 1,0\,\% &amp; 10,6\,\% \\
+        Komfortfehler &amp; 19,7\,\% &amp; 61,5\,\% &amp; 3,3\,\% &amp; 29,7\,\% \\
+        Präzision &amp; 0,896 &amp; 0,750 &amp; 0,984 &amp; 0,860 \\
+        Trefferquote &amp; 0,830 &amp; 0,901 &amp; 0,990 &amp; 0,894 \\
+        F1-Maß &amp; 0,862 &amp; 0,819 &amp; 0,987 &amp; 0,877 \\
+        Übersehene Katzen &amp; 4,3\,\% &amp; 6,5\,\% &amp; 4,3\,\% &amp; 6,5\,\% \\
+        Durchgelassene Beute &amp; 10 von 10 &amp; 8 von 10 &amp; 2 von 10 &amp; 2 von 10 \\
+        Entscheidungszeit (sauber) &amp; 0,00\,s &amp; 2,54\,s &amp; 0,60\,s &amp; 3,02\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Vergleich des zweistufigen Systems (Detektion und Segmentierung) mit dem einstufigen Objektdetektor, ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3).}
+    \label{tab:ablation_1stage}
+\end{table}</td><td>\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrr}
+        \toprule
+        &amp; \multicolumn{2}{c}{Without state machine} &amp; \multicolumn{2}{c}{With state machine} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+        Metric &amp; Two-stage &amp; Single-stage &amp; Two-stage &amp; Single-stage \\
+        \midrule
+        Safety error &amp; 17.0\,\% &amp; 9.9\,\% &amp; 1.0\,\% &amp; 10.6\,\% \\
+        Comfort error &amp; 19.7\,\% &amp; 61.5\,\% &amp; 3.3\,\% &amp; 29.7\,\% \\
+        Precision &amp; 0.896 &amp; 0.750 &amp; 0.984 &amp; 0.860 \\
+        Recall &amp; 0.830 &amp; 0.901 &amp; 0.990 &amp; 0.894 \\
+        F1 score &amp; 0.862 &amp; 0.819 &amp; 0.987 &amp; 0.877 \\
+        Missed cats &amp; 4.3\,\% &amp; 6.5\,\% &amp; 4.3\,\% &amp; 6.5\,\% \\
+        Prey let through &amp; 10 of 10 &amp; 8 of 10 &amp; 2 of 10 &amp; 2 of 10 \\
+        Decision time (clean) &amp; 0.00\,s &amp; 2.54\,s &amp; 0.60\,s &amp; 3.02\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Comparison of the two-stage system (detection and segmentation) with the single-stage object detector, without state machine (time window of one frame, threshold 0.5) and with state machine (time window of 20 frames, threshold 0.3).}
+    \label{tab:ablation_1stage}
+\end{table}</td></tr>
+<tr><td class="n">56</td><td>Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,3\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 61,5\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 29,7\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lassen beide Systeme in zwei von zehn Videos Beute durch. Der Sicherheitsfehler des einstufigen Systems ist mit 10,6\,\% jedoch rund zehnmal so hoch wie jener des zweistufigen Systems (1,0\,\%). Das F1-Maß des zweistufigen Systems liegt mit 0,987 deutlich über jenem des einstufigen Systems (0,877). Zudem benötigt das einstufige System im Mittel 3,02~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Entscheidungszeit von drei Sekunden.</td><td>At 6.5\,\%, the single-stage system misses more cats than the face detector of the two-stage system (4.3\,\%). The clearest difference is in the comfort error: without the state machine, the flap is locked in 61.5\,\% of the frames with clean cats, and with the state machine in 29.7\,\%. The single-stage detector frequently assigns clean cats to the class ``cat with prey&#x27;&#x27;. As a result, without the state machine it achieves a lower safety error than the two-stage system, but this comes at the expense of the clean cats. With the state machine, both systems let prey through in two of ten videos. However, the safety error of the single-stage system, at 10.6\,\%, is around ten times as high as that of the two-stage system (1.0\,\%). The F1 score of the two-stage system, at 0.987, is clearly above that of the single-stage system (0.877). In addition, the single-stage system needs 3.02~seconds on average until a clean cat is released and thus exceeds the decision time of three seconds.</td></tr>
+<tr><td class="n">57</td><td>\subsection{Graustufen gegenüber Farbbildern}
+Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
+Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werden mit denselben Trainingsdaten trainiert. Das Farbmodell erhält dabei die ursprünglichen Farbbilder, das Graustufenmodell die in Graustufen umgewandelten Bilder. Der Gesichtsdetektor und der Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) bleiben in beiden Konfigurationen unverändert. Die Tagaufnahmen umfassen sechs, die Infrarot-Aufnahmen vier Videopaare. Tabelle~\ref{tab:ablation_gray} zeigt die Ergebnisse.</td><td>\subsection{Greyscale versus Colour Images}
+Since the camera switches to infrared night vision in darkness, the system works on greyscale images throughout. In this study, a system trained on greyscale images is compared with a system trained on colour images, broken down by daytime and night-time recordings.
+Both segmentation models have the same architecture (YOLO26n-seg) and are trained with the same training data. The colour model receives the original colour images, the greyscale model the images converted to greyscale. The face detector and the state machine (time window of 20 frames, threshold 0.3) remain unchanged in both configurations. The daytime recordings comprise six video pairs, the infrared recordings four. Table~\ref{tab:ablation_gray} shows the results.</td></tr>
+<tr><td class="n">58</td><td>\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        &amp; \multicolumn{2}{c}{Tag} &amp; \multicolumn{2}{c}{Infrarot} &amp; \multicolumn{2}{c}{Gesamt} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+        Metrik &amp; Grau &amp; Farbe &amp; Grau &amp; Farbe &amp; Grau &amp; Farbe \\
+        \midrule
+        Sicherheitsfehler &amp; 0,8\,\% &amp; 4,4\,\% &amp; 1,2\,\% &amp; 5,6\,\% &amp; 1,0\,\% &amp; 4,9\,\% \\
+        Komfortfehler &amp; 5,6\,\% &amp; 0,0\,\% &amp; 0,0\,\% &amp; 0,0\,\% &amp; 3,3\,\% &amp; 0,0\,\% \\
+        Präzision &amp; 0,973 &amp; 1,000 &amp; 1,000 &amp; 1,000 &amp; 0,984 &amp; 1,000 \\
+        Trefferquote &amp; 0,992 &amp; 0,956 &amp; 0,988 &amp; 0,944 &amp; 0,990 &amp; 0,951 \\
+        F1-Maß &amp; 0,982 &amp; 0,978 &amp; 0,994 &amp; 0,971 &amp; 0,987 &amp; 0,975 \\
+        Durchgelassene Beute &amp; 1 von 6 &amp; 2 von 6 &amp; 1 von 4 &amp; 2 von 4 &amp; 2 von 10 &amp; 4 von 10 \\
+        Entscheidungszeit (Beute) &amp; 0,19\,s &amp; 0,94\,s &amp; 0,03\,s &amp; 0,75\,s &amp; 0,13\,s &amp; 0,86\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Vergleich des Segmentierungsmodells für Graustufenbilder mit dem Segmentierungsmodell für Farbbilder, getrennt nach Tag- und Infrarot-Aufnahmen.}
+    \label{tab:ablation_gray}
+\end{table}</td><td>\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        &amp; \multicolumn{2}{c}{Day} &amp; \multicolumn{2}{c}{Infrared} &amp; \multicolumn{2}{c}{Overall} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+        Metric &amp; Grey &amp; Colour &amp; Grey &amp; Colour &amp; Grey &amp; Colour \\
+        \midrule
+        Safety error &amp; 0.8\,\% &amp; 4.4\,\% &amp; 1.2\,\% &amp; 5.6\,\% &amp; 1.0\,\% &amp; 4.9\,\% \\
+        Comfort error &amp; 5.6\,\% &amp; 0.0\,\% &amp; 0.0\,\% &amp; 0.0\,\% &amp; 3.3\,\% &amp; 0.0\,\% \\
+        Precision &amp; 0.973 &amp; 1.000 &amp; 1.000 &amp; 1.000 &amp; 0.984 &amp; 1.000 \\
+        Recall &amp; 0.992 &amp; 0.956 &amp; 0.988 &amp; 0.944 &amp; 0.990 &amp; 0.951 \\
+        F1 score &amp; 0.982 &amp; 0.978 &amp; 0.994 &amp; 0.971 &amp; 0.987 &amp; 0.975 \\
+        Prey let through &amp; 1 of 6 &amp; 2 of 6 &amp; 1 of 4 &amp; 2 of 4 &amp; 2 of 10 &amp; 4 of 10 \\
+        Decision time (prey) &amp; 0.19\,s &amp; 0.94\,s &amp; 0.03\,s &amp; 0.75\,s &amp; 0.13\,s &amp; 0.86\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Comparison of the segmentation model for greyscale images with the segmentation model for colour images, broken down by daytime and infrared recordings.}
+    \label{tab:ablation_gray}
+\end{table}</td></tr>
+<tr><td class="n">59</td><td>Bei Tagaufnahmen erreichen beide Modelle ein ähnliches F1-Maß (0,982 gegenüber 0,978). Das Graustufenmodell weist einen geringeren Sicherheitsfehler auf (0,8\,\% gegenüber 4,4\,\%), das Farbmodell einen geringeren Komfortfehler (0,0\,\% gegenüber 5,6\,\%). Bei Infrarot-Aufnahmen liegt keine Farbinformation vor. Hier erzielt das Graustufenmodell einen deutlich geringeren Sicherheitsfehler (1,2\,\% gegenüber 5,6\,\%) und ein höheres F1-Maß (0,994 gegenüber 0,971), während beide Modelle keinen Komfortfehler aufweisen. Zudem sperrt das Graustufenmodell die Klappe bei Katzen mit Beute im Mittel nach 0,13~Sekunden, das Farbmodell erst nach 0,86~Sekunden. Über den gesamten Testdatensatz erreicht das Graustufenmodell das höhere F1-Maß und lässt in zwei statt vier Videos Beute durch.</td><td>For daytime recordings, both models achieve a similar F1 score (0.982 versus 0.978). The greyscale model has a lower safety error (0.8\,\% versus 4.4\,\%), the colour model a lower comfort error (0.0\,\% versus 5.6\,\%). For infrared recordings, no colour information is available. Here the greyscale model achieves a clearly lower safety error (1.2\,\% versus 5.6\,\%) and a higher F1 score (0.994 versus 0.971), while neither model shows a comfort error. In addition, the greyscale model locks the flap for cats with prey after 0.13~seconds on average, the colour model only after 0.86~seconds. Over the entire test dataset, the greyscale model achieves the higher F1 score and lets prey through in two instead of four videos.</td></tr>
+</table>
+<h2 id="diskussion.tex">diskussion.tex &nbsp; (14 / 14 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Diskussion}
+\label{sec:diskussion}</td><td>\chapter{Discussion}
+\label{sec:diskussion}</td></tr>
+<tr><td class="n">2</td><td>Die in Kapitel 6 präsentierten Testergebnisse liefern ein klares Bild der Systemleistung. In diesem Kapitel werden diese Ergebnisse interpretiert und kritisch bewertet. Dabei wird untersucht, inwiefern die Forschungsziele erreicht wurde, wo die grenzen des Systems liegen und welche Funktionalitäten für die Qualität ausschlaggebend waren.</td><td>The test results presented in Chapter 6 provide a clear picture of the system performance. In this chapter, these results are interpreted and critically assessed. In doing so, it is examined to what extent the research goals were achieved, where the limits of the system lie and which functionalities were decisive for its quality.</td></tr>
+<tr><td class="n">3</td><td>\section{Beantwortung der zentralen Forschungsfrage}
+Die primäre Forschungsfrage dieser Arbeit war, ob eine Verarbeitungskette aus Objekterkennung, Bildsegmentierung, Objektverfolgung und zeitlicher Zustandsmodellierung, eine robustere Beute-Erkennung ermöglicht gegenüber Einzelbildmethoden.</td><td>\section{Answering the Central Research Question}
+The primary research question of this thesis was whether a pipeline consisting of object detection, image segmentation, object tracking and temporal state modelling enables a more robust detection of prey compared with single-frame methods.</td></tr>
+<tr><td class="n">4</td><td>Die Evaluierung liefert hierauf eine eindeutig Antwort. Ein einzelbildbasierter Ansatz ist bei der Analyse von Videostreams stark anfällig für Fehler. Bewegungsunschärfe (Motion Blur), wenn die Katze ins Bild läuft, partielle Verdeckungen (Okklusionen) der Beute durch die Pfoten oder rasche Änderungen der Beleuchtung führen zu starken Ungenauigkeiten der Segmentierung. Ohne die zeitliche Aggregation im Zustandsautomaten würde die Zugangskontrolle ständig zwischen den Zuständen \glqq verriegelt\grqq\ und \glqq entriegelt\grqq\ wechseln (Flackern).</td><td>The evaluation provides a clear answer to this. A single-frame approach is highly susceptible to errors when analysing video streams. Motion blur when the cat walks into the image, partial occlusions of the prey by the paws or rapid changes in lighting lead to severe inaccuracies in the segmentation. Without the temporal aggregation in the state machine, the access control would constantly switch between the states ``locked&#x27;&#x27; and ``unlocked&#x27;&#x27; (flickering).</td></tr>
+<tr><td class="n">5</td><td>Durch die hilfe der \texttt{StateMachine} in Kombination mit ByteTrack wird diese Problem elegant gelöst. Die zeitliche Aggregation über eine Historie von Einzelbildern erzeugt ein robustes Signal, das Ausreißer effektiv glättet. Die Ablationsstudie in Abschnitt~\ref{sec:ablation_sm} zeigt, dass das System selbst dann richtig entscheidet, wenn einzelne Bilder falsch segmentiert werden. Der Sicherheitsfehler sinkt von 17,0\,\% auf 1,0\,\%, der Komfortfehler von 19,7\,\% auf 3,3\,\%. Somit ist der Beweis erbracht, dass der Zustandsautomat in diesem Anwendungsfall ein wesentlicher Teil ist und zwingend für die Zuverlässigkeit im realen Betrieb ist.</td><td>With the help of the \texttt{StateMachine} in combination with ByteTrack, this problem is solved elegantly. The temporal aggregation over a history of frames produces a robust signal that effectively smooths out outliers. The ablation study in Section~\ref{sec:ablation_sm} shows that the system makes the correct decision even when individual frames are segmented incorrectly. The safety error drops from 17.0\,\% to 1.0\,\%, the comfort error from 19.7\,\% to 3.3\,\%. This proves that the state machine is an essential part in this use case and is imperative for reliability in real-world operation.</td></tr>
+<tr><td class="n">6</td><td>\section{Bewertung des Architektur-Ansatzes}
+Die Entscheidung, das Problem in zwei separate neuronale Netze (YOLO-Detektor für das Gesicht und YOLO-Segmentierungsmodell für die Beute) zu unterteilen, hat sich als äußerst vorteilhaft erwiesen.</td><td>\section{Assessment of the Architectural Approach}
+The decision to divide the problem into two separate neural networks (YOLO detector for the face and YOLO segmentation model for the prey) has proven to be extremely advantageous.</td></tr>
+<tr><td class="n">7</td><td>\subsection{Stärken der Verarbeitungsketten-Kaskadierung}
+Der übliche Ansatz im Bereich maschinelles Sehen bestünde darin, ein einziges Objekterkennungsmodell darauf zu trainieren, direkt die Klassen \glqq Katze\grqq\ und \glqq Beutetier\grqq\ im Gesamtbild zu finden. Bei einer Katzenklappe scheitert dieser Ansatz jedoch häufig. Eine Maus im Maul einer Katze nimmt im Gesamtbild der Kamera nur einen verschwindend geringen Bruchteil der Pixel ein und ist durch das Maul und die Schnurrhaare stark verdeckt. Standard-Objektdetektoren haben immense Schwierigkeiten, derart kleine, okkludierte Objekte zuverlässig mit einem Begrenzungsrahmen zu versehen \cite{tong2020small}.</td><td>\subsection{Strengths of the Pipeline Cascading}
+The usual approach in the field of computer vision would be to train a single object detection model to directly find the classes ``cat&#x27;&#x27; and ``prey animal&#x27;&#x27; in the overall image. In the case of a cat flap, however, this approach often fails. A mouse in a cat&#x27;s mouth occupies only a vanishingly small fraction of the pixels in the camera&#x27;s overall image and is heavily occluded by the mouth and the whiskers. Standard object detectors have immense difficulty in reliably placing a bounding box around such small, occluded objects \cite{tong2020small}.</td></tr>
+<tr><td class="n">8</td><td>Der in dieser Arbeit gewählte Kaskadierungs-Ansatz umgeht dieses Problem elegant \cite{baumann2020smartcatflap, zhang2014partbased}. Der erste Detektor muss lediglich das vergleichsweise große und markante Katzengesicht finden – eine triviale Aufgabe für moderne Architekturen wie YOLO26, was sich in der hohen Erkennungsstabilität niederschlug. Durch das anschließende Herausschneiden (Zuschneiden) dieses Bereichs wird die Aufmerksamkeit des nachgelagerten Segmentierungsmodells exklusiv auf die relevante Region fokussiert (Aufmerksamkeitsmechanismus \textit{by design}). Das Segmentierungsmodell muss keine kleine Maus im Hintergrund des Gartens suchen, sondern analysiert lediglich die Pixelstruktur direkt am Maul der Katze. Das bestätigt auch die Ablationsstudie in Abschnitt~\ref{sec:ablation_1stage}: Der einstufige Detektor sperrt saubere Katzen in 29,7\,\% der Einzelbilder, das zweistufige System nur in 3,3\,\%. Zudem ist der Sicherheitsfehler des einstufigen Detektors rund zehnmal so hoch.</td><td>The cascading approach chosen in this thesis elegantly circumvents this problem \cite{baumann2020smartcatflap, zhang2014partbased}. The first detector only has to find the comparatively large and distinctive cat face -- a trivial task for modern architectures such as YOLO26, which was reflected in the high detection stability. By subsequently cutting out (cropping) this region, the attention of the downstream segmentation model is focused exclusively on the relevant region (attention mechanism \textit{by design}). The segmentation model does not have to search for a small mouse in the background of the garden, but merely analyses the pixel structure directly at the cat&#x27;s mouth. The ablation study in Section~\ref{sec:ablation_1stage} confirms this: the single-stage detector locks clean cats in 29.7\,\% of the frames, the two-stage system only in 3.3\,\%. In addition, the safety error of the single-stage detector is around ten times as high.</td></tr>
+<tr><td class="n">9</td><td>\subsection{Die Rolle der asymmetrischen Randerweiterung}
+Dadurch das die Annotationen des Datensatzes im Detektor (\glqq Cat Dataset\grqq\ von Crawford \cite{kaggle2024cat}) den unteren Teil des Mauls komplett verdecken, ist es unerlässlich für Training und Inferrenz den Begrenzungsrahmen nach untenhin Proportional zu erweitern.</td><td>\subsection{The Role of the Asymmetric Padding}
+Because the annotations of the dataset in the detector (``Cat Dataset&#x27;&#x27; by Crawford \cite{kaggle2024cat}) completely cover the lower part of the mouth, it is essential for training and inference to extend the bounding box proportionally downwards.</td></tr>
+<tr><td class="n">10</td><td>\section{Schwächen, Limitationen und Fehlerquellen}
+Aus der Analyse werden die Limitationen des aktuellen Systems genau aufgezeigt. Dadurch entsteht das Potenzial für zukünftige Verbesserungen:</td><td>\section{Weaknesses, Limitations and Sources of Error}
+The analysis clearly shows the limitations of the current system. This gives rise to the potential for future improvements:</td></tr>
+<tr><td class="n">11</td><td>\begin{enumerate}
+    \item \textbf{Verlust von Tiefeninformationen:} Dadurch das die Kamera ein 2D Bild aufnimmt kann nicht unterschieden werden, wie weit weg sich ein Objekt unterhalb des Katzenmauls befindet. Daraus folgt, dass das Modell den Unterschied zwischen Hintergrund und Beute nicht zuverlässig trennen kann.
+    \item \textbf{Extreme Bewegungsgeschwindigkeit:} Wenn eine Katze fluchtartig durch die Klappe rennt, bleibt sehr wenig Zeit eine klare Aussage zu treffen. Bei einer Laufzeit von ca. 8 FPS verbleiben dem System nur eine Handvoll Einzelbilder zur Analyse. Da der Zustandsautomat 20 Einzelbilder (2,5 Sekunden) sammelt, bevor er eine Katze freigibt, muss die Katze mindestens so lange im Bild sein.  In diesem Szenario kann die \texttt{StateMachine} ihre Stärke (die zeitliche Glättung) nicht voll ausspielen und die Katze muss warten bis der Zustandsautomat eine klare Entscheidung trifft.
+    \item \textbf{Große Entfernung:} Ist die Katze noch weit von der Kamera entfernt, ist die Beute im Bildausschnitt zu klein, um vom Segmentierungsmodell erkannt zu werden. In der Evaluation führte das in einem Video zu einer kurzen Freigabe, bevor die Beute erkannt wurde. Hier ist es essentiell Daten aus dem Praxisbetrieb zu sammeln, bei denen sich das Modell unsicher war, um genau diese Fälle besser trainieren zu können.
+    \item \textbf{Verlust des Katzengesichts:} Läuft die Katze direkt unter der Kamera hindurch oder dreht sie den Kopf weg, liefert das Segmentierungsmodell keine Beute mehr. Nach Ablauf des Zeitfensters gilt die Katze dann als sauber. Ein möglicher Ansatz wäre, die Sperre einer Katze mit Beute so lange aufrecht zu halten, bis die Katze das Bild verlassen hat.
+\end{enumerate}</td><td>\begin{enumerate}
+    \item \textbf{Loss of depth information:} Because the camera records a 2D image, it is not possible to distinguish how far away an object below the cat&#x27;s mouth is. It follows that the model cannot reliably separate the background from the prey.
+    \item \textbf{Extreme speed of movement:} When a cat runs through the flap in a panic, very little time remains to make a clear statement. At a runtime of approx.\ 8 FPS, the system has only a handful of frames left for analysis. Since the state machine collects 20 frames (2.5 seconds) before it releases a cat, the cat must be in the image for at least that long.  In this scenario, the \texttt{StateMachine} cannot fully exploit its strength (the temporal smoothing) and the cat has to wait until the state machine makes a clear decision.
+    \item \textbf{Long distance:} If the cat is still far from the camera, the prey in the crop is too small to be detected by the segmentation model. In the evaluation, this led to a brief release in one video before the prey was detected. Here it is essential to collect data from real-world operation in which the model was uncertain, in order to be able to train for precisely these cases better.
+    \item \textbf{Loss of the cat&#x27;s face:} If the cat walks directly underneath the camera or turns its head away, the segmentation model no longer returns any prey. After the time window has elapsed, the cat is then considered clean. One possible approach would be to keep the lock on a cat with prey in place until the cat has left the image.
+\end{enumerate}</td></tr>
+<tr><td class="n">12</td><td>\section{Lokale Datenverarbeitung}
+Ziel dieser Arbeit war es auch, dass das System ressourcenschonend konzipiert wird um sicherzustellen dass die Inferrenz auch auf einem Einplatinencomputer lokal operieren kann. Daher viel die Entscheidung auf eine leichtgewichtige Architektur (YOLO26n) und optimierte Formate (TensorFlow Lite). Die dadurch verlorene Genauigkeit wird durch die erreichte Leistung gerechtfertigt (ca. 8 FPS).</td><td>\section{Local Data Processing}
+One aim of this thesis was also that the system be designed in a resource-efficient manner to ensure that inference can run locally on a single-board computer. The decision was therefore made in favour of a lightweight architecture (YOLO26n) and optimised formats (TensorFlow Lite). The accuracy lost as a result is justified by the performance achieved (approx.\ 8 FPS).</td></tr>
+<tr><td class="n">13</td><td>Dieser Ansatz beweist, dass eine komplexe Aufgabe auf ressourcenbegrenzter Hardware durch eine intelligent gewählte Architektur gelöst werden kann, ohne dass die Robustheit zu stark beeinträchtigt wird. Dadurch wird eine Auslagerung von Berechnungen in externe Rechenzentren vermieden. Das spart Geld und macht die Lösung zuverlässiger, da keine Internetverbindung notwendig ist.</td><td>This approach proves that a complex task can be solved on resource-limited hardware through an intelligently chosen architecture without the robustness being impaired too much. This avoids outsourcing computations to external data centres. This saves money and makes the solution more reliable, since no internet connection is necessary.</td></tr>
+<tr><td class="n">14</td><td>Abschließend lässt sich sagen, dass die Architektur ihre Aufgabe größtenteils erfüllt. Die verbleibenden Fehlalarme sind kein Architekturfehler, sondern zeigen die Grenzen des begrenzten Segmentierungsdatensatzes auf. Mithilfe des in Kapitel 5 integrierten Modells zum Speichern von Bildern, bei denen das Modell unsicher war, können genau diese Lücken im Datensatz ergänzt werden. So kann das Modell kontinuierlich verbessert werden.</td><td>In conclusion, it can be said that the architecture largely fulfils its task. The remaining false alarms are not an architectural flaw, but show the limits of the limited segmentation dataset. With the help of the model integrated in Chapter 5 for saving images in which the model was uncertain, precisely these gaps in the dataset can be filled. In this way, the model can be continuously improved.</td></tr>
+</table>
+<h2 id="zusammenfassung.tex">zusammenfassung.tex &nbsp; (14 / 14 Absätze)</h2><table>
+<tr><td class="n">1</td><td>\chapter{Zusammenfassung und Ausblick}
+\label{sec:zusammenfassung}</td><td>\chapter{Summary and Outlook}
+\label{sec:zusammenfassung}</td></tr>
+<tr><td class="n">2</td><td>In der vorliegenden Bachelorarbeit wird ein robustes Zugangssystem für Katzen entwickelt, dass das eindringen von Beutetieren (z. B. Mäuse oder Vögel) in den Wohnraum verhindert. Durch die Kombination von mehrschitigen Lernen (eng. Deep Learning) und zeitlicher Aggregation wurde ein System geschaffen, das die einzelbildbasierte Objekterkennung bei Weitem übertrifft.</td><td>In this bachelor thesis, a robust access system for cats is developed that prevents prey animals (e.g.\ mice or birds) from entering the living space. By combining deep learning and temporal aggregation, a system was created that outperforms single-frame object detection by a wide margin.</td></tr>
+<tr><td class="n">3</td><td>\section{Zusammenfassung der Erkenntnisse}
+\label{subsec:zusammenfassung_erkenntnisse}</td><td>\section{Summary of the Findings}
+\label{subsec:zusammenfassung_erkenntnisse}</td></tr>
+<tr><td class="n">4</td><td>Die theoretischen Annahmen konnten durch die praktische Evaluierung erfolgreich validiert werden. In diesem Anwendungsfall ist der klassische monolithische Objektdetektor bei weitem ungenauer als die in der Arbeit vorgestellte Verarbeitungskette, die aus einem Objektdetektor, einer Bildsegmentierung und einer zeitlichen Aggregation besteht.</td><td>The theoretical assumptions could be successfully validated through the practical evaluation. In this use case, the classic monolithic object detector is far less accurate than the pipeline presented in this thesis, which consists of an object detector, an image segmentation and a temporal aggregation.</td></tr>
+<tr><td class="n">5</td><td>Zunächst detektiert ein YOLO-Detektor das Gesicht der Katze. Um zu verhindern, dass die eventuelle Beute im Maul der Katze okkludiert wird, wird der Ausschnitt des Gesichts um die doppelte Gesichtshöhe nach unten erweitert. Im zweiten Schritt analysiert ein YOLO-Segmentierungsmodell, ob sich Beute im Maul der Katze befindet. Um Fehlklassifikationen auszugleichen, muss eine Katze beweisen, dass sie sauber ist. Erst dann darf sie in den Wohnraum eintreten. Dazu wird die Katze über mehrere Sekunden hinweg mithilfe von ByteTrack verfolgt. Der gleitende Durchschnitt der letzten 20 Einzelbilder (was bei 8 Bildern pro Sekunde 2,5 Sekunden entspricht) entscheidet dann, ob die Katze ins Haus darf oder nicht.</td><td>First, a YOLO detector detects the cat&#x27;s face. To prevent the possible prey in the cat&#x27;s mouth from being occluded, the crop of the face is extended downwards by twice the face height. In the second step, a YOLO segmentation model analyses whether there is prey in the cat&#x27;s mouth. To compensate for misclassifications, a cat has to prove that it is clean. Only then may it enter the living space. For this purpose, the cat is tracked over several seconds using ByteTrack. The moving average of the last 20 frames (which corresponds to 2.5 seconds at 8 frames per second) then decides whether or not the cat is allowed into the house.</td></tr>
+<tr><td class="n">6</td><td>Die Evaluierung mit KI-generierten Videodaten zeigte den Erfolg des gewählten Architektur-Ansatzes. Das System gab die Klappe nur in 1,0\,\% der Einzelbilder mit Beute fälschlicherweise frei und sperrte keine saubere Katze dauerhaft aus. Der gewählte Schwellenwert von 0,3 sperrt die Klappe bereits bei geringen Anzeichen von Beute. Durch die Glättung über 20 Einzelbilder müssen saubere Katzen trotzdem nicht unnötig warten. Das System erweist sich somit als sehr praxistauglich und läuft mit durchschnittlich 8 Bildern pro Sekunde ressourcenschonend auf lokalen Endgeräten.</td><td>The evaluation with AI-generated video data showed the success of the chosen architectural approach. The system wrongly released the flap in only 1.0\,\% of the frames with prey and never permanently locked out a clean cat. The chosen threshold of 0.3 locks the flap even at slight signs of prey. Thanks to the smoothing over 20 frames, clean cats nevertheless do not have to wait unnecessarily. The system thus proves to be very practical and runs in a resource-efficient manner on local edge devices at an average of 8 frames per second.</td></tr>
+<tr><td class="n">7</td><td>Somit konnte die zentrale Forschungsfrage bejaht werden. Eine Kombination aus Objekterkennung, Objektverfolgung und zeitlicher Glättung ist deutlich robuster als herkömmliche Einzelbildauswertungen.</td><td>The central research question could therefore be answered in the affirmative. A combination of object detection, object tracking and temporal smoothing is considerably more robust than conventional single-frame evaluation.</td></tr>
+<tr><td class="n">8</td><td>\section{Ausblick und Weiterentwicklungsmöglichkeiten}
+\label{subsec:ausblick}</td><td>\section{Outlook and Possibilities for Further Development}
+\label{subsec:ausblick}</td></tr>
+<tr><td class="n">9</td><td>Obwohl das System in seiner aktuellen Form bereits zuverlässig Beutetiere aussperrt, zeigt die Praxis, dass auch dieser Ansatz Schwächen und Limitierungen hat. Das eröffnet die Möglichkeit, konkrete Ansatzpunkte für zukünftige Verbesserungen zu identifizieren.</td><td>Although the system in its current form already reliably keeps prey animals out, practice shows that this approach also has weaknesses and limitations. This makes it possible to identify concrete starting points for future improvements.</td></tr>
+<tr><td class="n">10</td><td>\subsection{Kontinuierliches Sammeln schwieriger Negativbeispiele}
+Die vielversprechendste Methode, um die Systemleistung zu steigern, ist die Erweiterung des Datensatzes für Katzen mit Beute. Um dieses Ziel zu automatisieren, verfügt die Applikation über eine Funktionalität, die Bilder speichert, bei denen die Bildsegmentierung unsicher war. Dadurch können zukünftige Arbeiten diesen stetig wachsenden Datensatz nutzen, um das YOLO-Segmentierungsmodell iterativ nachzutrainieren. Sobald das Segmentierungsmodell aus diesen Fehlern lernen kann, wird die Fehlalarmrate des gesamten Systems erheblich sinken.</td><td>\subsection{Continuous Collection of Hard Negative Examples}
+The most promising method to increase system performance is to expand the dataset for cats with prey. To automate this goal, the application has a functionality that saves images for which the image segmentation was uncertain. Future work can thereby use this steadily growing dataset to iteratively retrain the YOLO segmentation model. Once the segmentation model can learn from these errors, the false alarm rate of the entire system will decrease considerably.</td></tr>
+<tr><td class="n">11</td><td>\subsection{Verlust der Tiefeninformationen}
+Eine weitere Einschränkung ist der Verlust von 3D-Informationen im Bild. Dadurch kann es passieren, dass Objekte im Hintergrund oder sogar der Körper der Katze fälschlicherweise als \glqq im Maul der Katze\grqq\ interpretiert werden. Eine mögliche Erweiterung bestünde darin, diese 3D-Informationen mithilfe von Stereo-Kameras oder Time-of-Flight-Sensoren zurückzugewinnen. Dadurch könnten Fehlalarme herausgefiltert werden, bei denen sich das vermeintliche Beutetier weit hinter dem Maul der Katze befindet.</td><td>\subsection{Loss of Depth Information}
+A further limitation is the loss of 3D information in the image. As a result, it can happen that objects in the background or even the cat&#x27;s body are wrongly interpreted as ``in the cat&#x27;s mouth&#x27;&#x27;. One possible extension would be to recover this 3D information with the help of stereo cameras or time-of-flight sensors. This could filter out false alarms in which the supposed prey animal is located far behind the cat&#x27;s mouth.</td></tr>
+<tr><td class="n">12</td><td>\subsection{Hardware-Beschleunigung}
+Derzeit wird das System ausschließlich auf der CPU ausgeführt. Ein Wechsel auf eine dedizierte Hardware (z. B. Google Coral) würde die Anzahl der pro Sekunde verarbeiteten Bilder deutlich erhöhen. Dadurch können wir in der gleichen Zeit mehr Daten der Katze sammeln, was die zeitliche Glättung verbessern würde. Das Flackern des Systems würde dadurch noch weiter eingeschränkt.</td><td>\subsection{Hardware Acceleration}
+Currently, the system is executed exclusively on the CPU. Switching to dedicated hardware (e.g.\ Google Coral) would significantly increase the number of frames processed per second. As a result, we can collect more data on the cat in the same amount of time, which would improve the temporal smoothing. The flickering of the system would thereby be reduced even further.</td></tr>
+<tr><td class="n">13</td><td>\vspace{0.5cm}</td><td>\vspace{0.5cm}</td></tr>
+<tr><td class="n">14</td><td>Abschließend lässt sich zusammenfassen, dass die in dieser Arbeit entwickelte Verarbeitungskette ein äußerst kompaktes und robustes Fundament bildet. Sie löst das Problem des unerwünschten Beuteeintrags durch Katzen zuverlässig und ermöglicht zugleich spannende Erweiterungen und Verbesserungen.</td><td>In conclusion, it can be said that the pipeline developed in this thesis forms an extremely compact and robust foundation. It reliably solves the problem of cats bringing in unwanted prey and at the same time allows for exciting extensions and improvements.</td></tr>
+</table>
