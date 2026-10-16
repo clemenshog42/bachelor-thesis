@@ -1,0 +1,33 @@
+\chapter{Summary and Outlook}
+\label{sec:zusammenfassung}
+
+In this bachelor thesis, a robust access system for cats is developed that prevents prey animals (e.g.\ mice or birds) from entering the living space. By combining deep learning and temporal aggregation, a system was created that outperforms single-frame object detection by a wide margin.
+
+\section{Summary of the Findings}
+\label{subsec:zusammenfassung_erkenntnisse}
+
+The theoretical assumptions could be successfully validated through the practical evaluation. In this use case, the classic monolithic object detector is far less accurate than the pipeline presented in this thesis, which consists of an object detector, an image segmentation and a temporal aggregation.
+
+First, a YOLO detector detects the cat's face. To prevent the possible prey in the cat's mouth from being occluded, the crop of the face is extended downwards by twice the face height. In the second step, a YOLO segmentation model analyses whether there is prey in the cat's mouth. To compensate for misclassifications, a cat has to prove that it is clean. Only then may it enter the living space. For this purpose, the cat is tracked over several seconds using ByteTrack. The moving average of the last 20 frames (which corresponds to 2.5 seconds at 8 frames per second) then decides whether or not the cat is allowed into the house.
+
+The evaluation with AI-generated video data showed the success of the chosen architectural approach. The system wrongly released the flap in only 1.0\,\% of the frames with prey and never permanently locked out a clean cat. The chosen threshold of 0.3 locks the flap even at slight signs of prey. Thanks to the smoothing over 20 frames, clean cats nevertheless do not have to wait unnecessarily. The system thus proves to be very practical and runs in a resource-efficient manner on local edge devices at an average of 8 frames per second.
+
+The central research question could therefore be answered in the affirmative. A combination of object detection, object tracking and temporal smoothing is considerably more robust than conventional single-frame evaluation.
+
+\section{Outlook and Possibilities for Further Development}
+\label{subsec:ausblick}
+
+Although the system in its current form already reliably keeps prey animals out, practice shows that this approach also has weaknesses and limitations. This makes it possible to identify concrete starting points for future improvements.
+
+\subsection{Continuous Collection of Hard Negative Examples}
+The most promising method to increase system performance is to expand the dataset for cats with prey. To automate this goal, the application has a functionality that saves images for which the image segmentation was uncertain. Future work can thereby use this steadily growing dataset to iteratively retrain the YOLO segmentation model. Once the segmentation model can learn from these errors, the false alarm rate of the entire system will decrease considerably.
+
+\subsection{Loss of Depth Information}
+A further limitation is the loss of 3D information in the image. As a result, it can happen that objects in the background or even the cat's body are wrongly interpreted as ``in the cat's mouth''. One possible extension would be to recover this 3D information with the help of stereo cameras or time-of-flight sensors. This could filter out false alarms in which the supposed prey animal is located far behind the cat's mouth.
+
+\subsection{Hardware Acceleration}
+Currently, the system is executed exclusively on the CPU. Switching to dedicated hardware (e.g.\ Google Coral) would significantly increase the number of frames processed per second. As a result, we can collect more data on the cat in the same amount of time, which would improve the temporal smoothing. The flickering of the system would thereby be reduced even further.
+
+\vspace{0.5cm}
+
+In conclusion, it can be said that the pipeline developed in this thesis forms an extremely compact and robust foundation. It reliably solves the problem of cats bringing in unwanted prey and at the same time allows for exciting extensions and improvements.

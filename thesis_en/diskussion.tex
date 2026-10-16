@@ -1,0 +1,39 @@
+\chapter{Discussion}
+\label{sec:diskussion}
+
+The test results presented in Chapter 6 provide a clear picture of the system performance. In this chapter, these results are interpreted and critically assessed. In doing so, it is examined to what extent the research goals were achieved, where the limits of the system lie and which functionalities were decisive for its quality.
+
+\section{Answering the Central Research Question}
+The primary research question of this thesis was whether a pipeline consisting of object detection, image segmentation, object tracking and temporal state modelling enables a more robust detection of prey compared with single-frame methods.
+
+The evaluation provides a clear answer to this. A single-frame approach is highly susceptible to errors when analysing video streams. Motion blur when the cat walks into the image, partial occlusions of the prey by the paws or rapid changes in lighting lead to severe inaccuracies in the segmentation. Without the temporal aggregation in the state machine, the access control would constantly switch between the states ``locked'' and ``unlocked'' (flickering).
+
+With the help of the \texttt{StateMachine} in combination with ByteTrack, this problem is solved elegantly. The temporal aggregation over a history of frames produces a robust signal that effectively smooths out outliers. The ablation study in Section~\ref{sec:ablation_sm} shows that the system makes the correct decision even when individual frames are segmented incorrectly. The safety error drops from 17.0\,\% to 1.0\,\%, the comfort error from 19.7\,\% to 3.3\,\%. This proves that the state machine is an essential part in this use case and is imperative for reliability in real-world operation.
+
+\section{Assessment of the Architectural Approach}
+The decision to divide the problem into two separate neural networks (YOLO detector for the face and YOLO segmentation model for the prey) has proven to be extremely advantageous.
+
+\subsection{Strengths of the Pipeline Cascading}
+The usual approach in the field of computer vision would be to train a single object detection model to directly find the classes ``cat'' and ``prey animal'' in the overall image. In the case of a cat flap, however, this approach often fails. A mouse in a cat's mouth occupies only a vanishingly small fraction of the pixels in the camera's overall image and is heavily occluded by the mouth and the whiskers. Standard object detectors have immense difficulty in reliably placing a bounding box around such small, occluded objects \cite{tong2020small}.
+
+The cascading approach chosen in this thesis elegantly circumvents this problem \cite{baumann2020smartcatflap, zhang2014partbased}. The first detector only has to find the comparatively large and distinctive cat face -- a trivial task for modern architectures such as YOLO26, which was reflected in the high detection stability. By subsequently cutting out (cropping) this region, the attention of the downstream segmentation model is focused exclusively on the relevant region (attention mechanism \textit{by design}). The segmentation model does not have to search for a small mouse in the background of the garden, but merely analyses the pixel structure directly at the cat's mouth. The ablation study in Section~\ref{sec:ablation_1stage} confirms this: the single-stage detector locks clean cats in 29.7\,\% of the frames, the two-stage system only in 3.3\,\%. In addition, the safety error of the single-stage detector is around ten times as high.
+
+\subsection{The Role of the Asymmetric Padding}
+Because the annotations of the dataset in the detector (``Cat Dataset'' by Crawford \cite{kaggle2024cat}) completely cover the lower part of the mouth, it is essential for training and inference to extend the bounding box proportionally downwards.
+
+\section{Weaknesses, Limitations and Sources of Error}
+The analysis clearly shows the limitations of the current system. This gives rise to the potential for future improvements:
+
+\begin{enumerate}
+    \item \textbf{Loss of depth information:} Because the camera records a 2D image, it is not possible to distinguish how far away an object below the cat's mouth is. It follows that the model cannot reliably separate the background from the prey.
+    \item \textbf{Extreme speed of movement:} When a cat runs through the flap in a panic, very little time remains to make a clear statement. At a runtime of approx.\ 8 FPS, the system has only a handful of frames left for analysis. Since the state machine collects 20 frames (2.5 seconds) before it releases a cat, the cat must be in the image for at least that long.  In this scenario, the \texttt{StateMachine} cannot fully exploit its strength (the temporal smoothing) and the cat has to wait until the state machine makes a clear decision.
+    \item \textbf{Long distance:} If the cat is still far from the camera, the prey in the crop is too small to be detected by the segmentation model. In the evaluation, this led to a brief release in one video before the prey was detected. Here it is essential to collect data from real-world operation in which the model was uncertain, in order to be able to train for precisely these cases better.
+    \item \textbf{Loss of the cat's face:} If the cat walks directly underneath the camera or turns its head away, the segmentation model no longer returns any prey. After the time window has elapsed, the cat is then considered clean. One possible approach would be to keep the lock on a cat with prey in place until the cat has left the image.
+\end{enumerate}
+
+\section{Local Data Processing}
+One aim of this thesis was also that the system be designed in a resource-efficient manner to ensure that inference can run locally on a single-board computer. The decision was therefore made in favour of a lightweight architecture (YOLO26n) and optimised formats (TensorFlow Lite). The accuracy lost as a result is justified by the performance achieved (approx.\ 8 FPS).
+
+This approach proves that a complex task can be solved on resource-limited hardware through an intelligently chosen architecture without the robustness being impaired too much. This avoids outsourcing computations to external data centres. This saves money and makes the solution more reliable, since no internet connection is necessary.
+
+In conclusion, it can be said that the architecture largely fulfils its task. The remaining false alarms are not an architectural flaw, but show the limits of the limited segmentation dataset. With the help of the model integrated in Chapter 5 for saving images in which the model was uncertain, precisely these gaps in the dataset can be filled. In this way, the model can be continuously improved.
