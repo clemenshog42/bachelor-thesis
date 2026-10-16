@@ -258,7 +258,7 @@ Aus der Parameterreihe lassen sich folgende Zusammenhänge ablesen:
 \begin{itemize}
     \item \emph{Länge des Zeitfensters}: Bei einem Schwellenwert von 0,3 sinken mit zunehmender Länge des Zeitfensters sowohl der Sicherheitsfehler (von 12,8\,\% auf 1,6\,\%) als auch die Anzahl der Videos, in denen Beute durchgelassen wird (von 10 auf 3). Kurze Fehlentscheidungen des Segmentierungsmodells werden über mehr Einzelbilder gemittelt und führen seltener zu einer Freigabe. Bei hohen Schwellenwerten ist dieser Zusammenhang nicht zu beobachten. Ab einem Zeitfenster von zehn Einzelbildern bleibt der Komfortfehler bei Schwellenwerten ab 0,4 konstant bei 4,1\,\%.
     \item \emph{Schwellenwert}: Ein niedriger Schwellenwert sperrt die Klappe bereits bei einem geringen mittleren Beuteanteil. Dadurch sinkt der Sicherheitsfehler, bei Zeitfenstern von drei bis zehn Einzelbildern steigt jedoch der Komfortfehler. Bei langen Zeitfenstern bleibt der Komfortfehler auch bei einem Schwellenwert von 0,3 bei 4,1\,\%.
-    \item \emph{Entscheidungszeit}: Längere Zeitfenster verzögern die Freigabe für saubere Katzen, da der Zustandsautomat zuerst eine ausreichende Historie sammeln muss. Gleichzeitig steigt mit dem Schwellenwert die Zeit bis zur Sperrung bei Katzen mit Beute. Bei 20 Einzelbildern beträgt die mittlere Entscheidungszeit für saubere Katzen 0,67~Sekunden und liegt damit deutlich unter der Entscheidungszeit von drei Sekunden.
+    \item \emph{Entscheidungszeit}: Längere Zeitfenster verzögern die Freigabe für saubere Katzen, da der Zustandsautomat zuerst eine ausreichende Historie sammeln muss. Gleichzeitig steigt mit dem Schwellenwert in der Regel die Zeit bis zur Sperrung bei Katzen mit Beute. Bei 20 Einzelbildern beträgt die mittlere Entscheidungszeit für saubere Katzen 0,67~Sekunden und liegt damit deutlich unter der Entscheidungszeit von drei Sekunden.
 \end{itemize}
 
 Die Kombination aus einem Zeitfenster von 20 Einzelbildern und einem Schwellenwert von 0,3 erreicht den geringsten Sicherheitsfehler (1,6\,\%), das höchste F1-Maß (0,982) und die geringste Anzahl an Videos mit durchgelassener Beute (3 von 10). Der Komfortfehler liegt mit 4,1\,\% auf dem niedrigsten Wert, der bei langen Zeitfenstern erreicht wird, und keine saubere Katze wird ausgesperrt. Bei 8 Bildern pro Sekunde entspricht das Zeitfenster einer Historie von 2,5~Sekunden. Diese Konfiguration wird daher als finale Parametrisierung des Zustandsautomaten festgelegt und in allen folgenden Ablationsstudien verwendet.
@@ -282,7 +282,31 @@ Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentie
 
 
 Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Fehlklassifikationen beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
-% TODO: Ergebnisse mit den neuen Metriken einfügen
+Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfiguration (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) ausgewertet. Tabelle~\ref{tab:ablation_1stage} zeigt die Ergebnisse beider Varianten.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrr}
+        \toprule
+        & \multicolumn{2}{c}{Ohne Zustandsautomat} & \multicolumn{2}{c}{Mit Zustandsautomat} \\
+        \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+        Metrik & Zweistufig & Einstufig & Zweistufig & Einstufig \\
+        \midrule
+        Sicherheitsfehler & 17,3\,\% & 10,1\,\% & 1,6\,\% & 10,6\,\% \\
+        Komfortfehler & 20,5\,\% & 62,1\,\% & 4,1\,\% & 30,5\,\% \\
+        Präzision & 0,892 & 0,748 & 0,980 & 0,857 \\
+        Trefferquote & 0,828 & 0,899 & 0,984 & 0,894 \\
+        F1-Maß & 0,859 & 0,817 & 0,982 & 0,875 \\
+        Übersehene Katzen & 4,3\,\% & 6,5\,\% & 4,3\,\% & 6,5\,\% \\
+        Durchgelassene Beute & 10 von 10 & 10 von 10 & 3 von 10 & 2 von 10 \\
+        Entscheidungszeit (sauber) & 0,00\,s & 2,54\,s & 0,67\,s & 3,02\,s \\
+        \bottomrule
+    \end{tabular}
+    \caption{Vergleich des zweistufigen Systems (Detektion und Segmentierung) mit dem einstufigen Objektdetektor, ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3).}
+    \label{tab:ablation_1stage}
+\end{table}
+
+Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,3\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 62,1\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 30,5\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lässt das einstufige System in zwei von zehn Videos Beute durch, das zweistufige System in drei. Der Sicherheitsfehler des einstufigen Systems ist mit 10,6\,\% jedoch mehr als sechsmal so hoch wie jener des zweistufigen Systems (1,6\,\%). Das F1-Maß des zweistufigen Systems liegt mit 0,982 deutlich über jenem des einstufigen Systems (0,875). Zudem benötigt das einstufige System im Mittel 3,02~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Entscheidungszeit von drei Sekunden.
 
 \subsection{Graustufen gegenüber Farbbildern}
 Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
