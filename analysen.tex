@@ -28,7 +28,7 @@ Die Wahrheitsmatrix (\emph{engl. Confusion Matrix}) der Objekterkennung (Abbildu
     \label{fig:confusion_det}
 \end{figure}
 
-Eine wichtige Metrik, welche auch auf den Validierungsdaten beruht, ist die Präzision-Trefferquote-Kurve (\emph{engl. Precision-Recall-Curve}), sie gibt das Verhältnis zwischen richtig erkannten Objekten und Fehlalarmen an wie sicher  das Modell ist \cite{everingham2010pascal, lin2014coco}. In diesem Fall zeigt der Verlauf, dass das Modell extrem sicher ist und nicht raten muss, wenn es ein Katzengesicht sieht.
+Eine wichtige Metrik, welche auch auf den Validierungsdaten beruht, ist die Präzision-Trefferquote-Kurve (\emph{engl. Precision-Recall-Curve}), sie zeigt, welche Präzision und Trefferquote das Modell bei unterschiedlichen Konfidenzschwellen erreicht \cite{everingham2010pascal, lin2014coco}. In diesem Fall zeigt der Verlauf, dass das Modell über nahezu alle Konfidenzschwellen gleichzeitig eine hohe Präzision und eine hohe Trefferquote erreicht.
 
 \begin{figure}[H]
     \centering
@@ -57,7 +57,7 @@ Die Abbildung \ref{fig:val_pred_det} liefert einen Eindruck auf die Erkennungsle
 
 \subsection{Leistung der Bildsegmentierung}
 Die folgenden Trainingsmetriken des Beute-Segmentierungsmodells zeigen, dass das Modell seine Aufgabe erfolgreich gelernt hat.
-Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht, daraus können wir schließen, dass das Segmentierungsmodell lernt ohne sich dabei zu viel auf den Trainingsdatensatz anpasst.
+Beim betrachten der Verlustfunktionen wird ersichtlich, dass das Modell über die Epochen weniger Fehler sowohl bei Training als auch Validierung macht. Der Validierungsfehler der Segmentierung sinkt in der zweiten Hälfte des Trainings jedoch kaum noch, während der Trainingsfehler weiter sinkt. Weitere Epochen verbessern das Modell daher kaum noch, und es deutet sich eine beginnende Überanpassung an.
 
 \begin{figure}[H]
     \centering
@@ -93,7 +93,7 @@ Mithilfe der Abbildung \ref{fig:val_pred_cls} lässt sich gut erkennen, wie gut 
     \label{fig:val_pred_cls}
 \end{figure}
 
-Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die entscheidende Frage ist jedoch, wie verhält sich das System im Praxiseinsatz und welche Vorteile bietet die Verarbeitungskette gegenüber der reinen Detektion und Segmentierung.
+Rein auf dem Papier würden diese Modelle fast fehlerfreie Aussagen treffen. Die Validierungsdaten stammen jedoch aus derselben Quelle wie die Trainingsdaten und bilden die Bedingungen an der Katzenklappe nur eingeschränkt ab. Die entscheidende Frage ist jedoch, wie verhält sich das System im Praxiseinsatz und welche Vorteile bietet die Verarbeitungskette gegenüber der reinen Detektion und Segmentierung.
 
 \section{Evaluationsmethodik und Datensatz}
 \label{sec:evaluationsmethodik}
@@ -169,7 +169,7 @@ In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfe
 
 \subsection{Zustandsautomat}
 \label{sec:ablation_sm}
-Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Eine anfängliche Sperre ist gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Deshalb werden Komfortfehler erst nach der Karenzzeit von drei Sekunden gezählt. Bei dieser Studie wurde das exakt selbe System zweimal auf alle 20 Testvideos angewendet:
+Um die Wirksamkeit und Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Eine anfängliche Sperre ist gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Deshalb werden Komfortfehler erst nach der Karenzzeit von drei Sekunden gezählt. Bei dieser Studie wurde das exakt selbe System zweimal auf alle 20 Testvideos angewendet:
 
 \begin{enumerate}
     \item \textbf{Volles System:} Mit aktivem Zustandsautomaten und einem \glqq gleitenden Durchschnitt\grqq\ (\emph{engl. moving average})\ über 20 Einzelbilder (\texttt{history\_length=20}).
