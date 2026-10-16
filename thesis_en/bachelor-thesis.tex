@@ -1,0 +1,47 @@
+% !TeX encoding = utf8
+% !TeX program = pdflatex 
+% !TeX spellcheck = en_GB
+% !BIB program = biber
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{hgbpdfa}
+
+\documentclass[type=bachelor,degree=engineering,theme=default,language=english,titlelanguage=english,smartquotes=true]{hgbthesis}
+
+\usepackage{float}
+\graphicspath{{images/}}
+\bibliography{literatur} % BibLaTeX bibliography file
+
+\begin{document}
+
+\title{Temporally Robust Detection and State Modelling of Cats and Prey Using Deep Learning}
+\author{Clemens Höglinger}
+\programname{Software Engineering}
+\placeofstudy{Hagenberg}
+\dateofsubmission{2026}{08}{20}
+\advisor{Dr. Gerald Adam Zwettler}
+
+\frontmatter
+\maketitle
+\include{front/ki-dokumentation}
+\tableofcontents
+
+\include{front/kurzfassung}		
+\include{front/abstract}			
+
+\mainmatter
+
+\include{einleitung}
+\include{grundlagen}
+\include{material}
+\include{methodik}
+\include{implementierung}
+\include{analysen}
+\include{diskussion}
+\include{zusammenfassung}
+
+\backmatter
+
+\MakeBibliography
+
+\end{document}
