@@ -37,7 +37,7 @@ Eine wichtige Metrik, welche auch auf den Validierungsdaten beruht, ist die Prä
     \label{fig:pr_curve_det}
 \end{figure}
 
-Die F1-Maß-Kurve (Abbildung \ref{fig:f1_curve_det}) zeigt wie sich die Leistung des Modells bei Änderung des Konfidenzschwellenwerts \cite{ultralytics_confidence} verändert. Dadurch können wir den optimalen Schwellenwert für den realen Betrieb des Modells ermitteln. Da die Kurve bis $\approx 0,85$ flach bleibt, d.h. hier wird keine Katze übersehen, fällt sie $> 0{,}85$ stark ab. Das zeigt, dass ab diesem Schwellenwert auch reale Katzen leicht übersehen werden. In der Praxis zeigt sich, dass bei einem Konfidenzschwellwert von $\approx 0,75$ ein gutes Verhältnis zwischen „Katze wird nicht erkannt“ und „es wird eine Katze erkannt, wo sich keine befindet“ entsteht.
+Die F1-Maß-Kurve (Abbildung \ref{fig:f1_curve_det}) zeigt wie sich die Leistung des Modells bei Änderung des Konfidenzschwellenwerts \cite{ultralytics_confidence} verändert. Dadurch können wir den optimalen Schwellenwert für den realen Betrieb des Modells ermitteln. Da die Kurve bis $\approx 0,85$ flach bleibt, d.h. hier wird keine Katze übersehen, fällt sie $> 0{,}85$ stark ab. Das zeigt, dass ab diesem Schwellenwert auch reale Katzen leicht übersehen werden. In der Praxis zeigt sich, dass bei einem Konfidenzschwellwert von $\approx 0,75$ ein gutes Verhältnis zwischen „Katze wird nicht erkannt“ und „es wird eine Katze erkannt, wo sich keine befindet“ entsteht. Im Betrieb wird der Detektor dennoch mit einem niedrigen Schwellenwert von 0,1 ausgeführt, da ByteTrack auch Erkennungen mit niedrigem Konfidenzwert für die Zuordnung verwendet \cite{zhang2022bytetrack}.
 
 \begin{figure}[H]
     \centering
@@ -168,7 +168,7 @@ In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfe
 
 \subsection{Zustandsautomat}
 \label{sec:ablation_sm}
-Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Einige Zustandswechsel sind gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Bei dieser Studie wurde das exakt selbe System zweimal auf eine Auswahl von Testvideos angewendet:
+Um die Wirksamkeit und absolute Notwendigkeit der zeitlichen Aggregation (Zustandsautomat) zu validieren, wurde eine Ablationsstudie durchgeführt. Achtung! Eine anfängliche Sperre ist gewollt: Auch wenn die Katze keine Beute trägt, wird ihr der Zugang so lange verweigert, bis sie beweist, dass sie sauber ist. Deshalb werden Komfortfehler erst nach der Entscheidungszeit von drei Sekunden gezählt. Bei dieser Studie wurde das exakt selbe System zweimal auf alle 20 Testvideos angewendet:
 
 \begin{enumerate}
     \item \textbf{Volles System:} Mit aktivem Zustandsautomaten und einem \glqq gleitenden Durchschnitt\grqq\ (\emph{engl. moving average})\ über 20 Einzelbilder (\texttt{history\_length=20}).
@@ -293,7 +293,7 @@ Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentie
 \end{figure}
 
 
-Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Fehlklassifikationen beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
+Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Sicherheits- und Komfortfehler beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
 Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfiguration (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) ausgewertet. Tabelle~\ref{tab:ablation_1stage} zeigt die Ergebnisse beider Varianten.
 
 \begin{table}[H]
