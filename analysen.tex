@@ -349,7 +349,7 @@ Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetekto
 
 \subsection{Graustufen gegenüber Farbbildern}
 Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
-Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werden mit denselben Trainingsdaten trainiert. Das Farbmodell erhält dabei die ursprünglichen Farbbilder, das Graustufenmodell die in Graustufen umgewandelten Bilder. Der Gesichtsdetektor und der Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) bleiben in beiden Konfigurationen unverändert. Die Tagaufnahmen umfassen sechs, die Infrarot-Aufnahmen vier Videopaare. Tabelle~\ref{tab:ablation_gray} zeigt die Ergebnisse.
+Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werden mit denselben Trainingsdaten trainiert. Das Farbmodell erhält dabei die ursprünglichen Farbbilder, das Graustufenmodell die in Graustufen umgewandelten Bilder. Der Gesichtsdetektor und der Zustandsautomat (Zeitfenster von 30 Einzelbildern, Schwellenwert 0,3) bleiben in beiden Konfigurationen unverändert. Die Tagaufnahmen umfassen sechs, die Infrarot-Aufnahmen vier Videopaare. Tabelle~\ref{tab:ablation_gray} zeigt die Ergebnisse.
 
 \begin{table}[H]
     \centering
@@ -360,13 +360,13 @@ Beide Segmentierungsmodelle besitzen dieselbe Architektur (YOLO26n-seg) und werd
         \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
         Metrik & Grau & Farbe & Grau & Farbe & Grau & Farbe \\
         \midrule
-        Sicherheitsfehler & 0,8\,\% & 4,4\,\% & 1,2\,\% & 5,6\,\% & 1,0\,\% & 4,9\,\% \\
-        Komfortfehler & 5,6\,\% & 0,0\,\% & 0,0\,\% & 0,0\,\% & 3,3\,\% & 0,0\,\% \\
-        Präzision & 0,973 & 1,000 & 1,000 & 1,000 & 0,984 & 1,000 \\
-        Trefferquote & 0,992 & 0,956 & 0,988 & 0,944 & 0,990 & 0,951 \\
-        F1-Maß & 0,982 & 0,978 & 0,994 & 0,971 & 0,987 & 0,975 \\
-        Durchgelassene Beute & 1 von 6 & 2 von 6 & 1 von 4 & 2 von 4 & 2 von 10 & 4 von 10 \\
-        Entscheidungszeit (Beute) & 0,19\,s & 0,94\,s & 0,03\,s & 0,75\,s & 0,13\,s & 0,86\,s \\
+        Sicherheitsfehler & 0,0\,\% & 0,0\,\% & 0,0\,\% & 5,0\,\% & 0,0\,\% & 2,0\,\% \\
+        Komfortfehler & 0,0\,\% & 0,0\,\% & 0,0\,\% & 0,0\,\% & 0,0\,\% & 0,0\,\% \\
+        Präzision & 1,000 & 1,000 & 1,000 & 1,000 & 1,000 & 1,000 \\
+        Trefferquote & 1,000 & 1,000 & 1,000 & 0,950 & 1,000 & 0,980 \\
+        F1-Maß & 1,000 & 1,000 & 1,000 & 0,974 & 1,000 & 0,990 \\
+        Durchgelassene Beute & 0 von 6 & 0 von 6 & 0 von 4 & 2 von 4 & 0 von 10 & 2 von 10 \\
+        Entscheidungszeit (Beute) & 0,42\,s & 0,38\,s & 0,00\,s & 1,00\,s & 0,25\,s & 0,63\,s \\
         \bottomrule
     \end{tabular}
     \caption{Vergleich des Segmentierungsmodells für Graustufenbilder mit dem Segmentierungsmodell für Farbbilder, getrennt nach Tag- und Infrarot-Aufnahmen.}
