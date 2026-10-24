@@ -321,7 +321,7 @@ Zur Validierung der Architektur unserer zweistufigen Kette (Detektor + Segmentie
 
 
 Um die Modelle isoliert zu vergleichen, wurde der Zustandsautomat wieder deaktiviert (\texttt{history\_length=1}). Dabei wurde evaluiert wie viele Sicherheits- und Komfortfehler beide Systeme trafen, sowie wie viele Katzen insgesamt im Video übersehen wurden.
-Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfiguration (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3) ausgewertet. Tabelle~\ref{tab:ablation_1stage} zeigt die Ergebnisse beider Varianten.
+Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfiguration (Zeitfenster von 30 Einzelbildern, Schwellenwert 0,3) ausgewertet. Tabelle~\ref{tab:ablation_1stage} zeigt die Ergebnisse beider Varianten.
 
 \begin{table}[H]
     \centering
@@ -331,21 +331,21 @@ Zusätzlich werden beide Systeme mit dem Zustandsautomaten in der finalen Konfig
         \cmidrule(lr){2-3}\cmidrule(lr){4-5}
         Metrik & Zweistufig & Einstufig & Zweistufig & Einstufig \\
         \midrule
-        Sicherheitsfehler & 17,0\,\% & 9,9\,\% & 1,0\,\% & 10,6\,\% \\
-        Komfortfehler & 19,7\,\% & 61,5\,\% & 3,3\,\% & 29,7\,\% \\
-        Präzision & 0,896 & 0,750 & 0,984 & 0,860 \\
-        Trefferquote & 0,830 & 0,901 & 0,990 & 0,894 \\
-        F1-Maß & 0,862 & 0,819 & 0,987 & 0,877 \\
-        Übersehene Katzen & 4,3\,\% & 6,5\,\% & 4,3\,\% & 6,5\,\% \\
-        Durchgelassene Beute & 10 von 10 & 8 von 10 & 2 von 10 & 2 von 10 \\
-        Entscheidungszeit (sauber) & 0,00\,s & 2,54\,s & 0,60\,s & 3,02\,s \\
+        Sicherheitsfehler & 12,6\,\% & 9,9\,\% & 0,0\,\% & 8,5\,\% \\
+        Komfortfehler & 19,0\,\% & 61,5\,\% & 0,0\,\% & 24,6\,\% \\
+        Präzision & 0,904 & 0,750 & 1,000 & 0,884 \\
+        Trefferquote & 0,874 & 0,901 & 1,000 & 0,915 \\
+        F1-Maß & 0,889 & 0,819 & 1,000 & 0,899 \\
+        Übersehene Katzen & 4,5\,\% & 6,5\,\% & 4,5\,\% & 6,5\,\% \\
+        Durchgelassene Beute & 10 von 10 & 8 von 10 & 0 von 10 & 2 von 10 \\
+        Entscheidungszeit (sauber) & 0,00\,s & 2,54\,s & 2,01\,s & 3,27\,s \\
         \bottomrule
     \end{tabular}
-    \caption{Vergleich des zweistufigen Systems (Detektion und Segmentierung) mit dem einstufigen Objektdetektor, ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 20 Einzelbildern, Schwellenwert 0,3).}
+    \caption{Vergleich des zweistufigen Systems (Detektion und Segmentierung) mit dem einstufigen Objektdetektor, ohne Zustandsautomat (Zeitfenster von einem Einzelbild, Schwellenwert 0,5) und mit Zustandsautomat (Zeitfenster von 30 Einzelbildern, Schwellenwert 0,3).}
     \label{tab:ablation_1stage}
 \end{table}
 
-Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,3\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 61,5\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 29,7\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lassen beide Systeme in zwei von zehn Videos Beute durch. Der Sicherheitsfehler des einstufigen Systems ist mit 10,6\,\% jedoch rund zehnmal so hoch wie jener des zweistufigen Systems (1,0\,\%). Das F1-Maß des zweistufigen Systems liegt mit 0,987 deutlich über jenem des einstufigen Systems (0,877). Zudem benötigt das einstufige System im Mittel 3,02~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Karenzzeit von drei Sekunden.
+Das einstufige System übersieht mit 6,5\,\% mehr Katzen als der Gesichtsdetektor des zweistufigen Systems (4,5\,\%). Der deutlichste Unterschied zeigt sich beim Komfortfehler: Ohne Zustandsautomat ist die Klappe in 61,5\,\% der Einzelbilder mit sauberen Katzen gesperrt, mit Zustandsautomat in 24,6\,\%. Der einstufige Detektor ordnet saubere Katzen häufig der Klasse \glqq Katze mit Beute\grqq\ zu. Dadurch erreicht er ohne Zustandsautomat zwar einen geringeren Sicherheitsfehler als das zweistufige System, dies geht jedoch zulasten der sauberen Katzen. Mit Zustandsautomat lässt das einstufige System in zwei von zehn Videos Beute durch, das zweistufige in keinem. Der Sicherheitsfehler des einstufigen Systems liegt bei 8,5\,\%, jener des zweistufigen Systems bei 0,0\,\%. Das F1-Maß des zweistufigen Systems liegt mit 1,000 deutlich über jenem des einstufigen Systems (0,899). Zudem benötigt das einstufige System im Mittel 3,27~Sekunden bis zur Freigabe einer sauberen Katze und überschreitet damit die Karenzzeit von drei Sekunden.
 
 \subsection{Graustufen gegenüber Farbbildern}
 Da die Kamera bei Dunkelheit auf Infrarot-Nachtsicht umschaltet, arbeitet das System durchgehend auf Graustufenbildern. In dieser Studie wird ein auf Graustufenbildern trainiertes System mit einem auf Farbbildern trainierten System verglichen, getrennt nach Tag- und Nachtaufnahmen.
