@@ -11,20 +11,19 @@ Die Klasse \texttt{CatFlapPipeline} verwaltet Detektor und Segmentierungsmodell 
 
 Die Methode \texttt{run\_detector} konvertiert das Bild in Graustufen. Anschließend wird die Objekterkennung aufgerufen, durch den Aufruf der Methode \texttt{track} mit dem Parameter \texttt{tracker='bytetrack.yaml'} wird der in Ultralytics integrierte ByteTrack-Tracker aktiviert, welcher uns die Begrenzungsrahmen samt Objekt-IDs liefert. Der Parameter \texttt{persist=True} sorgt dafür, dass die Tracks zwischen den Aufrufen erhalten bleiben.
 
-Die Methode \texttt{run\_prey\_detector} schneidet das Bild wie in Kapitel~\ref{sec:bildausschnitt} beschrieben zusammen. Im folgenden Codeausschnitt ist zu sehen, wie dieses Zuschneiden implementiert ist und welche Auswirkungen es auf das Katzengesicht hat. Durch das Erweitern nach unten stellen wir sicher, dass das Modell genügend Informationen über mögliche Beute im Maul der Katze erhält.
+Die Methode \texttt{run\_prey\_detector} schneidet das Bild wie in Kapitel~\ref{sec:bildausschnitt} beschrieben zusammen. Im folgenden Codeausschnitt ist zu sehen, wie dieses Zuschneiden implementiert ist und welche Auswirkungen es auf das Katzengesicht hat. Durch das Erweitern nach unten stellen wir sicher, dass das Modell genügend Informationen über mögliche Beute im Maul der Katze erhält. Die Geometrie des Ausschnitts ist in der Funktion \texttt{crop\_region} im Modul \texttt{crop.py} zusammengefasst. Sie liefert zusätzlich, ob der erweiterte Rahmen vollständig im Bild liegt.
 
 \begin{PythonCode}[caption={Asymmetrische Randerweiterung für den Bildausschnitt}]
-x1, y1, x2, y2 = map(int, box)
-# Add padding (heavy on bottom for dangling prey)
-face_w = x2 - x1
-face_h = y2 - y1
-pad_w = int(face_w * 0.8)
-pad_top = 0
-pad_bottom = int(face_h * 2.0)
-x1 -= pad_w
-y1 -= pad_top
-x2 += pad_w
-y2 += pad_bottom
+CROP_PAD = (0.56, -0.47, 1.06)  # (sides, top, bottom), relative to the face box
+
+def crop_region(box, img_w, img_h, pad=CROP_PAD):
+    x1, y1, x2, y2 = box
+    fw, fh = x2 - x1, y2 - y1
+    pw, pt, pb = pad
+    ex1, ey1 = x1 - fw * pw, y1 - fh * pt
+    ex2, ey2 = x2 + fw * pw, y2 + fh * pb
+    inside = ex1 >= 0 and ey1 >= 0 and ex2 <= img_w and ey2 <= img_h
+    ...
 \end{PythonCode}
 Anschließend wird der Bildausschnitt des Katzengesichtes vom Segmentierungsmodell verarbeitet, dieser liefert uns dann für jedes gefundene Beutetier einen Konfidenzwert. Der höchste davon wird an den Zustandsautomaten übergeben. Findet das Modell keine Beute, ist der Wert 0.
 
