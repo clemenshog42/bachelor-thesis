@@ -79,7 +79,7 @@ Da der Eingang des Segmentierungsmodells der Ausgang des Detektors ist, müssen 
 
 Daher wird der Begrenzungsrahmen des Detektors verändert bevor ihn das Segmentierungsmodell bekommt. Das Katzengesicht wird nach untenhin um 106\,\% der Gesichtshöhe und seitlich um jeweils 56\,\% der Gesichtsbreite erweitert um sicher zu gehen das die Beute im Bild ist. Da der Begrenzungsrahmen des Detektors auch die Ohren umfasst, wird er oben um 47\,\% der Gesichtshöhe verkleinert. Die Werte sind so gewählt, dass der Ausschnitt den Bildern entspricht, mit denen das Segmentierungsmodell trainiert wurde.
 
-Der Detektor erwartet ein 3-Kanal-Bild, daher wird das Graustufenbild dreifach dupliziert (\texttt{cv2.cvtColor(gray, cv2.COLOR\_GRAY2BGR)}). Das Segmentierungsmodell wurde dagegen direkt mit einkanaligen Graustufenbildern trainiert und erhält den Ausschnitt als einkanaliges Bild. Zuvor wird der Ausschnitt mit schwarzen Rändern zu einem Quadrat aufgefüllt. Abbildung~\ref{fig:ausschnitt} zeigt ein Beispiel.
+Detektor und Segmentierungsmodell wurden direkt mit einkanaligen Graustufenbildern trainiert und erhalten das Bild beziehungsweise den Ausschnitt als einkanaliges Bild. Zuvor wird der Ausschnitt mit schwarzen Rändern zu einem Quadrat aufgefüllt. Abbildung~\ref{fig:ausschnitt} zeigt ein Beispiel.
 
 \begin{figure}[htbp]
 	\centering
