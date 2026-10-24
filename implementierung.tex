@@ -34,7 +34,10 @@ Der Zustandsautomat ist durch die Klasse \texttt{StateMachine} abgebildet. Der S
 Der folgende Codeausschnitt zeigt die Kernlogik der \texttt{update}-Methode. Diese berechnet bei jedem neuen Bild den gleitenden Durchschnitt (\texttt{numpy.mean}) und schaltet anschließend den Zustand entsprechend um.
 
 \begin{PythonCode}[caption={Zustandsermittlung mittels gleitendem Durchschnitt}]
-def update(self, prey_confidence, frame_idx):
+def update(self, prey_confidence, frame_idx, valid=True):
+    if not valid:  # crop reaches beyond the image border
+        self.last_seen = frame_idx
+        return self.current_state
     self.confidence_history.append(prey_confidence)
     self.last_seen = frame_idx
 
@@ -49,6 +52,8 @@ def update(self, prey_confidence, frame_idx):
     else:
         self.current_state = State.CAT_NO_PREY
 \end{PythonCode}
+
+Liegt der Bildausschnitt nicht vollständig im Bild (\texttt{valid=False}), wird die Katze nur als gesehen markiert, ohne den Konfidenzwert in die Historie aufzunehmen.
 
 Die Klasse \texttt{StateMachine} verwaltet die verschiedenen \texttt{TrackState}-Objekte in einem Dictionary (\texttt{track\_id} $\rightarrow$ \texttt{TrackState}). Die Methode \texttt{process\_global\_state} iteriert zu Beginn jedes Aufrufs über dieses Dictionary und entfernt die Objekte, die seit mehr als 30 Einzelbildern nicht mehr vom Tracker zugeordnet wurden konnten, um Speicherlecks zu vermeiden.
 
