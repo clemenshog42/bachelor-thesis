@@ -155,12 +155,14 @@ Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor
 
 Über alle Einzelbilder mit sichtbarer Katze erreicht die Entscheidung \glqq Klappe sperren\grqq\ eine Präzision von 1,000, eine Trefferquote von 1,000 und ein F1-Maß von 1,000. In 4,5\,\% der Einzelbilder mit erkennbarem Katzengesicht detektiert das System keine Katze. Getrennt nach Lichtverhältnissen liegen Sicherheits- und Komfortfehler sowohl bei Tag- als auch bei Infrarot-Aufnahmen bei 0,0\,\%.
 
-Keine saubere Katze wird dauerhaft ausgesperrt. In zwei der zehn Videos mit Beute wird die Klappe kurzzeitig für jeweils vier Einzelbilder (0,5~Sekunden) geöffnet. Die Analyse dieser Videos zeigt zwei Ursachen:
+Keine saubere Katze wird ausgesperrt, und in keinem der zehn Videos mit Beute wird die Klappe geöffnet. Eine saubere Katze wartet im Mittel 2,0~Sekunden ab dem Erkennen ihres Gesichts auf die Freigabe, höchstens 3,0~Sekunden. Mit einem Zeitfenster von 20 Einzelbildern wird die Klappe dagegen in zwei Videos kurzzeitig geöffnet. Die Analyse dieser Videos zeigt zwei Ursachen:
 
 \begin{itemize}
     \item Die Katze ist zu Beginn noch weit von der Kamera entfernt, wodurch die Beute im Bildausschnitt zu klein ist, um vom Segmentierungsmodell erkannt zu werden. Liegt der Durchschnitt nach 20 Einzelbildern noch unter dem Schwellenwert, wird die Katze kurz freigegeben, bis die Beute erkannt wird.
-    \item Die Katze läuft am Ende des Videos unter der Kamera hindurch. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
+    \item Die Katze steht am Ende des Videos direkt vor der Kamera und verdeckt die Beute. Das Segmentierungsmodell liefert für diese Einzelbilder keine Beute, und nach Ablauf des Zeitfensters gilt die Katze als sauber.
 \end{itemize}
+
+Das längere Zeitfenster von 30 Einzelbildern gleicht beide Fälle aus. Die Randregel verhindert zusätzlich, dass Einzelbilder, in denen die Beute aus dem Bildausschnitt ragt, die Katze entlasten: Ohne Randregel wird die Klappe auch mit 30 Einzelbildern in einem Video kurzzeitig geöffnet (Sicherheitsfehler 0,5\,\%). Da die Parameter auf denselben Testvideos gewählt wurden, auf denen sie bewertet werden, ist dieses Ergebnis als optimistisch einzuschätzen.
 
 In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind (Abschnitt~\ref{sec:methodik_zustand}). Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Karenzzeit.
 
