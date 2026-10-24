@@ -109,6 +109,8 @@ Damit dieses Problem eingedämpft wird, wurde die Objekterkennung um den ByteTra
 
 Damit nun die Systementscheidung nicht durch das aktuellste Einzelbild getroffen wird, speichert das \texttt{TrackState}-Objekt eine Historie der Konfidenzwerte des Segmentierungsmodells der letzten 30 Bilder. Der aktuelle Zustand wird bei jedem Bild neu berechnet, dabei wird einfach der gleitende Durchschnitt der Historie berechnet. Wird der Schwellenwert von 0,3 erreicht oder überschritten, so wird die Katze als \texttt{CAT\_WITH\_PREY} markiert. Fällt der Wert darunter wird sie als \texttt{CAT\_NO\_PREY} markiert, sofern bereits 30 Werte gesammelt wurden. Die Übergänge zwischen den Zuständen einer Katze sind in Abbildung~\ref{fig:zustaende} dargestellt.
 
+Ragt der erweiterte Bildausschnitt über den Bildrand hinaus, etwa wenn die Katze direkt vor der Kamera steht, fehlt ein Teil des Bereichs, in dem sich die Beute befinden würde. Der Konfidenzwert eines solchen Einzelbildes wird daher nicht in die Historie aufgenommen und der Zustand der Katze bleibt unverändert. Die Katze gilt dennoch als erkannt und wird nicht aus dem Speicher entfernt.
+
 \begin{figure}[htbp]
 	\centering
 	\begin{tikzpicture}[
