@@ -134,7 +134,7 @@ Anders als eine Bewertung auf Videoebene erfasst die bildweise Auswertung auch k
 Die Auswertung erfolgt in zwei Schritten. Zunächst werden Detektor und Segmentierungsmodell einmal pro Video und Konfiguration ausgeführt und die Ergebnisse jedes Einzelbildes protokolliert. Anschließend wird der Zustandsautomat auf diesen Protokollen nachgebildet. Dadurch lassen sich unterschiedliche Parameter des Zustandsautomaten ohne erneute Inferenz vergleichen.
 
 \section{Ergebnisse der Evaluation}
-Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor und Segmentierungsmodell arbeiten auf Graustufenbildern, der Zustandsautomat verwendet ein Zeitfenster von 20 Einzelbildern und einen Schwellenwert von 0,3. Die Herleitung dieser Parameter ist in Abschnitt~\ref{sec:ablation_sm} beschrieben. Tabelle~\ref{tab:system_eval} fasst die Ergebnisse auf den 20 Videos des Testdatensatzes zusammen.
+Das Gesamtsystem wird in der finalen Konfiguration ausgewertet: Gesichtsdetektor und Segmentierungsmodell arbeiten auf Graustufenbildern, der Zustandsautomat verwendet ein Zeitfenster von 30 Einzelbildern und einen Schwellenwert von 0,3. Einzelbilder, deren Bildausschnitt über den Bildrand hinausragt, fließen nicht in die Historie ein. Die Herleitung dieser Parameter ist in Abschnitt~\ref{sec:ablation_sm} beschrieben. Tabelle~\ref{tab:system_eval} fasst die Ergebnisse auf den 20 Videos des Testdatensatzes zusammen.
 
 \begin{table}[H]
     \centering
