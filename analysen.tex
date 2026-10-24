@@ -164,7 +164,7 @@ Keine saubere Katze wird ausgesperrt, und in keinem der zehn Videos mit Beute wi
 
 Das längere Zeitfenster von 30 Einzelbildern gleicht beide Fälle aus. Die Randregel verhindert zusätzlich, dass Einzelbilder, in denen die Beute aus dem Bildausschnitt ragt, die Katze entlasten: Ohne Randregel wird die Klappe auch mit 30 Einzelbildern in einem Video kurzzeitig geöffnet (Sicherheitsfehler 0,5\,\%). Da die Parameter auf denselben Testvideos gewählt wurden, auf denen sie bewertet werden, ist dieses Ergebnis als optimistisch einzuschätzen.
 
-In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind (Abschnitt~\ref{sec:methodik_zustand}). Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,6~Sekunden, bleibt aber innerhalb der Karenzzeit.
+In den Szenen mit zwei Katzen weist der Tracker (ByteTrack) derselben Katze teilweise mehrmals eine neue Identität zu. Die dabei entstehenden kurzlebigen Tracks blockieren die Freigabe nicht, da nur Katzen berücksichtigt werden, die im aktuellen Einzelbild sichtbar sind (Abschnitt~\ref{sec:methodik_zustand}). Die Freigabe verzögert sich dadurch in diesen Szenen auf bis zu 2,8~Sekunden, bleibt aber innerhalb der Karenzzeit.
 
 \section{Ablationsstudien}
 In den folgenden Ablationsstudien wird jeweils eine Komponente des Systems entfernt oder ersetzt, während alle übrigen Komponenten unverändert bleiben. Alle Studien verwenden den Testdatensatz und die Metriken aus Abschnitt~\ref{sec:evaluationsmethodik}.
